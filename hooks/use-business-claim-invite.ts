@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { normalizeBusinessRecord } from "@/lib/businesses";
+import { normalizeBusinessClaimInvite } from "@/lib/businesses";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
-import { Business } from "@/lib/types";
+import { BusinessClaimInvite } from "@/lib/types";
 
-export function useBusiness(id: string) {
-  const [business, setBusiness] = useState<Business | null>(null);
+export function useBusinessClaimInvite(businessId: string) {
+  const [invite, setInvite] = useState<BusinessClaimInvite | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
+    if (!businessId) {
       setLoading(false);
       return;
     }
@@ -31,17 +31,16 @@ export function useBusiness(id: string) {
       return;
     }
 
-    const reference = doc(db, "businesses", id);
     const unsubscribe = onSnapshot(
-      reference,
+      doc(db, "business_claim_invites", businessId),
       (snapshot) => {
         if (!snapshot.exists()) {
-          setBusiness(null);
+          setInvite(null);
           setLoading(false);
           return;
         }
 
-        setBusiness(normalizeBusinessRecord(snapshot.data(), snapshot.id));
+        setInvite(normalizeBusinessClaimInvite(snapshot.data(), snapshot.id));
         setLoading(false);
       },
       (snapshotError) => {
@@ -51,7 +50,7 @@ export function useBusiness(id: string) {
     );
 
     return () => unsubscribe();
-  }, [id]);
+  }, [businessId]);
 
-  return { business, loading, error };
+  return { invite, loading, error };
 }

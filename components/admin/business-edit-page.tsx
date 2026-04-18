@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
@@ -11,16 +10,21 @@ import { businessToFormValues } from "@/lib/businesses";
 import {
   removeBusinessPhoto,
   saveBusiness,
+  sendBusinessClaimInvite,
   uploadBusinessPhotos
 } from "@/lib/firebase/businesses";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { BusinessFormValues } from "@/lib/types";
 
-export function DashboardPageContent() {
-  const { profile, isAdmin } = useAuth();
-  const { business, loading, error } = useBusiness(profile?.businessId ?? "");
+type BusinessEditPageProps = {
+  businessId: string;
+};
+
+export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
+  const { business, loading, error } = useBusiness(businessId);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [inviting, setInviting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -35,7 +39,7 @@ export function DashboardPageContent() {
     try {
       await saveBusiness(business.id, values, business.address);
       setFeedbackTone("success");
-      setFeedback("Listing updated successfully.");
+      setFeedback("Business saved.");
     } catch (saveError) {
       setFeedbackTone("error");
       setFeedback(formatFirebaseError(saveError));
@@ -81,32 +85,58 @@ export function DashboardPageContent() {
     }
   }
 
+  async function handleClaimInvite() {
+    if (!business) {
+      return;
+    }
+
+    setInviting(true);
+    setFeedback(null);
+
+    try {
+      await sendBusinessClaimInvite(business, window.location.origin);
+      setFeedbackTone("success");
+      setFeedback(
+        `Claim invite queued for ${business.email}. The recipient can finish account creation from the emailed claim link.`
+      );
+    } catch (inviteError) {
+      setFeedbackTone("error");
+      setFeedback(formatFirebaseError(inviteError));
+    } finally {
+      setInviting(false);
+    }
+  }
+
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
-                Owner dashboard
+                Business edit
               </p>
               <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
-                Manage your listing.
+                {loading ? "Loading..." : business?.name || "Business"}
               </h1>
-              <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
-                Your updates publish directly to the public directory. Focus on
-                accurate hours first, then keep the rest of the profile fresh.
-              </p>
             </div>
 
-            {isAdmin ? (
+            <div className="flex flex-wrap gap-3">
               <Link
-                href="/admin"
-                className="rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm text-accentSoft transition hover:bg-accent/15"
+                href="/admin/businesses"
+                className="rounded-full border border-line px-5 py-3 text-sm text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
               >
-                Open admin workspace
+                Back to business manager
               </Link>
-            ) : null}
+              <button
+                type="button"
+                onClick={() => void handleClaimInvite()}
+                disabled={inviting || !business?.email}
+                className="rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+              >
+                {inviting ? "Sending invite..." : "Claim this listing"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -125,40 +155,34 @@ export function DashboardPageContent() {
         {loading ? (
           <div className="mt-6">
             <StatePanel
-              title="Loading your business"
-              description="Your linked listing is being fetched from Firestore."
+              title="Loading business"
+              description="Fetching the selected listing from Firestore."
             />
           </div>
         ) : error ? (
           <div className="mt-6">
-            <StatePanel title="Unable to load listing" description={error} />
-          </div>
-        ) : !profile?.businessId ? (
-          <div className="mt-6">
-            <StatePanel
-              title="No business is linked to this account"
-              description="Add a businessId to the user's Firestore document or assign the account from the admin workspace."
-            />
+            <StatePanel title="Unable to load business" description={error} />
           </div>
         ) : !business ? (
           <div className="mt-6">
             <StatePanel
-              title="Linked listing not found"
-              description="The business document tied to this account could not be found. Check the user's businessId in Firestore."
+              title="Business not found"
+              description="This listing could not be loaded."
             />
           </div>
         ) : (
           <div className="mt-6">
             <BusinessEditorForm
               initialValues={businessToFormValues(business)}
-              title="Listing editor"
-              description="Edit the public details for your Milwaukee listing. Address changes will try to refresh the map coordinates automatically."
-              submitLabel="Save listing"
+              title="Full business editor"
+              description="Update all public listing fields, normalize imported hours, refine the map pin, and queue an owner-claim invite when the email is ready."
+              submitLabel="Save business"
               onSubmit={handleSave}
               onUploadPhotos={handleUpload}
               onRemovePhoto={handleRemove}
               saving={saving}
               uploading={uploading}
+              showAdminFields
             />
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
+import { normalizeBusinessRecord } from "@/lib/businesses";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
 import { Business } from "@/lib/types";
 
@@ -28,10 +29,9 @@ export function useAllBusinesses() {
     const unsubscribe = onSnapshot(
       collection(db, "businesses"),
       (snapshot) => {
-        const nextBusinesses = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Business[];
+        const nextBusinesses = snapshot.docs.map((document) =>
+          normalizeBusinessRecord(document.data(), document.id)
+        );
 
         nextBusinesses.sort((left, right) => left.name.localeCompare(right.name));
         setBusinesses(nextBusinesses);

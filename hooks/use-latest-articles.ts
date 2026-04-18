@@ -1,22 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { normalizeBusinessRecord } from "@/lib/businesses";
+import { collection, onSnapshot } from "firebase/firestore";
+import {
+  isPublishedArticle,
+  normalizeArticleSummary,
+  sortArticleSummaries
+} from "@/lib/homepage";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
-import { Business } from "@/lib/types";
+import { ArticleSummary } from "@/lib/types";
 
-export function useBusiness(id: string) {
-  const [business, setBusiness] = useState<Business | null>(null);
+export function useLatestArticles(limitCount = 3) {
+  const [articles, setArticles] = useState<ArticleSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-
     if (!isFirebaseConfigured) {
       setError("Firebase environment variables are missing.");
       setLoading(false);
@@ -31,17 +30,14 @@ export function useBusiness(id: string) {
       return;
     }
 
-    const reference = doc(db, "businesses", id);
     const unsubscribe = onSnapshot(
-      reference,
+      collection(db, "articles"),
       (snapshot) => {
-        if (!snapshot.exists()) {
-          setBusiness(null);
-          setLoading(false);
-          return;
-        }
+        const nextArticles = snapshot.docs
+          .filter((document) => isPublishedArticle(document.data()))
+          .map((document) => normalizeArticleSummary(document.data(), document.id));
 
-        setBusiness(normalizeBusinessRecord(snapshot.data(), snapshot.id));
+        setArticles(sortArticleSummaries(nextArticles).slice(0, limitCount));
         setLoading(false);
       },
       (snapshotError) => {
@@ -51,7 +47,7 @@ export function useBusiness(id: string) {
     );
 
     return () => unsubscribe();
-  }, [id]);
+  }, [limitCount]);
 
-  return { business, loading, error };
+  return { articles, loading, error };
 }

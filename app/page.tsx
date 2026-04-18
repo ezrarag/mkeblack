@@ -1,5 +1,5 @@
-import { DirectoryPage } from "@/components/directory/directory-page";
+import { HomepagePage } from "@/components/homepage/homepage-page";
 
 export default function HomePage() {
-  return <DirectoryPage />;
+  return <HomepagePage />;
 }

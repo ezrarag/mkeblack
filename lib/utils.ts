@@ -35,3 +35,35 @@ export function normalizeUrl(value: string) {
     ? value
     : `https://${value}`;
 }
+
+export function normalizeHref(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return "";
+  }
+
+  if (
+    trimmedValue.startsWith("/") ||
+    trimmedValue.startsWith("#") ||
+    trimmedValue.startsWith("?") ||
+    trimmedValue.startsWith("mailto:") ||
+    trimmedValue.startsWith("tel:")
+  ) {
+    return trimmedValue;
+  }
+
+  if (/^(https?:)?\/\//i.test(trimmedValue)) {
+    return trimmedValue;
+  }
+
+  if (/^[a-z0-9/_-]+$/i.test(trimmedValue)) {
+    return `/${trimmedValue.replace(/^\/+/, "")}`;
+  }
+
+  return normalizeUrl(trimmedValue);
+}
+
+export function isExternalHref(value: string) {
+  return /^(https?:)?\/\//i.test(value) || value.startsWith("mailto:") || value.startsWith("tel:");
+}

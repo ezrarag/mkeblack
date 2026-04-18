@@ -1,37 +1,132 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function signedIn() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      return signedIn()
-        && (
-          request.auth.token.admin == true
-          || (
-            exists(/databases/$(database)/documents/users/$(request.auth.uid))
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-          )
-        );
+      return signedIn() && (
+        request.auth.token.admin == true ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        )
+      );
     }
 
     function ownsBusiness() {
       return signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function hasPendingClaimInvite(businessId) {
+      return exists(/databases/$(database)/documents/business_claim_invites/$(businessId))
+        && get(/databases/$(database)/documents/business_claim_invites/$(businessId)).data.status == 'pending'
+        && get(/databases/$(database)/documents/business_claim_invites/$(businessId)).data.email == request.auth.token.email;
+    }
+
+    function canClaimBusiness(businessId) {
+      return signedIn()
+        && hasPendingClaimInvite(businessId)
+        && (
+          resource.data.ownerUid == null
+          || resource.data.ownerUid == ''
+        )
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly([
+          'ownerUid',
+          'email',
+          'claimInviteStatus'
+        ]);
+    }
+
+    // ── Businesses ──────────────────────────────────────────────────────────
     match /businesses/{businessId} {
       allow read: if resource.data.active == true || isAdmin() || ownsBusiness();
       allow create: if isAdmin();
-      allow update: if isAdmin() || ownsBusiness();
+      allow update: if isAdmin() || ownsBusiness() || canClaimBusiness(businessId);
       allow delete: if isAdmin();
     }
 
+    // ── Users ────────────────────────────────────────────────────────────────
     match /users/{uid} {
-      allow read: if (signedIn() && request.auth.uid == uid) || isAdmin();
-      allow create: if (signedIn() && request.auth.uid == uid) || isAdmin();
-      allow update: if (signedIn() && request.auth.uid == uid) || isAdmin();
+      allow read: if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid) || isAdmin();
+      allow update: if isSelf(uid) || isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // ── Homepage Modules ─────────────────────────────────────────────────────
+    match /homepage_modules/{moduleId} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Member Discounts ─────────────────────────────────────────────────────
+    match /member_discounts/{discountId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Articles ─────────────────────────────────────────────────────────────
+    match /articles/{articleId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /mail/{mailId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /business_claim_invites/{businessId} {
+      allow read: if resource.data.status == 'pending' || isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && hasPendingClaimInvite(businessId)
+          && request.resource.data.status == 'claimed'
+          && request.resource.data.claimedByUid == request.auth.uid
+        );
+      allow delete: if isAdmin();
+    }
+
+    // ── Members (Solidarity Circle) ──────────────────────────────────────────
+    match /members/{memberId} {
+      allow read: if isSelf(memberId) || isAdmin();
+      allow create: if true; // Stripe webhook creates via server — also allow self-create after checkout
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Benefit Types ────────────────────────────────────────────────────────
+    match /benefit_types/{benefitId} {
+      allow read: if true; // public — shown on membership page
+      allow write: if isAdmin();
+    }
+
+    // ── Google Workspace Sync (future) ───────────────────────────────────────
+    // Cached copies of Drive files, Calendar events, Gmail threads
+    match /gw_drive/{fileId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /gw_calendar/{eventId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /gw_gmail/{threadId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
   }
 }

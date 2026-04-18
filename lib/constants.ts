@@ -28,6 +28,17 @@ export function createDefaultBusinessHours(): BusinessHours {
   }, {} as BusinessHours);
 }
 
+export function createClosedBusinessHours(): BusinessHours {
+  return DAY_KEYS.reduce((hours, day) => {
+    hours[day] = {
+      open: "09:00",
+      close: "17:00",
+      closed: true
+    };
+    return hours;
+  }, {} as BusinessHours);
+}
+
 export function createEmptyBusinessForm() {
   return {
     name: "",
@@ -36,10 +47,13 @@ export function createEmptyBusinessForm() {
     address: "",
     phone: "",
     website: "",
+    email: "",
+    hoursText: "",
     hours: createDefaultBusinessHours(),
     photos: [],
     ownerUid: "",
     active: true,
+    source: "manual" as const,
     location: { ...MILWAUKEE_CENTER }
   };
 }

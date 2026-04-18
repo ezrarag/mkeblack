@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { normalizeBusinessRecord } from "@/lib/businesses";
+import { sortHomepageModules, normalizeHomepageModule } from "@/lib/homepage";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
-import { Business } from "@/lib/types";
+import { HomepageModule } from "@/lib/types";
 
-export function useBusinesses() {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
+export function useHomepageModules(visibleOnly = false) {
+  const [modules, setModules] = useState<HomepageModule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,21 +26,22 @@ export function useBusinesses() {
       return;
     }
 
-    const businessesQuery = query(
-      collection(db, "businesses"),
-      where("active", "==", true)
-    );
+    const modulesQuery = visibleOnly
+      ? query(collection(db, "homepage_modules"), where("visible", "==", true))
+      : collection(db, "homepage_modules");
 
     const unsubscribe = onSnapshot(
-      businessesQuery,
+      modulesQuery,
       (snapshot) => {
-        const nextBusinesses = snapshot.docs.map((document) =>
-          normalizeBusinessRecord(document.data(), document.id)
+        const nextModules = snapshot.docs.map((document) =>
+          normalizeHomepageModule(document.data(), document.id)
         );
 
-        nextBusinesses.sort((left, right) => left.name.localeCompare(right.name));
-
-        setBusinesses(nextBusinesses);
+        setModules(
+          sortHomepageModules(
+            visibleOnly ? nextModules.filter((module) => module.visible) : nextModules
+          )
+        );
         setLoading(false);
       },
       (snapshotError) => {
@@ -50,7 +51,7 @@ export function useBusinesses() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [visibleOnly]);
 
-  return { businesses, loading, error };
+  return { modules, loading, error };
 }

@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { normalizeBusinessRecord } from "@/lib/businesses";
+import {
+  normalizeMemberDiscount,
+  sortMemberDiscounts
+} from "@/lib/homepage";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
-import { Business } from "@/lib/types";
+import { MemberDiscount } from "@/lib/types";
 
-export function useBusinesses() {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
+export function useMemberDiscounts(activeOnly = false) {
+  const [discounts, setDiscounts] = useState<MemberDiscount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,21 +29,24 @@ export function useBusinesses() {
       return;
     }
 
-    const businessesQuery = query(
-      collection(db, "businesses"),
-      where("active", "==", true)
-    );
+    const discountsQuery = activeOnly
+      ? query(collection(db, "member_discounts"), where("active", "==", true))
+      : collection(db, "member_discounts");
 
     const unsubscribe = onSnapshot(
-      businessesQuery,
+      discountsQuery,
       (snapshot) => {
-        const nextBusinesses = snapshot.docs.map((document) =>
-          normalizeBusinessRecord(document.data(), document.id)
+        const nextDiscounts = snapshot.docs.map((document) =>
+          normalizeMemberDiscount(document.data(), document.id)
         );
 
-        nextBusinesses.sort((left, right) => left.name.localeCompare(right.name));
-
-        setBusinesses(nextBusinesses);
+        setDiscounts(
+          sortMemberDiscounts(
+            activeOnly
+              ? nextDiscounts.filter((discount) => discount.active)
+              : nextDiscounts
+          )
+        );
         setLoading(false);
       },
       (snapshotError) => {
@@ -50,7 +56,7 @@ export function useBusinesses() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [activeOnly]);
 
-  return { businesses, loading, error };
+  return { discounts, loading, error };
 }

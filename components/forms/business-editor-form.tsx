@@ -5,6 +5,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { BUSINESS_CATEGORIES } from "@/lib/constants";
 import { BusinessFormValues, DayKey } from "@/lib/types";
 import { formatPhone } from "@/lib/utils";
+import { BusinessMap } from "@/components/map/business-map";
 import { HoursEditor } from "@/components/forms/hours-editor";
 
 type BusinessEditorFormProps = {
@@ -51,6 +52,9 @@ export function BusinessEditorForm({
 }: BusinessEditorFormProps) {
   const [values, setValues] = useState<BusinessFormValues>(
     cloneFormValues(initialValues)
+  );
+  const categoryOptions = Array.from(
+    new Set([...BUSINESS_CATEGORIES, values.category].filter(Boolean))
   );
 
   useEffect(() => {
@@ -129,7 +133,7 @@ export function BusinessEditorForm({
               value={values.category}
               onChange={(event) => updateField("category", event.target.value)}
             >
-              {BUSINESS_CATEGORIES.map((category) => (
+              {categoryOptions.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -176,6 +180,23 @@ export function BusinessEditorForm({
               placeholder="https://example.com"
             />
           </div>
+          <div>
+            <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+              Email
+            </label>
+            <input
+              type="email"
+              value={values.email}
+              onChange={(event) => updateField("email", event.target.value)}
+              placeholder="owner@business.com"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+              Listing source
+            </label>
+            <input value={values.source} readOnly className="cursor-not-allowed opacity-70" />
+          </div>
         </div>
       </div>
 
@@ -189,6 +210,16 @@ export function BusinessEditorForm({
         </p>
         <div className="mt-6">
           <HoursEditor hours={values.hours} onChange={handleHoursChange} />
+        </div>
+        <div className="mt-6">
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+            Imported hours text
+          </label>
+          <textarea
+            value={values.hoursText}
+            onChange={(event) => updateField("hoursText", event.target.value)}
+            placeholder="Paste or normalize raw hours text from imported data."
+          />
         </div>
       </div>
 
@@ -318,6 +349,37 @@ export function BusinessEditorForm({
                 }
               />
             </div>
+          </div>
+
+          <div className="mt-6">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">
+              Map preview
+            </p>
+            <BusinessMap
+              businesses={[
+                {
+                  id: "preview",
+                  name: values.name || "Preview listing",
+                  category: values.category,
+                  description: values.description,
+                  address: values.address,
+                  phone: values.phone,
+                  website: values.website,
+                  email: values.email,
+                  hoursText: values.hoursText,
+                  hours: values.hours,
+                  photos: values.photos,
+                  ownerUid: values.ownerUid || null,
+                  active: values.active,
+                  source: values.source,
+                  importedAt: null,
+                  claimInviteStatus: "not_invited",
+                  claimInvitedAt: null,
+                  location: values.location
+                }
+              ]}
+              heightClassName="h-[340px]"
+            />
           </div>
         </div>
       ) : null}

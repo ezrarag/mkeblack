@@ -42,6 +42,7 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   }
 
   const weeklyHours = getWeeklyHours(business.hours);
+  const hasOnlyClosedHours = weeklyHours.every((day) => day.summary === "Closed");
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -117,6 +118,21 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                   <p className="mt-1">Not listed</p>
                 )}
               </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                  Email
+                </p>
+                {business.email ? (
+                  <a
+                    href={`mailto:${business.email}`}
+                    className="mt-1 inline-block break-all hover:text-accentSoft"
+                  >
+                    {business.email}
+                  </a>
+                ) : (
+                  <p className="mt-1">Not listed</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -124,6 +140,16 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
               Weekly hours
             </p>
+            {business.hoursText ? (
+              <div className="mt-5 rounded-3xl border border-line bg-panelAlt/70 p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                  Imported hours note
+                </p>
+                <p className="mt-2 text-sm leading-7 text-stone-300">
+                  {business.hoursText}
+                </p>
+              </div>
+            ) : null}
             <div className="mt-5 divide-y divide-line">
               {weeklyHours.map((day) => (
                 <div
@@ -131,7 +157,11 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                   className="flex items-center justify-between gap-4 py-3 text-sm"
                 >
                   <span className="text-stone-200">{day.label}</span>
-                  <span className="text-stone-400">{day.summary}</span>
+                  <span className="text-stone-400">
+                    {hasOnlyClosedHours && business.hoursText
+                      ? "See imported hours note"
+                      : day.summary}
+                  </span>
                 </div>
               ))}
             </div>

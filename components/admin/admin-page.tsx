@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useAllBusinesses } from "@/hooks/use-all-businesses";
+import { businessToFormValues } from "@/lib/businesses";
 import {
   createBusiness,
   createBusinessDraft,
@@ -132,6 +134,28 @@ export function AdminPageContent() {
               <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
                 Review every listing.
               </h1>
+              <div className="mt-6">
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/admin/businesses"
+                    className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Open business manager
+                  </Link>
+                  <Link
+                    href="/admin/import"
+                    className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Import spreadsheet
+                  </Link>
+                  <Link
+                    href="/admin/homepage"
+                    className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Open homepage workspace
+                  </Link>
+                </div>
+              </div>
             </div>
             <div className="rounded-3xl border border-line bg-panelAlt/70 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
@@ -265,7 +289,7 @@ export function AdminPageContent() {
               />
             ) : selectedBusiness ? (
               <BusinessEditorForm
-                initialValues={selectedBusiness}
+                initialValues={businessToFormValues(selectedBusiness)}
                 title="Edit listing"
                 description="Admins can edit any listing, deactivate it, or attach it to an owner account."
                 submitLabel="Save listing"

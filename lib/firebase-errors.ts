@@ -12,6 +12,10 @@ export function formatFirebaseError(error: unknown) {
         return "The email or password was incorrect.";
       case "auth/invalid-email":
         return "Enter a valid email address.";
+      case "auth/email-already-in-use":
+        return "That email already has an account. Sign in instead or use another email address.";
+      case "auth/weak-password":
+        return "Use a stronger password with at least 8 characters.";
       case "auth/too-many-requests":
         return "Too many attempts were made. Wait a few minutes and try again.";
       case "storage/unauthorized":
