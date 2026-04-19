@@ -17,16 +17,35 @@ import {
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { BusinessFormValues } from "@/lib/types";
 
-export function AdminPageContent() {
+type AdminPageContentProps = {
+  initialMode?: string | string[];
+};
+
+function isCreateMode(mode: string | string[] | undefined) {
+  return Array.isArray(mode) ? mode.includes("create") : mode === "create";
+}
+
+export function AdminPageContent({ initialMode }: AdminPageContentProps) {
   const { businesses, loading, error } = useAllBusinesses();
+  const startCreating = isCreateMode(initialMode);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(startCreating);
   const [draftValues, setDraftValues] = useState(createBusinessDraft());
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
+
+  useEffect(() => {
+    if (!startCreating) {
+      return;
+    }
+
+    setCreating(true);
+    setSelectedBusinessId(null);
+    setDraftValues(createBusinessDraft());
+  }, [startCreating]);
 
   useEffect(() => {
     if (!loading && businesses.length && !selectedBusinessId && !creating) {

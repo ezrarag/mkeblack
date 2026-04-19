@@ -30,6 +30,8 @@ export function formatFirebaseError(error: unknown) {
         return "This domain is not authorized for Firebase Auth. Add it to the project's authorized domains.";
       case "auth/too-many-requests":
         return "Too many attempts were made. Wait a few minutes and try again.";
+      case "permission-denied":
+        return "Firestore denied this write. Verify that this account is an admin in the active Firebase project and that the latest Firestore rules are deployed.";
       case "storage/unauthorized":
         return "You do not have permission to upload files for this listing.";
       default:

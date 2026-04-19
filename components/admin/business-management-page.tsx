@@ -205,10 +205,10 @@ export function BusinessManagementPage() {
                 Import spreadsheet
               </Link>
               <Link
-                href="/admin"
+                href="/admin?mode=create"
                 className="rounded-full border border-line px-5 py-3 text-sm text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
               >
-                Back to admin
+                Manual input
               </Link>
             </div>
           </div>

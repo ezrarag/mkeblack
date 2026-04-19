@@ -1,5 +1,11 @@
 import { AdminPageContent } from "@/components/admin/admin-page";
 
-export default function AdminPage() {
-  return <AdminPageContent />;
+type AdminPageProps = {
+  searchParams?: {
+    mode?: string | string[];
+  };
+};
+
+export default function AdminPage({ searchParams }: AdminPageProps) {
+  return <AdminPageContent initialMode={searchParams?.mode} />;
 }

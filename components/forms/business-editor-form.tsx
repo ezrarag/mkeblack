@@ -7,6 +7,7 @@ import { BusinessFormValues, DayKey } from "@/lib/types";
 import { formatPhone } from "@/lib/utils";
 import { BusinessMap } from "@/components/map/business-map";
 import { HoursEditor } from "@/components/forms/hours-editor";
+import { geocodeAddress } from "@/lib/geocode";
 
 type BusinessEditorFormProps = {
   initialValues: BusinessFormValues;
@@ -23,6 +24,11 @@ type BusinessEditorFormProps = {
   /** Show internal data-only fields: listing source badge, raw hoursText. Hidden for owners. */
   showInternalFields?: boolean;
 };
+
+type GeocodeFeedback = {
+  tone: "success" | "error";
+  message: string;
+} | null;
 
 function cloneFormValues(values: BusinessFormValues): BusinessFormValues {
   return {
@@ -57,12 +63,15 @@ export function BusinessEditorForm({
   const [values, setValues] = useState<BusinessFormValues>(
     cloneFormValues(initialValues)
   );
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeFeedback, setGeocodeFeedback] = useState<GeocodeFeedback>(null);
   const categoryOptions = Array.from(
     new Set([...BUSINESS_CATEGORIES, values.category].filter(Boolean))
   );
 
   useEffect(() => {
     setValues(cloneFormValues(initialValues));
+    setGeocodeFeedback(null);
   }, [initialValues]);
 
   function updateField<Key extends keyof BusinessFormValues>(
@@ -104,6 +113,40 @@ export function BusinessEditorForm({
     const files = Array.from(event.target.files);
     await onUploadPhotos(files);
     event.target.value = "";
+  }
+
+  async function handleUseAddress() {
+    if (!values.address.trim()) {
+      setGeocodeFeedback({
+        tone: "error",
+        message: "Add an address first so Google Maps can confirm the location."
+      });
+      return;
+    }
+
+    setGeocoding(true);
+    setGeocodeFeedback(null);
+
+    try {
+      const location = await geocodeAddress(values.address);
+
+      if (!location) {
+        setGeocodeFeedback({
+          tone: "error",
+          message:
+            "Google Maps could not confirm that address. Check the address or enter coordinates manually."
+        });
+        return;
+      }
+
+      updateField("location", location);
+      setGeocodeFeedback({
+        tone: "success",
+        message: "Coordinates updated from the address."
+      });
+    } finally {
+      setGeocoding(false);
+    }
   }
 
   return (
@@ -164,6 +207,36 @@ export function BusinessEditorForm({
               onChange={(event) => updateField("address", event.target.value)}
               placeholder="1234 W Example Ave, Milwaukee, WI"
             />
+            <p className="mt-2 text-sm leading-6 text-stone-400">
+              Saving will try to confirm the map coordinates from this address
+              automatically.
+            </p>
+            {showAdminFields ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void handleUseAddress()}
+                  disabled={geocoding}
+                  className="rounded-full border border-accent/35 bg-accent/10 px-4 py-2 text-sm text-accentSoft transition hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {geocoding ? "Confirming address..." : "Use address for map pin"}
+                </button>
+                <p className="text-sm text-stone-500">
+                  Latitude and longitude below are only for manual overrides.
+                </p>
+              </div>
+            ) : null}
+            {geocodeFeedback ? (
+              <div
+                className={`mt-3 rounded-3xl px-4 py-3 text-sm ${
+                  geocodeFeedback.tone === "success"
+                    ? "border border-success/35 bg-success/10 text-stone-100"
+                    : "border border-danger/35 bg-danger/10 text-stone-100"
+                }`}
+              >
+                {geocodeFeedback.message}
+              </div>
+            ) : null}
           </div>
           <div>
             <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
