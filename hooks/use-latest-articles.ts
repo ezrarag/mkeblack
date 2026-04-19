@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  isPublishedArticle,
   normalizeArticleSummary,
   sortArticleSummaries
 } from "@/lib/homepage";
@@ -45,12 +44,17 @@ export function useLatestArticles(limitCount = 3) {
           return;
         }
 
-        unsubscribe = firestoreModule.onSnapshot(
+        const articlesQuery = firestoreModule.query(
           firestoreModule.collection(db, "articles"),
+          firestoreModule.where("published", "==", true)
+        );
+
+        unsubscribe = firestoreModule.onSnapshot(
+          articlesQuery,
           (snapshot) => {
-            const nextArticles = snapshot.docs
-              .filter((document) => isPublishedArticle(document.data()))
-              .map((document) => normalizeArticleSummary(document.data(), document.id));
+            const nextArticles = snapshot.docs.map((document) =>
+              normalizeArticleSummary(document.data(), document.id)
+            );
 
             setArticles(sortArticleSummaries(nextArticles).slice(0, limitCount));
             setLoading(false);
