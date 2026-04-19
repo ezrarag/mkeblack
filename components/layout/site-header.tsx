@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { signOut } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
-import { getFirebaseAuth } from "@/lib/firebase/client";
+import {
+  getFirebaseAuth,
+  loadFirebaseAuthModule
+} from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
 
 type NavLink = {
@@ -16,42 +18,27 @@ type NavLink = {
 
 const publicLinks: NavLink[] = [
   { href: "/directory", label: "Directory" },
-  {
-    href: "https://www.mkeblack.org/contact",
-    label: "Contact",
-    external: true
-  }
+  { href: "https://www.mkeblack.org/contact", label: "Contact", external: true }
 ];
 
 function HeaderLink({ href, label, external }: NavLink) {
   const className =
     "rounded-full border border-line px-4 py-2 text-sm text-ink transition hover:border-accent/40 hover:bg-accent/10 hover:text-accentSoft";
-
-  if (external) {
-    return (
-      <a href={href} className={className}>
-        {label}
-      </a>
-    );
-  }
-
-  return (
-    <Link href={href} className={className}>
-      {label}
-    </Link>
-  );
+  if (external) return <a href={href} className={className}>{label}</a>;
+  return <Link href={href} className={className}>{label}</Link>;
 }
 
-function getAvatarInitials(displayName: string | null | undefined, email: string | null | undefined) {
+function getAvatarInitials(
+  displayName: string | null | undefined,
+  email: string | null | undefined
+) {
   const source = displayName?.trim() || email?.trim() || "Account";
-
   const initials = source
     .split(/[\s@._-]+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
-
   return initials || "AC";
 }
 
@@ -61,35 +48,27 @@ export function SiteHeader() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const hasAdminAccess = isAdmin || profile?.role === "admin";
   const avatarInitials = getAvatarInitials(user?.displayName, user?.email);
-  const accountLinks: NavLink[] = [{ href: "/dashboard", label: "Owner dashboard" }];
 
-  if (hasAdminAccess) {
-    accountLinks.push(
-      { href: "/admin", label: "Admin workspace" },
-      { href: "/admin/homepage", label: "Homepage editor" }
-    );
-  }
+  const accountLinks: NavLink[] = hasAdminAccess
+    ? [
+        { href: "/admin", label: "Admin workspace" },
+        { href: "/admin/homepage", label: "Homepage editor" },
+        { href: "/admin/businesses", label: "Business manager" },
+        { href: "/admin/import", label: "Import spreadsheet" },
+        { href: "/admin/team", label: "Team access" },
+      ]
+    : [{ href: "/dashboard", label: "My listing" }];
 
   useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
-
+    if (!menuOpen) return;
     function handlePointerDown(event: MouseEvent) {
-      if (!menuRef.current?.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
     }
-
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setMenuOpen(false);
-      }
+      if (event.key === "Escape") setMenuOpen(false);
     }
-
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
@@ -126,9 +105,7 @@ export function SiteHeader() {
           ))}
 
           {loading ? (
-            <span className="rounded-full border border-line px-4 py-2 text-sm text-muted">
-              Checking session...
-            </span>
+            <span className="rounded-full border border-line px-4 py-2 text-sm text-muted">…</span>
           ) : user ? (
             <div ref={menuRef} className="relative">
               <button
@@ -136,7 +113,7 @@ export function SiteHeader() {
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 aria-label="Open account menu"
-                onClick={() => setMenuOpen((current) => !current)}
+                onClick={() => setMenuOpen((c) => !c)}
                 className={cn(
                   "flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold uppercase tracking-[0.2em] transition",
                   menuOpen
@@ -147,18 +124,18 @@ export function SiteHeader() {
                 {avatarInitials}
               </button>
 
-              {menuOpen ? (
+              {menuOpen && (
                 <div className="absolute right-0 top-full mt-3 w-72 rounded-[1.8rem] border border-line bg-panel/95 p-3 shadow-glow">
                   <div className="rounded-[1.4rem] border border-line/80 bg-canvas/45 px-4 py-4">
                     <p className="text-[11px] uppercase tracking-[0.24em] text-muted">
-                      Signed in
+                      {hasAdminAccess ? "Admin account" : "Business owner"}
                     </p>
                     <p className="mt-2 font-medium text-stone-100">
                       {user.displayName || user.email || "MKE Black account"}
                     </p>
-                    {user.email ? (
+                    {user.email && (
                       <p className="mt-1 text-sm text-stone-400">{user.email}</p>
-                    ) : null}
+                    )}
                   </div>
 
                   <div className="mt-3 flex flex-col gap-2">
@@ -175,14 +152,13 @@ export function SiteHeader() {
 
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
                         setMenuOpen(false);
-
-                        const auth = getFirebaseAuth();
-
-                        if (auth) {
-                          signOut(auth);
-                        }
+                        const [authModule, auth] = await Promise.all([
+                          loadFirebaseAuthModule(),
+                          getFirebaseAuth()
+                        ]);
+                        if (auth) await authModule.signOut(auth);
                       }}
                       className="rounded-2xl border border-accent/35 bg-accent px-4 py-3 text-left text-sm text-canvas transition hover:bg-accentSoft"
                     >
@@ -190,15 +166,23 @@ export function SiteHeader() {
                     </button>
                   </div>
                 </div>
-              ) : null}
+              )}
             </div>
           ) : (
-            <Link
-              href="/login"
-              className="rounded-full border border-accent/35 bg-accent px-4 py-2 text-sm text-canvas transition hover:bg-accentSoft"
-            >
-              Business Login
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login?next=/admin"
+                className="rounded-full border border-line px-4 py-2 text-sm text-stone-300 transition hover:border-accent/40 hover:bg-accent/10 hover:text-accentSoft"
+              >
+                Admin
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full border border-accent/35 bg-accent px-4 py-2 text-sm text-canvas transition hover:bg-accentSoft"
+              >
+                Business Login
+              </Link>
+            </div>
           )}
         </nav>
       </div>

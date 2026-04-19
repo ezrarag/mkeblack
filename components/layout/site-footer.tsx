@@ -37,19 +37,35 @@ const exploreLinks: FooterLink[] = [
 ];
 
 export function SiteFooter() {
-  const { profile, isAdmin } = useAuth();
-  const hasAdminAccess = isAdmin || profile?.role === "admin";
+  const { user, hasAdminAccess } = useAuth();
 
-  const businessLinks: FooterLink[] = [
-    { href: "/login", label: "Business login" },
-    { href: "/dashboard", label: "Owner dashboard" },
-    { href: "https://www.mkeblack.org/contact", label: "Submit a business", external: true }
-  ];
+  // Build owner/admin links based on auth state
+  const businessLinks: FooterLink[] = [];
 
-  if (hasAdminAccess) {
+  if (!user) {
+    // Logged out — show login entry points with ?next= so they land in the right place
+    businessLinks.push(
+      { href: "/login", label: "Business owner login" },
+      { href: "/login?next=/admin", label: "Admin login" }
+    );
+  } else if (hasAdminAccess) {
+    // Logged in as admin — show all admin routes
     businessLinks.push(
       { href: "/admin", label: "Admin workspace" },
-      { href: "/admin/homepage", label: "Homepage editor" }
+      { href: "/admin/homepage", label: "Homepage editor" },
+      { href: "/admin/businesses", label: "Business manager" },
+      { href: "/admin/import", label: "Import spreadsheet" },
+      { href: "/dashboard", label: "Owner dashboard" }
+    );
+  } else {
+    // Logged in as business owner
+    businessLinks.push(
+      { href: "/dashboard", label: "My listing" },
+      {
+        href: "https://www.mkeblack.org/contact",
+        label: "Submit a business",
+        external: true
+      }
     );
   }
 
@@ -84,7 +100,7 @@ export function SiteFooter() {
 
           <div>
             <p className="text-xs uppercase tracking-[0.26em] text-muted">
-              Owners & Admins
+              {hasAdminAccess ? "Admin" : "Owners & Admins"}
             </p>
             <nav className="mt-5 flex flex-col gap-2">
               {businessLinks.map((link) => (

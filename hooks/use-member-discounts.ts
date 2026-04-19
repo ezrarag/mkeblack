@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
 import {
   normalizeMemberDiscount,
   sortMemberDiscounts
 } from "@/lib/homepage";
-import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseDb,
+  loadFirebaseFirestoreModule,
+  isFirebaseConfigured
+} from "@/lib/firebase/client";
 import { MemberDiscount } from "@/lib/types";
 
 export function useMemberDiscounts(activeOnly = false) {
@@ -15,47 +18,78 @@ export function useMemberDiscounts(activeOnly = false) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setError("Firebase environment variables are missing.");
-      setLoading(false);
-      return;
-    }
+    let unsubscribe: () => void = () => undefined;
+    let cancelled = false;
 
-    const db = getFirebaseDb();
-
-    if (!db) {
-      setError("Firebase could not initialize in the current environment.");
-      setLoading(false);
-      return;
-    }
-
-    const discountsQuery = activeOnly
-      ? query(collection(db, "member_discounts"), where("active", "==", true))
-      : collection(db, "member_discounts");
-
-    const unsubscribe = onSnapshot(
-      discountsQuery,
-      (snapshot) => {
-        const nextDiscounts = snapshot.docs.map((document) =>
-          normalizeMemberDiscount(document.data(), document.id)
-        );
-
-        setDiscounts(
-          sortMemberDiscounts(
-            activeOnly
-              ? nextDiscounts.filter((discount) => discount.active)
-              : nextDiscounts
-          )
-        );
+    async function start() {
+      if (!isFirebaseConfigured) {
+        setError("Firebase environment variables are missing.");
         setLoading(false);
-      },
-      (snapshotError) => {
-        setError(snapshotError.message);
-        setLoading(false);
+        return;
       }
-    );
 
-    return () => unsubscribe();
+      try {
+        const [firestoreModule, db] = await Promise.all([
+          loadFirebaseFirestoreModule(),
+          getFirebaseDb()
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!db) {
+          setError("Firebase could not initialize in the current environment.");
+          setLoading(false);
+          return;
+        }
+
+        const discountsQuery = activeOnly
+          ? firestoreModule.query(
+              firestoreModule.collection(db, "member_discounts"),
+              firestoreModule.where("active", "==", true)
+            )
+          : firestoreModule.collection(db, "member_discounts");
+
+        unsubscribe = firestoreModule.onSnapshot(
+          discountsQuery,
+          (snapshot) => {
+            const nextDiscounts = snapshot.docs.map((document) =>
+              normalizeMemberDiscount(document.data(), document.id)
+            );
+
+            setDiscounts(
+              sortMemberDiscounts(
+                activeOnly
+                  ? nextDiscounts.filter((discount) => discount.active)
+                  : nextDiscounts
+              )
+            );
+            setLoading(false);
+          },
+          (snapshotError) => {
+            setError(snapshotError.message);
+            setLoading(false);
+          }
+        );
+      } catch (startError) {
+        if (!cancelled) {
+          setError(
+            startError instanceof Error
+              ? startError.message
+              : "Unable to load member discounts."
+          );
+          setLoading(false);
+        }
+      }
+    }
+
+    void start();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, [activeOnly]);
 
   return { discounts, loading, error };

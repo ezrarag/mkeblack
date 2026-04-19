@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
 import { normalizeBusinessRecord } from "@/lib/businesses";
-import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseDb,
+  loadFirebaseFirestoreModule,
+  isFirebaseConfigured
+} from "@/lib/firebase/client";
 import { Business } from "@/lib/types";
 
 export function useBusiness(id: string) {
@@ -12,45 +15,73 @@ export function useBusiness(id: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
+    let unsubscribe: () => void = () => undefined;
+    let cancelled = false;
 
-    if (!isFirebaseConfigured) {
-      setError("Firebase environment variables are missing.");
-      setLoading(false);
-      return;
-    }
+    async function start() {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
 
-    const db = getFirebaseDb();
+      if (!isFirebaseConfigured) {
+        setError("Firebase environment variables are missing.");
+        setLoading(false);
+        return;
+      }
 
-    if (!db) {
-      setError("Firebase could not initialize in the current environment.");
-      setLoading(false);
-      return;
-    }
+      try {
+        const [firestoreModule, db] = await Promise.all([
+          loadFirebaseFirestoreModule(),
+          getFirebaseDb()
+        ]);
 
-    const reference = doc(db, "businesses", id);
-    const unsubscribe = onSnapshot(
-      reference,
-      (snapshot) => {
-        if (!snapshot.exists()) {
-          setBusiness(null);
+        if (cancelled) {
+          return;
+        }
+
+        if (!db) {
+          setError("Firebase could not initialize in the current environment.");
           setLoading(false);
           return;
         }
 
-        setBusiness(normalizeBusinessRecord(snapshot.data(), snapshot.id));
-        setLoading(false);
-      },
-      (snapshotError) => {
-        setError(snapshotError.message);
-        setLoading(false);
-      }
-    );
+        const reference = firestoreModule.doc(db, "businesses", id);
+        unsubscribe = firestoreModule.onSnapshot(
+          reference,
+          (snapshot) => {
+            if (!snapshot.exists()) {
+              setBusiness(null);
+              setLoading(false);
+              return;
+            }
 
-    return () => unsubscribe();
+            setBusiness(normalizeBusinessRecord(snapshot.data(), snapshot.id));
+            setLoading(false);
+          },
+          (snapshotError) => {
+            setError(snapshotError.message);
+            setLoading(false);
+          }
+        );
+      } catch (startError) {
+        if (!cancelled) {
+          setError(
+            startError instanceof Error
+              ? startError.message
+              : "Unable to load business."
+          );
+          setLoading(false);
+        }
+      }
+    }
+
+    void start();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, [id]);
 
   return { business, loading, error };

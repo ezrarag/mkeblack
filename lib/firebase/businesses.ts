@@ -1,17 +1,4 @@
 import {
-  arrayRemove,
-  arrayUnion,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  serverTimestamp,
-  updateDoc
-} from "firebase/firestore";
-import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import {
   createClosedBusinessHours,
   createEmptyBusinessForm
 } from "@/lib/constants";
@@ -21,7 +8,9 @@ import {
 } from "@/lib/businesses";
 import {
   getFirebaseDb,
-  getFirebaseStorage
+  getFirebaseStorage,
+  loadFirebaseFirestoreModule,
+  loadFirebaseStorageModule
 } from "@/lib/firebase/client";
 import { geocodeAddress } from "@/lib/geocode";
 import {
@@ -33,6 +22,38 @@ import { normalizeUrl } from "@/lib/utils";
 
 function sanitizeFilename(name: string) {
   return name.replace(/[^a-zA-Z0-9.-]+/g, "-").toLowerCase();
+}
+
+async function getFirestoreHelpers() {
+  const [firestoreModule, db] = await Promise.all([
+    loadFirebaseFirestoreModule(),
+    getFirebaseDb()
+  ]);
+
+  if (!db) {
+    throw new Error("Firestore is not available in this environment.");
+  }
+
+  return {
+    db,
+    firestoreModule
+  };
+}
+
+async function getStorageHelpers() {
+  const [storageModule, storage] = await Promise.all([
+    loadFirebaseStorageModule(),
+    getFirebaseStorage()
+  ]);
+
+  if (!storage) {
+    throw new Error("Firebase Storage is not available in this environment.");
+  }
+
+  return {
+    storage,
+    storageModule
+  };
 }
 
 export function createBusinessDraft() {
@@ -62,24 +83,19 @@ export function normalizeBusinessPayload(values: BusinessFormValues) {
 }
 
 async function syncOwnerBusinessLink(ownerUid: string | null, businessId: string) {
-  const db = getFirebaseDb();
-
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
-
   if (!ownerUid) {
     return;
   }
 
-  const userReference = doc(db, "users", ownerUid);
-  const userSnapshot = await getDoc(userReference);
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  const userReference = firestoreModule.doc(db, "users", ownerUid);
+  const userSnapshot = await firestoreModule.getDoc(userReference);
 
   if (!userSnapshot.exists()) {
     return;
   }
 
-  await setDoc(
+  await firestoreModule.setDoc(
     userReference,
     {
       uid: ownerUid,
@@ -94,12 +110,7 @@ export async function saveBusiness(
   values: BusinessFormValues,
   previousAddress?: string
 ) {
-  const db = getFirebaseDb();
-
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
-
+  const { db, firestoreModule } = await getFirestoreHelpers();
   const payload = normalizeBusinessPayload(values);
 
   if (!payload.address) {
@@ -116,8 +127,8 @@ export async function saveBusiness(
     }
   }
 
-  await setDoc(
-    doc(db, "businesses", businessId),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "businesses", businessId),
     {
       id: businessId,
       ...payload,
@@ -130,86 +141,78 @@ export async function saveBusiness(
 }
 
 export async function createBusiness(values: BusinessFormValues) {
-  const db = getFirebaseDb();
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  const businessReference = firestoreModule.doc(
+    firestoreModule.collection(db, "businesses")
+  );
 
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
-
-  const businessReference = doc(collection(db, "businesses"));
   await saveBusiness(businessReference.id, values);
   return businessReference.id;
 }
 
 export async function deleteBusiness(business: Pick<Business, "id" | "photos">) {
-  const db = getFirebaseDb();
-  const storage = getFirebaseStorage();
-
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  const storage = await getFirebaseStorage();
 
   if (storage) {
+    const { storageModule } = await getStorageHelpers();
+
     for (const photoUrl of business.photos) {
       try {
-        await deleteObject(ref(storage, photoUrl));
+        await storageModule.deleteObject(storageModule.ref(storage, photoUrl));
       } catch {
         // Ignore storage cleanup failures so Firestore deletion can continue.
       }
     }
   }
 
-  await deleteDoc(doc(db, "businesses", business.id));
+  await firestoreModule.deleteDoc(firestoreModule.doc(db, "businesses", business.id));
 }
 
 export async function uploadBusinessPhotos(businessId: string, files: File[]) {
-  const db = getFirebaseDb();
-  const storage = getFirebaseStorage();
-
-  if (!db || !storage) {
-    throw new Error("Firebase Storage is not available in this environment.");
-  }
-
   if (!files.length) {
     return [];
   }
+
+  const [{ db, firestoreModule }, { storage, storageModule }] = await Promise.all([
+    getFirestoreHelpers(),
+    getStorageHelpers()
+  ]);
 
   const photoUrls: string[] = [];
 
   for (const file of files) {
     const timestamp = Date.now();
-    const storageReference = ref(
+    const storageReference = storageModule.ref(
       storage,
       `businesses/${businessId}/${timestamp}-${sanitizeFilename(file.name)}`
     );
 
-    const snapshot = await uploadBytes(storageReference, file);
-    photoUrls.push(await getDownloadURL(snapshot.ref));
+    const snapshot = await storageModule.uploadBytes(storageReference, file);
+    photoUrls.push(await storageModule.getDownloadURL(snapshot.ref));
   }
 
-  await updateDoc(doc(db, "businesses", businessId), {
-    photos: arrayUnion(...photoUrls)
+  await firestoreModule.updateDoc(firestoreModule.doc(db, "businesses", businessId), {
+    photos: firestoreModule.arrayUnion(...photoUrls)
   });
 
   return photoUrls;
 }
 
 export async function removeBusinessPhoto(businessId: string, photoUrl: string) {
-  const db = getFirebaseDb();
-  const storage = getFirebaseStorage();
-
-  if (!db || !storage) {
-    throw new Error("Firebase Storage is not available in this environment.");
-  }
+  const [{ db, firestoreModule }, { storage, storageModule }] = await Promise.all([
+    getFirestoreHelpers(),
+    getStorageHelpers()
+  ]);
 
   try {
-    await deleteObject(ref(storage, photoUrl));
+    await storageModule.deleteObject(storageModule.ref(storage, photoUrl));
   } catch {
     // Ignore storage cleanup failures so Firestore state can still be updated.
   }
 
-  await updateDoc(doc(db, "businesses", businessId), {
-    photos: arrayRemove(photoUrl)
+  await firestoreModule.updateDoc(firestoreModule.doc(db, "businesses", businessId), {
+    photos: firestoreModule.arrayRemove(photoUrl)
   });
 }
 
@@ -217,15 +220,11 @@ export async function setBusinessesActive(
   businessIds: string[],
   active: boolean
 ) {
-  const db = getFirebaseDb();
-
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
+  const { db, firestoreModule } = await getFirestoreHelpers();
 
   for (const businessId of businessIds) {
-    await setDoc(
-      doc(db, "businesses", businessId),
+    await firestoreModule.setDoc(
+      firestoreModule.doc(db, "businesses", businessId),
       { active },
       { merge: true }
     );
@@ -258,13 +257,10 @@ export async function importBusinesses(
   rows: ImportBusinessRow[],
   options: ImportBusinessesOptions = {}
 ) {
-  const db = getFirebaseDb();
-
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
-
-  const existingSnapshot = await getDocs(collection(db, "businesses"));
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  const existingSnapshot = await firestoreModule.getDocs(
+    firestoreModule.collection(db, "businesses")
+  );
   const seenKeys = new Set(
     existingSnapshot.docs.map((document) => {
       const business = normalizeBusinessRecord(document.data(), document.id);
@@ -298,9 +294,11 @@ export async function importBusinesses(
     }
 
     const location = address ? await geocodeAddress(address) : null;
-    const businessReference = doc(collection(db, "businesses"));
+    const businessReference = firestoreModule.doc(
+      firestoreModule.collection(db, "businesses")
+    );
 
-    await setDoc(doc(db, "businesses", businessReference.id), {
+    await firestoreModule.setDoc(firestoreModule.doc(db, "businesses", businessReference.id), {
       id: businessReference.id,
       name,
       category,
@@ -315,7 +313,7 @@ export async function importBusinesses(
       ownerUid: null,
       active: true,
       source: "import",
-      importedAt: serverTimestamp(),
+      importedAt: firestoreModule.serverTimestamp(),
       claimInviteStatus: "not_invited",
       claimInvitedAt: null,
       location: location ?? createEmptyBusinessForm().location
@@ -338,11 +336,7 @@ export async function sendBusinessClaimInvite(
   business: Pick<Business, "id" | "name" | "email">,
   appOrigin: string
 ) {
-  const db = getFirebaseDb();
-
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
+  const { db, firestoreModule } = await getFirestoreHelpers();
 
   if (!business.email.trim()) {
     throw new Error("Add an email address to this listing before sending an invite.");
@@ -350,23 +344,23 @@ export async function sendBusinessClaimInvite(
 
   const inviteUrl = `${appOrigin.replace(/\/$/, "")}/claim/${business.id}`;
 
-  await setDoc(
-    doc(db, "business_claim_invites", business.id),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "business_claim_invites", business.id),
     {
       id: business.id,
       businessId: business.id,
       businessName: business.name,
       email: business.email.trim(),
       status: "pending",
-      createdAt: serverTimestamp(),
+      createdAt: firestoreModule.serverTimestamp(),
       claimedAt: null,
       claimedByUid: null
     },
     { merge: true }
   );
 
-  await setDoc(
-    doc(collection(db, "mail")),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(firestoreModule.collection(db, "mail")),
     {
       to: [business.email.trim()],
       message: {
@@ -377,11 +371,11 @@ export async function sendBusinessClaimInvite(
     }
   );
 
-  await setDoc(
-    doc(db, "businesses", business.id),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "businesses", business.id),
     {
       claimInviteStatus: "pending",
-      claimInvitedAt: serverTimestamp()
+      claimInvitedAt: firestoreModule.serverTimestamp()
     },
     { merge: true }
   );
@@ -391,14 +385,10 @@ export async function claimBusinessListing(
   invite: Pick<BusinessClaimInvite, "businessId" | "email">,
   uid: string
 ) {
-  const db = getFirebaseDb();
+  const { db, firestoreModule } = await getFirestoreHelpers();
 
-  if (!db) {
-    throw new Error("Firestore is not available in this environment.");
-  }
-
-  await setDoc(
-    doc(db, "users", uid),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "users", uid),
     {
       uid,
       email: invite.email.trim(),
@@ -408,8 +398,8 @@ export async function claimBusinessListing(
     { merge: true }
   );
 
-  await setDoc(
-    doc(db, "businesses", invite.businessId),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "businesses", invite.businessId),
     {
       ownerUid: uid,
       email: invite.email.trim(),
@@ -418,11 +408,11 @@ export async function claimBusinessListing(
     { merge: true }
   );
 
-  await setDoc(
-    doc(db, "business_claim_invites", invite.businessId),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "business_claim_invites", invite.businessId),
     {
       status: "claimed",
-      claimedAt: serverTimestamp(),
+      claimedAt: firestoreModule.serverTimestamp(),
       claimedByUid: uid
     },
     { merge: true }

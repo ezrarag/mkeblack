@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { normalizeBusinessRecord } from "@/lib/businesses";
-import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseDb,
+  loadFirebaseFirestoreModule,
+  isFirebaseConfigured
+} from "@/lib/firebase/client";
 import { Business } from "@/lib/types";
 
 export function useBusinesses() {
@@ -12,44 +15,71 @@ export function useBusinesses() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setError("Firebase environment variables are missing.");
-      setLoading(false);
-      return;
-    }
+    let unsubscribe: () => void = () => undefined;
+    let cancelled = false;
 
-    const db = getFirebaseDb();
+    async function start() {
+      if (!isFirebaseConfigured) {
+        setError("Firebase environment variables are missing.");
+        setLoading(false);
+        return;
+      }
 
-    if (!db) {
-      setError("Firebase could not initialize in the current environment.");
-      setLoading(false);
-      return;
-    }
+      try {
+        const [firestoreModule, db] = await Promise.all([
+          loadFirebaseFirestoreModule(),
+          getFirebaseDb()
+        ]);
 
-    const businessesQuery = query(
-      collection(db, "businesses"),
-      where("active", "==", true)
-    );
+        if (cancelled) {
+          return;
+        }
 
-    const unsubscribe = onSnapshot(
-      businessesQuery,
-      (snapshot) => {
-        const nextBusinesses = snapshot.docs.map((document) =>
-          normalizeBusinessRecord(document.data(), document.id)
+        if (!db) {
+          setError("Firebase could not initialize in the current environment.");
+          setLoading(false);
+          return;
+        }
+
+        const businessesQuery = firestoreModule.query(
+          firestoreModule.collection(db, "businesses"),
+          firestoreModule.where("active", "==", true)
         );
 
-        nextBusinesses.sort((left, right) => left.name.localeCompare(right.name));
+        unsubscribe = firestoreModule.onSnapshot(
+          businessesQuery,
+          (snapshot) => {
+            const nextBusinesses = snapshot.docs.map((document) =>
+              normalizeBusinessRecord(document.data(), document.id)
+            );
 
-        setBusinesses(nextBusinesses);
-        setLoading(false);
-      },
-      (snapshotError) => {
-        setError(snapshotError.message);
-        setLoading(false);
+            nextBusinesses.sort((left, right) => left.name.localeCompare(right.name));
+            setBusinesses(nextBusinesses);
+            setLoading(false);
+          },
+          (snapshotError) => {
+            setError(snapshotError.message);
+            setLoading(false);
+          }
+        );
+      } catch (startError) {
+        if (!cancelled) {
+          setError(
+            startError instanceof Error
+              ? startError.message
+              : "Unable to load businesses."
+          );
+          setLoading(false);
+        }
       }
-    );
+    }
 
-    return () => unsubscribe();
+    void start();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   return { businesses, loading, error };

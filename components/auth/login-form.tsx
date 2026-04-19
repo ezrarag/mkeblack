@@ -3,23 +3,33 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import {
   getFirebaseAuth,
+  loadFirebaseAuthModule,
   isFirebaseConfigured
 } from "@/lib/firebase/client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 
+function getSafeNextPath(nextPath: string | null) {
+  if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
+    return null;
+  }
+
+  return nextPath;
+}
+
 export function LoginForm() {
-  const { user, profile, isAdmin, loading } = useAuth();
+  const { user, hasAdminAccess, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const nextPath = searchParams.get("next");
+  const nextPath = getSafeNextPath(searchParams.get("next"));
+  const isSubmitting = submitting || googleSubmitting;
 
   useEffect(() => {
     if (loading || !user) {
@@ -27,11 +37,10 @@ export function LoginForm() {
     }
 
     const destination =
-      nextPath ??
-      (isAdmin || profile?.role === "admin" ? "/admin" : "/dashboard");
+      nextPath ?? (hasAdminAccess ? "/admin" : "/dashboard");
 
     router.replace(destination);
-  }, [isAdmin, loading, nextPath, profile?.role, router, user]);
+  }, [hasAdminAccess, loading, nextPath, router, user]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,17 +48,45 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const auth = getFirebaseAuth();
+      const [authModule, auth] = await Promise.all([
+        loadFirebaseAuthModule(),
+        getFirebaseAuth()
+      ]);
 
       if (!auth) {
         throw new Error("Firebase Auth is not available in this environment.");
       }
 
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      await authModule.signInWithEmailAndPassword(auth, email.trim(), password);
     } catch (submitError) {
       setError(formatFirebaseError(submitError));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setGoogleSubmitting(true);
+    setError(null);
+
+    try {
+      const [authModule, auth] = await Promise.all([
+        loadFirebaseAuthModule(),
+        getFirebaseAuth()
+      ]);
+
+      if (!auth) {
+        throw new Error("Firebase Auth is not available in this environment.");
+      }
+
+      const provider = new authModule.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      await authModule.signInWithPopup(auth, provider);
+    } catch (submitError) {
+      setError(formatFirebaseError(submitError));
+    } finally {
+      setGoogleSubmitting(false);
     }
   }
 
@@ -104,8 +141,10 @@ export function LoginForm() {
           </p>
           <h2 className="mt-3 font-display text-4xl text-ink">Business login</h2>
           <p className="mt-4 text-sm leading-7 text-stone-300">
-            Use the email and password connected to your Firebase Auth account.
-            If you need access or an admin claim, contact the directory team.
+            Use the email and password connected to your Firebase Auth account,
+            or sign in with Google to create or access an account quickly. If
+            you need admin access or a linked business profile, contact the
+            directory team.
           </p>
 
           {!isFirebaseConfigured ? (
@@ -115,7 +154,36 @@ export function LoginForm() {
             </div>
           ) : null}
 
-          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+          <div className="mt-8">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isSubmitting || !isFirebaseConfigured}
+              className="flex w-full items-center justify-center gap-3 rounded-full border border-line bg-panelAlt/70 px-5 py-3 text-sm font-semibold text-stone-100 transition hover:border-accent/35 hover:bg-accent/10 hover:text-accentSoft disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-line/80 bg-canvas/70 text-xs uppercase tracking-[0.2em] text-accentSoft">
+                G
+              </span>
+              <span>
+                {googleSubmitting ? "Opening Google..." : "Continue with Google"}
+              </span>
+            </button>
+
+            <p className="mt-3 text-xs uppercase tracking-[0.22em] text-muted">
+              Invited admins should use the exact Google address tied to their
+              invite.
+            </p>
+          </div>
+
+          <div className="mt-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-line/80" />
+            <p className="text-[11px] uppercase tracking-[0.28em] text-muted">
+              Or use email
+            </p>
+            <div className="h-px flex-1 bg-line/80" />
+          </div>
+
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
                 Email
@@ -150,7 +218,7 @@ export function LoginForm() {
 
             <button
               type="submit"
-              disabled={submitting || !isFirebaseConfigured}
+              disabled={isSubmitting || !isFirebaseConfigured}
               className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft"
             >
               {submitting ? "Signing in..." : "Sign in"}

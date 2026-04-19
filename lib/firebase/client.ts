@@ -1,7 +1,7 @@
-import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
-import { Auth, getAuth } from "firebase/auth";
-import { Firestore, getFirestore } from "firebase/firestore";
-import { FirebaseStorage, getStorage } from "firebase/storage";
+import type { FirebaseApp } from "firebase/app";
+import type { Auth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
+import type { FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -24,47 +24,76 @@ function canInitializeFirebase() {
   return typeof window !== "undefined" && isFirebaseConfigured;
 }
 
-export function getFirebaseApp() {
+export async function loadFirebaseAppModule() {
+  return import("firebase/app");
+}
+
+export async function loadFirebaseAuthModule() {
+  return import("firebase/auth");
+}
+
+export async function loadFirebaseFirestoreModule() {
+  return import("firebase/firestore");
+}
+
+export async function loadFirebaseStorageModule() {
+  return import("firebase/storage");
+}
+
+export async function getFirebaseApp() {
   if (!canInitializeFirebase()) {
     return null;
   }
 
   if (!app) {
+    const { getApp, getApps, initializeApp } = await loadFirebaseAppModule();
     app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   }
 
   return app;
 }
 
-export function getFirebaseAuth() {
-  const firebaseApp = getFirebaseApp();
+export async function getFirebaseAuth() {
+  const firebaseApp = await getFirebaseApp();
 
   if (!firebaseApp) {
     return null;
   }
 
-  auth ??= getAuth(firebaseApp);
+  if (!auth) {
+    const { getAuth } = await loadFirebaseAuthModule();
+    auth = getAuth(firebaseApp);
+  }
+
   return auth;
 }
 
-export function getFirebaseDb() {
-  const firebaseApp = getFirebaseApp();
+export async function getFirebaseDb() {
+  const firebaseApp = await getFirebaseApp();
 
   if (!firebaseApp) {
     return null;
   }
 
-  db ??= getFirestore(firebaseApp);
+  if (!db) {
+    const { getFirestore } = await loadFirebaseFirestoreModule();
+    db = getFirestore(firebaseApp);
+  }
+
   return db;
 }
 
-export function getFirebaseStorage() {
-  const firebaseApp = getFirebaseApp();
+export async function getFirebaseStorage() {
+  const firebaseApp = await getFirebaseApp();
 
   if (!firebaseApp) {
     return null;
   }
 
-  storage ??= getStorage(firebaseApp);
+  if (!storage) {
+    const { getStorage } = await loadFirebaseStorageModule();
+    storage = getStorage(firebaseApp);
+  }
+
   return storage;
 }

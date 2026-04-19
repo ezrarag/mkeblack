@@ -8,7 +8,6 @@ import {
 } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { useAuth } from "@/components/providers/auth-provider";
 import { StatePanel } from "@/components/ui/state-panel";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import {
@@ -805,7 +804,6 @@ function MemberDiscountEditor({
 }
 
 export function HomepageAdminPage() {
-  const { profile } = useAuth();
   const {
     modules: homepageModules,
     loading: modulesLoading,
@@ -976,21 +974,8 @@ export function HomepageAdminPage() {
     }
   }
 
-  if (profile?.role !== "admin") {
-    return (
-      <ProtectedRoute>
-        <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <StatePanel
-            title="Admin role required"
-            description="Only users whose Firestore profile role is set to admin can manage homepage content."
-          />
-        </section>
-      </ProtectedRoute>
-    );
-  }
-
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">

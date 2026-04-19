@@ -1,45 +1,52 @@
 import {
-  collection,
-  doc,
-  setDoc,
-  writeBatch
-} from "firebase/firestore";
-import {
   createHomepageModuleDraft,
   createMemberDiscountDraft,
   serializeHomepageModule,
   serializeMemberDiscount
 } from "@/lib/homepage";
-import { getFirebaseDb } from "@/lib/firebase/client";
+import {
+  getFirebaseDb,
+  loadFirebaseFirestoreModule
+} from "@/lib/firebase/client";
 import { HomepageModule, HomepageModuleType, MemberDiscount } from "@/lib/types";
 
-function getDbOrThrow() {
-  const db = getFirebaseDb();
+async function getHomepageHelpers() {
+  const [firestoreModule, db] = await Promise.all([
+    loadFirebaseFirestoreModule(),
+    getFirebaseDb()
+  ]);
 
   if (!db) {
     throw new Error("Firestore is not available in this environment.");
   }
 
-  return db;
+  return {
+    db,
+    firestoreModule
+  };
 }
 
 export async function saveHomepageModule(
   moduleId: string,
   module: HomepageModule
 ) {
-  const db = getDbOrThrow();
+  const { db, firestoreModule } = await getHomepageHelpers();
 
-  await setDoc(doc(db, "homepage_modules", moduleId), serializeHomepageModule(module), {
-    merge: true
-  });
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "homepage_modules", moduleId),
+    serializeHomepageModule(module),
+    { merge: true }
+  );
 }
 
 export async function createHomepageModule(
   type: HomepageModuleType,
   order: number
 ) {
-  const db = getDbOrThrow();
-  const moduleReference = doc(collection(db, "homepage_modules"));
+  const { db, firestoreModule } = await getHomepageHelpers();
+  const moduleReference = firestoreModule.doc(
+    firestoreModule.collection(db, "homepage_modules")
+  );
   const draft = createHomepageModuleDraft(type);
 
   await saveHomepageModule(moduleReference.id, {
@@ -54,12 +61,12 @@ export async function createHomepageModule(
 export async function saveHomepageModuleArrangement(
   modules: Array<Pick<HomepageModule, "id" | "visible" | "order">>
 ) {
-  const db = getDbOrThrow();
-  const batch = writeBatch(db);
+  const { db, firestoreModule } = await getHomepageHelpers();
+  const batch = firestoreModule.writeBatch(db);
 
   modules.forEach((module) => {
     batch.set(
-      doc(db, "homepage_modules", module.id),
+      firestoreModule.doc(db, "homepage_modules", module.id),
       {
         id: module.id,
         visible: module.visible,
@@ -76,18 +83,20 @@ export async function saveMemberDiscount(
   discountId: string,
   discount: MemberDiscount
 ) {
-  const db = getDbOrThrow();
+  const { db, firestoreModule } = await getHomepageHelpers();
 
-  await setDoc(
-    doc(db, "member_discounts", discountId),
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "member_discounts", discountId),
     serializeMemberDiscount(discount),
     { merge: true }
   );
 }
 
 export async function createMemberDiscount(order: number) {
-  const db = getDbOrThrow();
-  const discountReference = doc(collection(db, "member_discounts"));
+  const { db, firestoreModule } = await getHomepageHelpers();
+  const discountReference = firestoreModule.doc(
+    firestoreModule.collection(db, "member_discounts")
+  );
   const draft = createMemberDiscountDraft();
 
   await saveMemberDiscount(discountReference.id, {
@@ -102,12 +111,12 @@ export async function createMemberDiscount(order: number) {
 export async function saveMemberDiscountArrangement(
   discounts: Array<Pick<MemberDiscount, "id" | "active" | "order">>
 ) {
-  const db = getDbOrThrow();
-  const batch = writeBatch(db);
+  const { db, firestoreModule } = await getHomepageHelpers();
+  const batch = firestoreModule.writeBatch(db);
 
   discounts.forEach((discount) => {
     batch.set(
-      doc(db, "member_discounts", discount.id),
+      firestoreModule.doc(db, "member_discounts", discount.id),
       {
         id: discount.id,
         active: discount.active,

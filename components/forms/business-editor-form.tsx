@@ -18,7 +18,10 @@ type BusinessEditorFormProps = {
   onRemovePhoto?: (photoUrl: string) => Promise<void>;
   saving?: boolean;
   uploading?: boolean;
+  /** Show admin-only controls: ownerUid, active toggle, lat/lng, map preview */
   showAdminFields?: boolean;
+  /** Show internal data-only fields: listing source badge, raw hoursText. Hidden for owners. */
+  showInternalFields?: boolean;
 };
 
 function cloneFormValues(values: BusinessFormValues): BusinessFormValues {
@@ -48,7 +51,8 @@ export function BusinessEditorForm({
   onRemovePhoto,
   saving = false,
   uploading = false,
-  showAdminFields = false
+  showAdminFields = false,
+  showInternalFields = true
 }: BusinessEditorFormProps) {
   const [values, setValues] = useState<BusinessFormValues>(
     cloneFormValues(initialValues)
@@ -97,7 +101,6 @@ export function BusinessEditorForm({
     if (!event.target.files?.length || !onUploadPhotos) {
       return;
     }
-
     const files = Array.from(event.target.files);
     await onUploadPhotos(files);
     event.target.value = "";
@@ -105,6 +108,8 @@ export function BusinessEditorForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+
+      {/* ── Core info ──────────────────────────────────────────────── */}
       <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
         <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
           {title}
@@ -166,7 +171,9 @@ export function BusinessEditorForm({
             </label>
             <input
               value={values.phone}
-              onChange={(event) => updateField("phone", formatPhone(event.target.value))}
+              onChange={(event) =>
+                updateField("phone", formatPhone(event.target.value))
+              }
               placeholder="(414) 555-0100"
             />
           </div>
@@ -191,38 +198,53 @@ export function BusinessEditorForm({
               placeholder="owner@business.com"
             />
           </div>
-          <div>
-            <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
-              Listing source
-            </label>
-            <input value={values.source} readOnly className="cursor-not-allowed opacity-70" />
-          </div>
+
+          {/* Internal only — hidden from business owners */}
+          {showInternalFields ? (
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                Listing source
+              </label>
+              <input
+                value={values.source}
+                readOnly
+                className="cursor-not-allowed opacity-70"
+              />
+            </div>
+          ) : null}
         </div>
       </div>
 
+      {/* ── Hours ──────────────────────────────────────────────────── */}
       <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
         <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
           Weekly hours
         </p>
         <p className="mt-3 text-sm leading-7 text-stone-300">
-          These hours drive the public day-open filter, so accuracy here matters
-          more than anything else in the directory.
+          {showInternalFields
+            ? "These hours drive the public day-open filter, so accuracy here matters more than anything else in the directory."
+            : "Set your hours for each day. This is what people see when they filter the directory by day — so keep it accurate."}
         </p>
         <div className="mt-6">
           <HoursEditor hours={values.hours} onChange={handleHoursChange} />
         </div>
-        <div className="mt-6">
-          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
-            Imported hours text
-          </label>
-          <textarea
-            value={values.hoursText}
-            onChange={(event) => updateField("hoursText", event.target.value)}
-            placeholder="Paste or normalize raw hours text from imported data."
-          />
-        </div>
+
+        {/* Raw hoursText — admin/import cleanup only */}
+        {showInternalFields ? (
+          <div className="mt-6">
+            <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+              Imported hours text
+            </label>
+            <textarea
+              value={values.hoursText}
+              onChange={(event) => updateField("hoursText", event.target.value)}
+              placeholder="Paste or normalize raw hours text from imported data."
+            />
+          </div>
+        ) : null}
       </div>
 
+      {/* ── Photos ─────────────────────────────────────────────────── */}
       <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -230,14 +252,15 @@ export function BusinessEditorForm({
               Photos
             </p>
             <p className="mt-3 text-sm leading-7 text-stone-300">
-              Upload storefront, interior, menu, product, or service images to
-              strengthen the public listing.
+              {showInternalFields
+                ? "Upload storefront, interior, menu, product, or service images to strengthen the public listing."
+                : "Add photos of your storefront, interior, menu, or products. These show up on your public directory card."}
             </p>
           </div>
 
           {onUploadPhotos ? (
             <label className="inline-flex cursor-pointer items-center rounded-full bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft">
-              {uploading ? "Uploading..." : "Upload photos"}
+              {uploading ? "Uploading…" : "Upload photos"}
               <input
                 type="file"
                 accept="image/*"
@@ -281,11 +304,15 @@ export function BusinessEditorForm({
           </div>
         ) : (
           <div className="mt-6 rounded-3xl border border-dashed border-line bg-canvas/40 p-8 text-center text-sm leading-7 text-stone-400">
-            No photos uploaded yet.
+            No photos yet.{" "}
+            {onUploadPhotos
+              ? 'Click "Upload photos" to add your first image.'
+              : "Contact MKE Black to add photos to your listing."}
           </div>
         )}
       </div>
 
+      {/* ── Admin controls (admin workspace only) ──────────────────── */}
       {showAdminFields ? (
         <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
           <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
@@ -307,14 +334,16 @@ export function BusinessEditorForm({
                 <input
                   type="checkbox"
                   checked={values.active}
-                  onChange={(event) => updateField("active", event.target.checked)}
+                  onChange={(event) =>
+                    updateField("active", event.target.checked)
+                  }
                   className="h-4 w-4 rounded border-line bg-panelAlt text-accent focus:ring-accent/30"
                 />
                 Listing is active
               </label>
               <p className="mt-3 text-sm leading-7 text-stone-400">
-                Deactivated listings disappear from the public directory but remain
-                editable here.
+                Deactivated listings disappear from the public directory but
+                remain editable here.
               </p>
             </div>
             <div>
@@ -384,13 +413,28 @@ export function BusinessEditorForm({
         </div>
       ) : null}
 
-      <div className="flex justify-end">
+      {/* ── Save button ────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4">
+        {!showInternalFields ? (
+          <p className="text-xs leading-6 text-stone-500">
+            Need to update something that&apos;s not here?{" "}
+            <a
+              href="https://www.mkeblack.org/contact"
+              className="text-accentSoft underline underline-offset-4 transition hover:text-accent"
+            >
+              Contact MKE Black
+            </a>
+            .
+          </p>
+        ) : (
+          <span />
+        )}
         <button
           type="submit"
           disabled={saving}
           className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft"
         >
-          {saving ? "Saving..." : submitLabel}
+          {saving ? "Saving…" : submitLabel}
         </button>
       </div>
     </form>

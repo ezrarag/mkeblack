@@ -14,8 +14,20 @@ export function formatFirebaseError(error: unknown) {
         return "Enter a valid email address.";
       case "auth/email-already-in-use":
         return "That email already has an account. Sign in instead or use another email address.";
+      case "auth/account-exists-with-different-credential":
+        return "That email already uses a different sign-in method. Try email and password instead.";
       case "auth/weak-password":
         return "Use a stronger password with at least 8 characters.";
+      case "auth/popup-blocked":
+        return "Your browser blocked the Google sign-in popup. Allow popups for this site and try again.";
+      case "auth/popup-closed-by-user":
+        return "The Google sign-in window was closed before sign-in finished.";
+      case "auth/cancelled-popup-request":
+        return "Another sign-in window is already open. Finish that one or close it before trying again.";
+      case "auth/operation-not-allowed":
+        return "This sign-in method is not enabled in Firebase Auth for this project.";
+      case "auth/unauthorized-domain":
+        return "This domain is not authorized for Firebase Auth. Add it to the project's authorized domains.";
       case "auth/too-many-requests":
         return "Too many attempts were made. Wait a few minutes and try again.";
       case "storage/unauthorized":

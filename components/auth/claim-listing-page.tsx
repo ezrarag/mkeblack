@@ -3,10 +3,13 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusinessClaimInvite } from "@/hooks/use-business-claim-invite";
-import { getFirebaseAuth, isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseAuth,
+  loadFirebaseAuthModule,
+  isFirebaseConfigured
+} from "@/lib/firebase/client";
 import { claimBusinessListing } from "@/lib/firebase/businesses";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 
@@ -49,13 +52,16 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
     setFeedback(null);
 
     try {
-      const auth = getFirebaseAuth();
+      const [authModule, auth] = await Promise.all([
+        loadFirebaseAuthModule(),
+        getFirebaseAuth()
+      ]);
 
       if (!auth) {
         throw new Error("Firebase Auth is not available in this environment.");
       }
 
-      const credentials = await createUserWithEmailAndPassword(
+      const credentials = await authModule.createUserWithEmailAndPassword(
         auth,
         invite.email,
         password

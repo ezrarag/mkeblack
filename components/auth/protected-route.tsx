@@ -16,10 +16,9 @@ export function ProtectedRoute({
   children,
   requireAdmin = false
 }: ProtectedRouteProps) {
-  const { user, profile, loading, isAdmin } = useAuth();
+  const { user, loading, hasAdminAccess } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const hasAdminAccess = isAdmin || profile?.role === "admin";
 
   useEffect(() => {
     if (!loading && !user) {
@@ -51,12 +50,23 @@ export function ProtectedRoute({
         title="Admin access required"
         description="This workspace is reserved for admins. Use an account with the admin custom claim or an admin role document."
         action={
-          <Link
-            href="/dashboard"
-            className="inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
-          >
-            Go to dashboard
-          </Link>
+          <div className="flex flex-col gap-4">
+            <Link
+              href="/dashboard"
+              className="inline-flex w-fit rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+            >
+              Go to dashboard
+            </Link>
+
+            <div className="w-fit rounded-2xl border border-line/80 bg-canvas/45 px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-muted">
+                Firebase UID
+              </p>
+              <code className="mt-2 block break-all text-sm text-stone-100">
+                {user.uid}
+              </code>
+            </div>
+          </div>
         }
       />
     );

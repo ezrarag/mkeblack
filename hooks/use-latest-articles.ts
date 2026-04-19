@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
 import {
   isPublishedArticle,
   normalizeArticleSummary,
   sortArticleSummaries
 } from "@/lib/homepage";
-import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseDb,
+  loadFirebaseFirestoreModule,
+  isFirebaseConfigured
+} from "@/lib/firebase/client";
 import { ArticleSummary } from "@/lib/types";
 
 export function useLatestArticles(limitCount = 3) {
@@ -16,37 +19,65 @@ export function useLatestArticles(limitCount = 3) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setError("Firebase environment variables are missing.");
-      setLoading(false);
-      return;
-    }
+    let unsubscribe: () => void = () => undefined;
+    let cancelled = false;
 
-    const db = getFirebaseDb();
-
-    if (!db) {
-      setError("Firebase could not initialize in the current environment.");
-      setLoading(false);
-      return;
-    }
-
-    const unsubscribe = onSnapshot(
-      collection(db, "articles"),
-      (snapshot) => {
-        const nextArticles = snapshot.docs
-          .filter((document) => isPublishedArticle(document.data()))
-          .map((document) => normalizeArticleSummary(document.data(), document.id));
-
-        setArticles(sortArticleSummaries(nextArticles).slice(0, limitCount));
+    async function start() {
+      if (!isFirebaseConfigured) {
+        setError("Firebase environment variables are missing.");
         setLoading(false);
-      },
-      (snapshotError) => {
-        setError(snapshotError.message);
-        setLoading(false);
+        return;
       }
-    );
 
-    return () => unsubscribe();
+      try {
+        const [firestoreModule, db] = await Promise.all([
+          loadFirebaseFirestoreModule(),
+          getFirebaseDb()
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!db) {
+          setError("Firebase could not initialize in the current environment.");
+          setLoading(false);
+          return;
+        }
+
+        unsubscribe = firestoreModule.onSnapshot(
+          firestoreModule.collection(db, "articles"),
+          (snapshot) => {
+            const nextArticles = snapshot.docs
+              .filter((document) => isPublishedArticle(document.data()))
+              .map((document) => normalizeArticleSummary(document.data(), document.id));
+
+            setArticles(sortArticleSummaries(nextArticles).slice(0, limitCount));
+            setLoading(false);
+          },
+          (snapshotError) => {
+            setError(snapshotError.message);
+            setLoading(false);
+          }
+        );
+      } catch (startError) {
+        if (!cancelled) {
+          setError(
+            startError instanceof Error
+              ? startError.message
+              : "Unable to load articles."
+          );
+          setLoading(false);
+        }
+      }
+    }
+
+    void start();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, [limitCount]);
 
   return { articles, loading, error };
