@@ -8,6 +8,9 @@ import { formatPhone } from "@/lib/utils";
 import { BusinessMap } from "@/components/map/business-map";
 import { HoursEditor } from "@/components/forms/hours-editor";
 import { geocodeAddress } from "@/lib/geocode";
+import { redetectBusinessNeighborhood } from "@/lib/firebase/neighborhoods";
+import { useBusinessTags } from "@/hooks/use-business-tags";
+import { BUSINESS_TAG_CATEGORIES } from "@/lib/tags";
 
 type BusinessEditorFormProps = {
   initialValues: BusinessFormValues;
@@ -34,6 +37,7 @@ function cloneFormValues(values: BusinessFormValues): BusinessFormValues {
   return {
     ...values,
     photos: [...values.photos],
+    tags: [...values.tags],
     location: { ...values.location },
     hours: {
       monday: { ...values.hours.monday },
@@ -64,9 +68,14 @@ export function BusinessEditorForm({
     cloneFormValues(initialValues)
   );
   const [geocoding, setGeocoding] = useState(false);
+  const [detectingNeighborhood, setDetectingNeighborhood] = useState(false);
   const [geocodeFeedback, setGeocodeFeedback] = useState<GeocodeFeedback>(null);
+  const { tags: businessTags, loading: tagsLoading, error: tagsError } = useBusinessTags();
   const categoryOptions = Array.from(
     new Set([...BUSINESS_CATEGORIES, values.category].filter(Boolean))
+  );
+  const visibleTags = businessTags.filter(
+    (tag) => tag.active && (showAdminFields || !tag.adminOnly)
   );
 
   useEffect(() => {
@@ -98,6 +107,15 @@ export function BusinessEditorForm({
           [field]: value
         }
       }
+    }));
+  }
+
+  function toggleTag(slug: string) {
+    setValues((current) => ({
+      ...current,
+      tags: current.tags.includes(slug)
+        ? current.tags.filter((tag) => tag !== slug)
+        : [...current.tags, slug]
     }));
   }
 
@@ -146,6 +164,32 @@ export function BusinessEditorForm({
       });
     } finally {
       setGeocoding(false);
+    }
+  }
+
+  async function handleRedetectNeighborhood() {
+    setDetectingNeighborhood(true);
+    setGeocodeFeedback(null);
+
+    try {
+      const neighborhood = await redetectBusinessNeighborhood(values.location);
+      updateField("neighborhood", neighborhood);
+      setGeocodeFeedback({
+        tone: neighborhood ? "success" : "error",
+        message: neighborhood
+          ? `Neighborhood updated to ${neighborhood}.`
+          : "No Milwaukee neighborhood matched these coordinates."
+      });
+    } catch (detectError) {
+      setGeocodeFeedback({
+        tone: "error",
+        message:
+          detectError instanceof Error
+            ? detectError.message
+            : "Neighborhood could not be detected."
+      });
+    } finally {
+      setDetectingNeighborhood(false);
     }
   }
 
@@ -262,6 +306,22 @@ export function BusinessEditorForm({
           </div>
           <div>
             <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+              Instagram reel URL
+            </label>
+            <input
+              value={values.instagramReelUrl}
+              onChange={(event) =>
+                updateField("instagramReelUrl", event.target.value)
+              }
+              placeholder="https://www.instagram.com/reel/..."
+            />
+            <p className="mt-2 text-sm leading-6 text-stone-400">
+              Public reel only. This shows as an external Instagram media link on
+              the business profile.
+            </p>
+          </div>
+          <div>
+            <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
               Email
             </label>
             <input
@@ -286,6 +346,73 @@ export function BusinessEditorForm({
             </div>
           ) : null}
         </div>
+      </div>
+
+      {/* ── Tags ───────────────────────────────────────────────────── */}
+      <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
+        <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+          Tags
+        </p>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
+          {showAdminFields
+            ? "Tags power directory filters and profile badges. Admin-only tags stay available only in this workspace."
+            : "Choose the tags that accurately describe your business. Admin-only tags are managed by MKE Black."}
+        </p>
+
+        {tagsError ? (
+          <div className="mt-4 rounded-3xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-stone-100">
+            {tagsError}
+          </div>
+        ) : null}
+
+        {tagsLoading ? (
+          <div className="mt-5 h-24 animate-pulse rounded-3xl border border-line bg-panelAlt/70" />
+        ) : visibleTags.length ? (
+          <div className="mt-5 space-y-5">
+            {BUSINESS_TAG_CATEGORIES.map((category) => {
+              const categoryTags = visibleTags.filter(
+                (tag) => tag.category === category
+              );
+
+              if (!categoryTags.length) {
+                return null;
+              }
+
+              return (
+                <div key={category}>
+                  <p className="mb-3 text-xs uppercase tracking-[0.22em] text-muted">
+                    {category}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {categoryTags.map((tag) => {
+                      const selected = values.tags.includes(tag.slug);
+
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => toggleTag(tag.slug)}
+                          className={`rounded-full px-4 py-2 text-sm transition ${
+                            selected
+                              ? "border border-accent bg-accent text-canvas"
+                              : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
+                          }`}
+                        >
+                          {tag.label}
+                          {showAdminFields && tag.adminOnly ? " · Admin" : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-5 rounded-3xl border border-dashed border-line bg-canvas/40 p-6 text-center text-sm text-stone-400">
+            No active tags are available yet.
+          </div>
+        )}
       </div>
 
       {/* ── Hours ──────────────────────────────────────────────────── */}
@@ -402,6 +529,26 @@ export function BusinessEditorForm({
                 placeholder="Firebase Auth UID for the business owner"
               />
             </div>
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                Neighborhood
+              </label>
+              <div className="flex gap-3">
+                <input
+                  value={values.neighborhood || "Not detected"}
+                  readOnly
+                  className="cursor-not-allowed opacity-70"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleRedetectNeighborhood()}
+                  disabled={detectingNeighborhood}
+                  className="shrink-0 rounded-full border border-accent/35 bg-accent/10 px-4 py-2 text-sm text-accentSoft transition hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {detectingNeighborhood ? "Detecting..." : "Re-detect"}
+                </button>
+              </div>
+            </div>
             <div className="rounded-3xl border border-line bg-panelAlt/70 p-4">
               <label className="flex items-center gap-3 text-sm text-stone-200">
                 <input
@@ -467,8 +614,11 @@ export function BusinessEditorForm({
                   address: values.address,
                   phone: values.phone,
                   website: values.website,
+                  instagramReelUrl: values.instagramReelUrl,
                   email: values.email,
                   hoursText: values.hoursText,
+                  neighborhood: values.neighborhood,
+                  tags: values.tags,
                   hours: values.hours,
                   photos: values.photos,
                   ownerUid: values.ownerUid || null,

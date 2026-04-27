@@ -1,14 +1,29 @@
 import { BusinessCategory, BusinessHours, DAY_KEYS } from "@/lib/types";
 
+/**
+ * Categories match the Wix export taxonomy exactly so imported businesses
+ * land in the correct filter bucket without any post-import cleanup.
+ */
 export const BUSINESS_CATEGORIES: BusinessCategory[] = [
   "Food & Drink",
-  "Retail",
-  "Services",
+  "Hair, Beauty & Grooming",
+  "Retail & Shopping",
+  "Music, Entertainment & Culture",
+  "Arts, Media & Creative Services",
+  "Professional & Business Services",
   "Health & Wellness",
-  "Arts & Culture",
-  "Beauty",
-  "Professional",
-  "Community",
+  "Mental Health",
+  "Education, Youth & Family Services",
+  "Home, Cleaning & Maintenance",
+  "Work & Event Spaces",
+  "Legal & Consulting",
+  "Automotive",
+  "Sports & Entertainment",
+  "Catering, Snacks & Drinks",
+  "Online Goods & Products",
+  "Online Clothing & Accessories",
+  "Nonprofits",
+  "Resources",
   "Other"
 ];
 
@@ -47,8 +62,11 @@ export function createEmptyBusinessForm() {
     address: "",
     phone: "",
     website: "",
+    instagramReelUrl: "",
     email: "",
     hoursText: "",
+    neighborhood: "",
+    tags: ["black-owned"],
     hours: createDefaultBusinessHours(),
     photos: [],
     ownerUid: "",

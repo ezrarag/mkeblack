@@ -153,6 +153,46 @@ const benefitTypes = [
   { id: "benefit_discounts", label: "Business Discounts", description: "Discounts at participating Black-owned businesses", active: true, autoApply: true, createdAt: Timestamp.now() },
 ];
 
+function slugify(value) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const businessTagSeeds = [
+  { label: "Black-owned", category: "Identity", adminOnly: true },
+  { label: "LGBTQ+ Affirming", category: "Identity", adminOnly: false },
+  { label: "Woman-owned", category: "Identity", adminOnly: false },
+  { label: "Veteran-owned", category: "Identity", adminOnly: false },
+  { label: "Minority-owned", category: "Identity", adminOnly: false },
+  { label: "Vegan Options", category: "Dietary", adminOnly: false },
+  { label: "Vegetarian", category: "Dietary", adminOnly: false },
+  { label: "Gluten-Free", category: "Dietary", adminOnly: false },
+  { label: "Halal", category: "Dietary", adminOnly: false },
+  { label: "Soul Food", category: "Dietary", adminOnly: false },
+  { label: "Caribbean", category: "Dietary", adminOnly: false },
+  { label: "Family-Friendly", category: "Vibe", adminOnly: false },
+  { label: "Date Night", category: "Vibe", adminOnly: false },
+  { label: "Live Music", category: "Vibe", adminOnly: false },
+  { label: "Outdoor Seating", category: "Vibe", adminOnly: false },
+  { label: "Late Night", category: "Vibe", adminOnly: false },
+  { label: "Wheelchair Accessible", category: "Accessibility", adminOnly: false },
+  { label: "ASL Friendly", category: "Accessibility", adminOnly: false },
+  { label: "Delivery", category: "Service", adminOnly: false },
+  { label: "Takeout", category: "Service", adminOnly: false },
+  { label: "Catering", category: "Service", adminOnly: false },
+  { label: "Appointment Only", category: "Service", adminOnly: false },
+  { label: "Walk-ins Welcome", category: "Service", adminOnly: false },
+].map((tag) => ({
+  ...tag,
+  id: slugify(tag.label),
+  slug: slugify(tag.label),
+  active: true,
+}));
+
 // ── RUNNER ────────────────────────────────────────────────────────────────────
 
 async function seed() {
@@ -174,6 +214,22 @@ async function seed() {
   for (const b of benefitTypes) {
     await db.collection("benefit_types").doc(b.id).set(b, { merge: true });
     console.log(`   ✅ ${b.label}`);
+  }
+
+  console.log("\n🏷️ business_tags...");
+  for (const tag of businessTagSeeds) {
+    const ref = db.collection("business_tags").doc(tag.id);
+    const snapshot = await ref.get();
+    const existing = snapshot.exists ? snapshot.data() : {};
+    await ref.set(
+      {
+        ...tag,
+        createdAt: existing.createdAt ?? Timestamp.now(),
+        usageCount: existing.usageCount ?? 0,
+      },
+      { merge: true }
+    );
+    console.log(`   ✅ ${tag.label}`);
   }
 
   console.log("\n✅ Seed complete!\n");

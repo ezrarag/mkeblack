@@ -12,12 +12,18 @@ type BusinessCardProps = {
   business: Business;
   layout: "grid" | "list";
   selectedDay: DayKey | "all";
+  distanceMiles?: number;
+  isHighlighted?: boolean;
+  onSelect?: (business: Business) => void;
 };
 
 export function BusinessCard({
   business,
   layout,
-  selectedDay
+  selectedDay,
+  distanceMiles,
+  isHighlighted = false,
+  onSelect
 }: BusinessCardProps) {
   const previewPhoto = business.photos[0];
   const isOpen = isBusinessOpenNow(business.hours);
@@ -36,7 +42,15 @@ export function BusinessCard({
   return (
     <Link
       href={`/business/${business.id}`}
-      className={`group overflow-hidden rounded-[2rem] border border-line bg-panel/80 transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-glow ${
+      onClick={(event) => {
+        if (onSelect) {
+          event.preventDefault();
+          onSelect(business);
+        }
+      }}
+      className={`group overflow-hidden rounded-[2rem] border bg-panel/80 transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-glow ${
+        isHighlighted ? "border-accent shadow-glow" : "border-line"
+      } ${
         layout === "list" ? "grid gap-0 md:grid-cols-[280px_minmax(0,1fr)]" : ""
       }`}
     >
@@ -63,6 +77,11 @@ export function BusinessCard({
         <div className="absolute left-4 top-4 rounded-full border border-black/10 bg-black/65 px-3 py-1 text-xs uppercase tracking-[0.22em] text-accentSoft">
           {business.category}
         </div>
+        {typeof distanceMiles === "number" ? (
+          <div className="absolute bottom-4 left-4 rounded-full border border-accent/35 bg-canvas/85 px-3 py-1 text-xs font-semibold text-accentSoft">
+            {distanceMiles.toFixed(1)} mi
+          </div>
+        ) : null}
       </div>
 
       <div className="flex flex-col justify-between p-5 sm:p-6">
@@ -71,6 +90,11 @@ export function BusinessCard({
             <div>
               <h3 className="font-display text-3xl text-ink">{business.name}</h3>
               <p className="mt-2 text-sm text-stone-400">{business.address}</p>
+              {business.neighborhood ? (
+                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">
+                  {business.neighborhood}
+                </p>
+              ) : null}
             </div>
             <span
               className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] ${

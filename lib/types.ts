@@ -22,6 +22,24 @@ export type BusinessSource = "import" | "manual" | "self-submitted";
 
 export type ClaimInviteStatus = "not_invited" | "pending" | "claimed";
 
+export type BusinessTagCategory =
+  | "Identity"
+  | "Dietary"
+  | "Accessibility"
+  | "Vibe"
+  | "Service";
+
+export type BusinessTag = {
+  id: string;
+  label: string;
+  slug: string;
+  category: BusinessTagCategory;
+  active: boolean;
+  adminOnly: boolean;
+  createdAt: Date | null;
+  usageCount: number;
+};
+
 export type HomepageLink = {
   label: string;
   href: string;
@@ -124,13 +142,24 @@ export type ArticleSummary = {
 
 export type BusinessCategory =
   | "Food & Drink"
-  | "Retail"
-  | "Services"
+  | "Hair, Beauty & Grooming"
+  | "Retail & Shopping"
+  | "Music, Entertainment & Culture"
+  | "Arts, Media & Creative Services"
+  | "Professional & Business Services"
   | "Health & Wellness"
-  | "Arts & Culture"
-  | "Beauty"
-  | "Professional"
-  | "Community"
+  | "Mental Health"
+  | "Education, Youth & Family Services"
+  | "Home, Cleaning & Maintenance"
+  | "Work & Event Spaces"
+  | "Legal & Consulting"
+  | "Automotive"
+  | "Sports & Entertainment"
+  | "Catering, Snacks & Drinks"
+  | "Online Goods & Products"
+  | "Online Clothing & Accessories"
+  | "Nonprofits"
+  | "Resources"
   | "Other";
 
 export type Business = {
@@ -141,8 +170,11 @@ export type Business = {
   address: string;
   phone: string;
   website: string;
+  instagramReelUrl: string;
   email: string;
   hoursText: string;
+  neighborhood: string;
+  tags: string[];
   hours: BusinessHours;
   photos: string[];
   ownerUid: string | null;
@@ -173,8 +205,11 @@ export type BusinessFormValues = {
   address: string;
   phone: string;
   website: string;
+  instagramReelUrl: string;
   email: string;
   hoursText: string;
+  neighborhood: string;
+  tags: string[];
   hours: BusinessHours;
   photos: string[];
   ownerUid: string;
@@ -184,6 +219,28 @@ export type BusinessFormValues = {
     lat: number;
     lng: number;
   };
+};
+
+export type GeoJsonPolygon = {
+  type: "Polygon";
+  coordinates: number[][][];
+};
+
+export type GeoJsonMultiPolygon = {
+  type: "MultiPolygon";
+  coordinates: number[][][][];
+};
+
+export type NeighborhoodGeoJsonFeature = {
+  type: "Feature";
+  properties: Record<string, unknown>;
+  geometry: GeoJsonPolygon | GeoJsonMultiPolygon;
+};
+
+export type MilwaukeeNeighborhood = {
+  id: string;
+  name: string;
+  geojson: NeighborhoodGeoJsonFeature;
 };
 
 export type BusinessClaimInvite = {

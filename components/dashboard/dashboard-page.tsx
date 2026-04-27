@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
+import { BusinessClaimSearch } from "@/components/dashboard/business-claim-search";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
 import { businessToFormValues } from "@/lib/businesses";
@@ -69,11 +70,18 @@ export function DashboardPageContent() {
     }
   }
 
+  // Called after a successful self-claim — refresh auth profile + business
+  function handleClaimed() {
+    // Force a page reload so the auth context re-reads the updated
+    // users/{uid} doc which now has businessId set
+    window.location.reload();
+  }
+
   return (
     <ProtectedRoute>
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
 
-        {/* Header */}
+        {/* ── Header ── */}
         <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
@@ -89,8 +97,8 @@ export function DashboardPageContent() {
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
                 Updates you make here publish directly to the public MKE Black
-                directory. Keep your hours accurate — that&apos;s what people search
-                by most.
+                directory. Keep your hours accurate — that&apos;s what people
+                search by most.
               </p>
             </div>
 
@@ -104,7 +112,7 @@ export function DashboardPageContent() {
             ) : null}
           </div>
 
-          {/* Quick-stat strip — shown once listing is loaded */}
+          {/* Quick-stat strip */}
           {business ? (
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <div className="rounded-3xl border border-line bg-panelAlt/70 px-5 py-4">
@@ -127,66 +135,44 @@ export function DashboardPageContent() {
           ) : null}
         </div>
 
-        {/* Feedback banner */}
+        {/* ── Feedback banner ── */}
         {feedback ? (
-          <div
-            className={`mt-6 rounded-3xl px-5 py-4 text-sm ${
-              feedbackTone === "success"
-                ? "border border-success/35 bg-success/10 text-stone-100"
-                : "border border-danger/35 bg-danger/10 text-stone-100"
-            }`}
-          >
+          <div className={`mt-6 rounded-3xl px-5 py-4 text-sm ${
+            feedbackTone === "success"
+              ? "border border-success/35 bg-success/10 text-stone-100"
+              : "border border-danger/35 bg-danger/10 text-stone-100"
+          }`}>
             {feedback}
           </div>
         ) : null}
 
-        {/* States */}
+        {/* ── States ── */}
         {loading ? (
           <div className="mt-6 space-y-4">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-24 animate-pulse rounded-[2rem] border border-line bg-panel/60"
-              />
+              <div key={i} className="h-24 animate-pulse rounded-[2rem] border border-line bg-panel/60" />
             ))}
           </div>
+
         ) : error ? (
           <div className="mt-6">
             <StatePanel title="Unable to load listing" description={error} />
           </div>
+
         ) : !profile?.businessId ? (
-          /* Owner has no businessId linked yet — friendly explanation, not raw UID */
-          <div className="mt-6 rounded-[2.2rem] border border-line bg-panel/85 p-8 sm:p-10">
-            <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
-              Getting set up
-            </p>
-            <h2 className="mt-4 font-display text-4xl text-ink">
-              Your listing is on its way.
-            </h2>
-            <p className="mt-5 max-w-2xl text-sm leading-8 text-stone-300">
-              The MKE Black team is linking your account to your business listing.
-              This usually happens within one business day. Once it&apos;s
-              connected, you&apos;ll be able to edit your hours, photos, and
-              details right here.
-            </p>
-            <p className="mt-6 text-sm leading-7 text-stone-400">
-              Questions?{" "}
-              <a
-                href="https://www.mkeblack.org/contact"
-                className="text-accentSoft underline underline-offset-4 transition hover:text-accent"
-              >
-                Reach the MKE Black team
-              </a>
-              .
-            </p>
-            {/* Show UID only for admin-role users who are also viewing as owner */}
+          /* ── No business linked yet: show search + claim ── */
+          <>
+            <BusinessClaimSearch onClaimed={handleClaimed} />
+
+            {/* Admin UID debug block */}
             {hasAdminAccess && user ? (
-              <div className="mt-6 rounded-2xl border border-line/80 bg-canvas/40 px-4 py-4">
+              <div className="mt-4 rounded-2xl border border-line/80 bg-canvas/40 px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted">Admin — Firebase UID</p>
                 <code className="mt-2 block break-all text-sm text-stone-300">{user.uid}</code>
               </div>
             ) : null}
-          </div>
+          </>
+
         ) : !business ? (
           <div className="mt-6">
             <StatePanel
@@ -202,8 +188,9 @@ export function DashboardPageContent() {
               }
             />
           </div>
+
         ) : (
-          /* The actual editor — owner-friendly, no admin fields */
+          /* ── Listing editor ── */
           <div className="mt-6">
             <BusinessEditorForm
               initialValues={businessToFormValues(business)}
@@ -220,6 +207,7 @@ export function DashboardPageContent() {
             />
           </div>
         )}
+
       </section>
     </ProtectedRoute>
   );

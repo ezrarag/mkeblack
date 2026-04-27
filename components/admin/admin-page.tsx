@@ -173,6 +173,12 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
                   >
                     Open homepage workspace
                   </Link>
+                  <Link
+                    href="/admin/tags"
+                    className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Manage tags
+                  </Link>
                 </div>
               </div>
             </div>

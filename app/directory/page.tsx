@@ -1,5 +1,19 @@
 import { DirectoryPage } from "@/components/directory/directory-page";
 
-export default function DirectoryRoutePage() {
-  return <DirectoryPage />;
+type DirectoryRoutePageProps = {
+  searchParams?: {
+    tag?: string | string[];
+  };
+};
+
+export default function DirectoryRoutePage({
+  searchParams
+}: DirectoryRoutePageProps) {
+  const tags = Array.isArray(searchParams?.tag)
+    ? searchParams.tag
+    : searchParams?.tag
+    ? [searchParams.tag]
+    : [];
+
+  return <DirectoryPage initialTags={tags} />;
 }

@@ -14,6 +14,7 @@ const firebaseConfig = {
 
 export const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
 export const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+export const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;

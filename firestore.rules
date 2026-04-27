@@ -24,33 +24,11 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
-    function hasPendingClaimInvite(businessId) {
-      return exists(/databases/$(database)/documents/business_claim_invites/$(businessId))
-        && get(/databases/$(database)/documents/business_claim_invites/$(businessId)).data.status == 'pending'
-        && get(/databases/$(database)/documents/business_claim_invites/$(businessId)).data.email == request.auth.token.email;
-    }
-
-    function canClaimBusiness(businessId) {
-      return signedIn()
-        && hasPendingClaimInvite(businessId)
-        && (
-          resource.data.ownerUid == null
-          || resource.data.ownerUid == ''
-        )
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.email == request.auth.token.email
-        && request.resource.data.diff(resource.data).changedKeys().hasOnly([
-          'ownerUid',
-          'email',
-          'claimInviteStatus'
-        ]);
-    }
-
     // ── Businesses ──────────────────────────────────────────────────────────
     match /businesses/{businessId} {
       allow read: if resource.data.active == true || isAdmin() || ownsBusiness();
       allow create: if isAdmin();
-      allow update: if isAdmin() || ownsBusiness() || canClaimBusiness(businessId);
+      allow update: if isAdmin() || ownsBusiness();
       allow delete: if isAdmin();
     }
 
@@ -80,40 +58,86 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    match /mail/{mailId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin();
-    }
-
-    match /business_claim_invites/{businessId} {
-      allow read: if resource.data.status == 'pending' || isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin()
-        || (
-          signedIn()
-          && hasPendingClaimInvite(businessId)
-          && request.resource.data.status == 'claimed'
-          && request.resource.data.claimedByUid == request.auth.uid
-        );
-      allow delete: if isAdmin();
-    }
-
     // ── Members (Solidarity Circle) ──────────────────────────────────────────
     match /members/{memberId} {
       allow read: if isSelf(memberId) || isAdmin();
-      allow create: if true; // Stripe webhook creates via server — also allow self-create after checkout
+      allow create: if true;
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
     // ── Benefit Types ────────────────────────────────────────────────────────
     match /benefit_types/{benefitId} {
-      allow read: if true; // public — shown on membership page
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // ── Google Workspace Sync (future) ───────────────────────────────────────
-    // Cached copies of Drive files, Calendar events, Gmail threads
+    // ── Business Claim Invites (admin-sent) ──────────────────────────────────
+    match /business_claim_invites/{businessId} {
+      allow read: if true;
+      allow write: if isAdmin() || signedIn();
+    }
+
+    // ── Pending Claims (self-service, awaiting admin verification) ───────────
+    match /pending_claims/{claimId} {
+      // Any signed-in user can create a self-claim
+      allow create: if signedIn();
+      // Only admin can read/update/delete (for verification workflow)
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Admin sync sessions (hours scrub tool) ───────────────────────────────
+    match /admin_sync_sessions/{sessionId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Milwaukee neighborhoods (GIS cache) ──────────────────────────────────
+    match /milwaukee_neighborhoods/{neighborhoodId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Business tags ────────────────────────────────────────────────────────
+    match /business_tags/{tagId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Events ───────────────────────────────────────────────────────────────
+    match /events/{eventId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Professionals directory ──────────────────────────────────────────────
+    match /professionals/{professionalId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create: if signedIn();
+      allow update: if isAdmin() ||
+        (signedIn() && request.auth.uid == resource.data.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ── Consumer favorites (subcollection under users) ───────────────────────
+    match /users/{uid}/favorites/{businessId} {
+      allow read: if true;
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ── Business reviews (subcollection under businesses) ────────────────────
+    match /businesses/{businessId}/reviews/{reviewId} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Business team (subcollection) ────────────────────────────────────────
+    match /businesses/{businessId}/team/{memberId} {
+      allow read: if resource.data.visible == true || isAdmin() || ownsBusiness();
+      allow write: if isAdmin() || ownsBusiness();
+    }
+
+    // ── Google Workspace cache ────────────────────────────────────────────────
     match /gw_drive/{fileId} {
       allow read: if isAdmin();
       allow write: if isAdmin();

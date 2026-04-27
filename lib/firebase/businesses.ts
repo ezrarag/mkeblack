@@ -13,15 +13,62 @@ import {
   loadFirebaseStorageModule
 } from "@/lib/firebase/client";
 import { geocodeAddress } from "@/lib/geocode";
+import { getMilwaukeeNeighborhoods } from "@/lib/firebase/neighborhoods";
+import { getNeighborhoodForPoint } from "@/lib/neighborhood";
+import { updateBusinessTagUsageCounts } from "@/lib/firebase/tags";
 import {
   Business,
   BusinessClaimInvite,
   BusinessFormValues
 } from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
+import { normalizeTagSlugs } from "@/lib/tags";
 
 function sanitizeFilename(name: string) {
   return name.replace(/[^a-zA-Z0-9.-]+/g, "-").toLowerCase();
+}
+
+/**
+ * Wix exports category as a JSON-array string e.g. '["Food & Drink"]'
+ * or '["Music, Entertainment & Culture"]'. Strip all that and return
+ * just the first clean value.
+ */
+function parseWixCategory(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+
+  // Try proper JSON parse first
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return String(parsed[0]).trim();
+    }
+  } catch {
+    // Not valid JSON — fall through to regex cleanup
+  }
+
+  // Strip leading/trailing brackets and quotes manually
+  return trimmed
+    .replace(/^\["|"\]$/g, "")   // ["..."]  →  ...
+    .replace(/^\["?|"?\]$/g, "") // fallback bracket strip
+    .replace(/^"+|"+$/g, "")     // strip stray quotes
+    .split('","')[0]              // take first if multiple
+    ?.trim() ?? trimmed;
+}
+
+/**
+ * Normalize a phone value from the CSV — Wix stores numbers without
+ * formatting, e.g. 4142150052. Format as (414) 215-0052.
+ */
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  return raw.trim(); // Unknown format — keep as-is
 }
 
 async function getFirestoreHelpers() {
@@ -69,8 +116,11 @@ export function normalizeBusinessPayload(values: BusinessFormValues) {
     address: values.address.trim(),
     phone: values.phone.trim(),
     website: normalizeUrl(values.website.trim()),
+    instagramReelUrl: normalizeUrl(values.instagramReelUrl.trim()),
     email: values.email.trim(),
     hoursText: values.hoursText.trim(),
+    neighborhood: values.neighborhood.trim(),
+    tags: normalizeTagSlugs(values.tags),
     photos: values.photos.filter(Boolean),
     ownerUid: values.ownerUid.trim(),
     active: Boolean(values.active),
@@ -111,6 +161,11 @@ export async function saveBusiness(
   previousAddress?: string
 ) {
   const { db, firestoreModule } = await getFirestoreHelpers();
+  const businessReference = firestoreModule.doc(db, "businesses", businessId);
+  const previousSnapshot = await firestoreModule.getDoc(businessReference);
+  const previousTags = previousSnapshot.exists()
+    ? normalizeTagSlugs(previousSnapshot.data().tags)
+    : [];
   const payload = normalizeBusinessPayload(values);
 
   if (!payload.address) {
@@ -127,8 +182,16 @@ export async function saveBusiness(
     }
   }
 
+  const neighborhoods = await getMilwaukeeNeighborhoods();
+  payload.neighborhood =
+    getNeighborhoodForPoint(
+      payload.location.lat,
+      payload.location.lng,
+      neighborhoods
+    ) ?? payload.neighborhood;
+
   await firestoreModule.setDoc(
-    firestoreModule.doc(db, "businesses", businessId),
+    businessReference,
     {
       id: businessId,
       ...payload,
@@ -137,6 +200,7 @@ export async function saveBusiness(
     { merge: true }
   );
 
+  await updateBusinessTagUsageCounts(previousTags, payload.tags);
   await syncOwnerBusinessLink(payload.ownerUid || null, businessId);
 }
 
@@ -153,6 +217,11 @@ export async function createBusiness(values: BusinessFormValues) {
 export async function deleteBusiness(business: Pick<Business, "id" | "photos">) {
   const { db, firestoreModule } = await getFirestoreHelpers();
   const storage = await getFirebaseStorage();
+  const businessReference = firestoreModule.doc(db, "businesses", business.id);
+  const businessSnapshot = await firestoreModule.getDoc(businessReference);
+  const previousTags = businessSnapshot.exists()
+    ? normalizeTagSlugs(businessSnapshot.data().tags)
+    : [];
 
   if (storage) {
     const { storageModule } = await getStorageHelpers();
@@ -166,7 +235,8 @@ export async function deleteBusiness(business: Pick<Business, "id" | "photos">) 
     }
   }
 
-  await firestoreModule.deleteDoc(firestoreModule.doc(db, "businesses", business.id));
+  await firestoreModule.deleteDoc(businessReference);
+  await updateBusinessTagUsageCounts(previousTags, []);
 }
 
 export async function uploadBusinessPhotos(businessId: string, files: File[]) {
@@ -258,6 +328,7 @@ export async function importBusinesses(
   options: ImportBusinessesOptions = {}
 ) {
   const { db, firestoreModule } = await getFirestoreHelpers();
+  const neighborhoods = await getMilwaukeeNeighborhoods();
   const existingSnapshot = await firestoreModule.getDocs(
     firestoreModule.collection(db, "businesses")
   );
@@ -275,7 +346,10 @@ export async function importBusinesses(
 
   for (const row of rows) {
     const name = row.name.trim();
-    const category = row.category.trim();
+
+    // Clean Wix JSON-array category format: ["Food & Drink"] → Food & Drink
+    const category = parseWixCategory(row.category ?? "");
+
     const address = row.address?.trim() ?? "";
     const duplicateKey = createBusinessDuplicateKey(name, address);
 
@@ -294,9 +368,16 @@ export async function importBusinesses(
     }
 
     const location = address ? await geocodeAddress(address) : null;
+    const neighborhood = location
+      ? getNeighborhoodForPoint(location.lat, location.lng, neighborhoods) ?? ""
+      : "";
+    const tags = ["black-owned"];
     const businessReference = firestoreModule.doc(
       firestoreModule.collection(db, "businesses")
     );
+
+    // Normalize phone from Wix numeric format e.g. 4142150052 → (414) 215-0052
+    const phone = normalizePhone(row.phone?.trim() ?? "");
 
     await firestoreModule.setDoc(firestoreModule.doc(db, "businesses", businessReference.id), {
       id: businessReference.id,
@@ -304,10 +385,13 @@ export async function importBusinesses(
       category,
       description: "",
       address,
-      phone: row.phone?.trim() ?? "",
+      phone,
       website: normalizeUrl(row.website?.trim() ?? ""),
+      instagramReelUrl: "",
       email: row.email?.trim() ?? "",
       hoursText: row.hoursText?.trim() ?? "",
+      neighborhood,
+      tags,
       hours: createClosedBusinessHours(),
       photos: [],
       ownerUid: null,
@@ -319,6 +403,7 @@ export async function importBusinesses(
       location: location ?? createEmptyBusinessForm().location
     });
 
+    await updateBusinessTagUsageCounts([], tags);
     seenKeys.add(duplicateKey);
     imported += 1;
     completed += 1;

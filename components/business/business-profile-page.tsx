@@ -6,6 +6,8 @@ import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { getWeeklyHours } from "@/lib/business-hours";
 import { useBusiness } from "@/hooks/use-business";
+import { useBusinessTags } from "@/hooks/use-business-tags";
+import { BusinessTag } from "@/lib/types";
 
 type BusinessProfilePageProps = {
   businessId: string;
@@ -13,6 +15,7 @@ type BusinessProfilePageProps = {
 
 export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const { business, loading, error } = useBusiness(businessId);
+  const { tags: businessTags } = useBusinessTags();
 
   if (loading) {
     return (
@@ -43,6 +46,9 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
 
   const weeklyHours = getWeeklyHours(business.hours);
   const hasOnlyClosedHours = weeklyHours.every((day) => day.summary === "Closed");
+  const profileTags = business.tags
+    .map((slug) => businessTags.find((tag) => tag.slug === slug && tag.active))
+    .filter((tag): tag is BusinessTag => Boolean(tag));
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -55,6 +61,19 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             <h1 className="mt-4 font-display text-5xl leading-none text-ink sm:text-6xl">
               {business.name}
             </h1>
+            {profileTags.length ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {profileTags.map((tag) => (
+                  <Link
+                    key={tag.id}
+                    href={`/directory?tag=${encodeURIComponent(tag.slug)}`}
+                    className="rounded-full border border-accent/35 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    {tag.label}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
             <p className="mt-5 text-base leading-8 text-stone-300">
               {business.description}
             </p>
@@ -63,6 +82,26 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           <div className="mt-6">
             <BusinessGallery name={business.name} photos={business.photos} />
           </div>
+
+          {business.instagramReelUrl ? (
+            <div className="mt-6 rounded-[2.4rem] border border-line bg-panel/80 p-6">
+              <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
+                Featured reel
+              </p>
+              <p className="mt-4 text-sm leading-8 text-stone-300">
+                Open this business&apos;s featured Instagram reel in Instagram for
+                full playback, audio, comments, and sharing.
+              </p>
+              <a
+                href={business.instagramReelUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+              >
+                Watch on Instagram
+              </a>
+            </div>
+          ) : null}
 
           <div className="mt-6 rounded-[2.4rem] border border-line bg-panel/80 p-6">
             <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">

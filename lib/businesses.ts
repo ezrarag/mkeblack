@@ -59,6 +59,21 @@ function parseDateValue(value: unknown) {
   return null;
 }
 
+function stringArrayValue(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
 function normalizeHours(value: unknown) {
   const defaultHours = createClosedBusinessHours();
 
@@ -184,8 +199,11 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
     address: stringValue(record.address).trim(),
     phone: stringValue(record.phone).trim(),
     website: normalizeUrl(stringValue(record.website).trim()),
+    instagramReelUrl: normalizeUrl(stringValue(record.instagramReelUrl).trim()),
     email: stringValue(record.email).trim(),
     hoursText: stringValue(record.hoursText),
+    neighborhood: stringValue(record.neighborhood).trim(),
+    tags: stringArrayValue(record.tags),
     hours: normalizeHours(record.hours),
     photos: Array.isArray(record.photos)
       ? record.photos.filter((photo): photo is string => typeof photo === "string")
@@ -217,8 +235,11 @@ export function businessToFormValues(business: Business): BusinessFormValues {
     address: business.address,
     phone: business.phone,
     website: business.website,
+    instagramReelUrl: business.instagramReelUrl,
     email: business.email,
     hoursText: business.hoursText,
+    neighborhood: business.neighborhood,
+    tags: [...business.tags],
     hours: normalizeHours(business.hours),
     photos: [...business.photos],
     ownerUid: business.ownerUid ?? "",

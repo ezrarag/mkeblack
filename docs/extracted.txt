@@ -1,0 +1,5222 @@
+
+============================================================
+App Rebuild Options _ Quotes.docx
+============================================================
+Option 1: Nadiyah Johnson (JetConstellations) 
+
+
+
+https://docs.google.com/document/d/16_Q_pKNYwvYAo-i_YkQpkjm0YCptMsQEpmG1efFfb_A/edit?usp=sharing 
+
+
+
+Quote: https://drive.google.com/file/d/1mZRTtSRDdhef13kxmzPGo2Uu7Fl98Itl/view?usp=sharing
+
+
+
+Notes:
+
+We would make the app dynamic so that you can update it yourself in an admin portal.
+
+We do have a portfolio however most projects are not for public viewing as they are either for research/academia or internal company projects. Alices Garden is a public app you may feel free to review on the app store.
+
+Timeline: typically projects run 3-4 months depending on the decided requirements. 
+
+Security: We use top-of-the-line security infrastructure at the software and network levels, to ensure that user data is always encrypted at rest, responsibly stored, and transmitted securely. This includes the use of TLS/SSL protocols, 256-bit AES data encryption, API call-level authentication, and modern DDoS mitigation controls.
+
+
+
+
+
+Option 2: Dweh 
+
+
+
+https://www.canva.com/design/DAEivMNT3jA/Hd-V-3ySQcsE5w84nPO2tg/view?utm_content=DAEivMNT3jA&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink
+
+============================================================
+BCC Business Plan.docx
+============================================================
+A proposed business plan for:
+
+
+
+
+
+
+
+
+
+
+
+
+
+BLK City Collective
+
+
+
+
+
+INTRODUCTION
+
+
+
+
+
+
+
+MISSION:
+
+
+
+To build a digitally connected collaborative network of Black-owned businesses to support the development of Black Communities.
+
+
+
+VISION:
+
+
+
+
+
+Management Summary
+
+
+
+Executive Team- 
+
+
+
+Rick Banks
+
+Rick Banks is a Milwaukee native who is joining BLOC after spending three years as a neighborhood organizer. He’s been an activist and an organizer in Milwaukee since 2010 when he was spurred by protests following the passage of ACT 10. Rick proudly identifies as pro-labor, pro-student rights, pro-women & LGBT+ equality, and he strongly opposes white supremacy and police violence.
+
+
+
+Paul Wellington
+
+
+
+
+
+Paul Wellington holds a Master’s in Architecture from the University of Wisconsin-Milwaukee, though he works as a public library supervisor. He is the author of Black Built: History and Architecture in the Black Community, a publication discussing the work of Black architects in the United States. Paul also runs the international blog ArchBrick Daily, showcasing the fan made LEGO architecture. 
+
+
+
+
+
+Ayrton Bryan
+
+
+
+
+
+Ayrton is a recent transplant to Milwaukee, but has already grown to love and value the many faces of the city. With a Bachelor’s from the south and Master’s from the east, he has found himself instantly welcomed by the warm MKE community and wanting to give back. He works as an Environmental Health and Safety Manager. He is an avid (audiobook) reader, yoga-fan, craft beer junkie, martial arts student and mindfulness practitioner.
+
+
+
+
+
+OPERATIONS
+
+
+
+Summary
+
+
+
+Black City Collective’s business model is to provide a mobile app software that we offer to white-label to other organizations on a regionally exclusive basis.  The primary use of the mobile app will be to provide a database a black-owned businesses, facilitate sales and advertisements, and the exchange of local digital and cryptocurrencies.   Our primary targeted market is organizers and organizations that seek to support Black-owned businesses.  Through partnering organizations, our secondary target markets are consumers who want to support Black-owned businesses.   By exporting branding and data collection to third party agencies BCC can quickly cover the most ground and build strong local nodes of Black owned Businesses that will contribute to a national database.  It also provides local organizations with an opportunity for branding.
+
+
+
+MKE Black Incorporated, being the organization to launch the proto-type, shall receive a perpetual license to operate BLK City Collective’s app at the cost of $1/year.
+
+
+
+Mobile App/ Directory
+
+
+
+
+
+The main service that MKE Black is its MKE Black Mobile App. This mobile app, available on Android and Apple, will serve as the central database of black owned businesses in Milwaukee. This app will feature not just restaurant and retail locations but also local black vendors and online businesses.
+
+
+
+Built by Paul Wellington using the platform Buildfire, the app features seven sections:
+
+
+
+Food & Drink
+
+
+
+Online Shopping
+
+Mental Health
+
+
+
+Health, Beauty & Wellness
+
+
+
+Shopping
+
+
+
+More Resources
+
+
+
+Services
+
+
+
+Things to Do
+
+
+
+Subscription Service - Business Sales - Collaboration (gift boxes)
+
+Cooperative Businesses (memberships)
+
+
+
+
+
+Food & Drink highlights restaurants and caterers and bars. Online Shopping features businesses with a robust digital presence. Mental Health highlights black businesses supporting the mental well-being of people. Things to Do highlights retailers, museums and other tourist attractions. Health, Beauty & Wellness highlights barber/beauty shops, pharmacies and health stores. Services includes professionals ranging from doctors to photographers, landscapers to lawyers… check it out! Shopping highlights a variety of wonderful spots to buy local. More Resources highlights the most in demand non-profit services demanded in the black community. 
+
+
+
+
+
+Businesses and events are located online on sites such as Facebook and Eventbrite as well as by referral by community members and business owners through our social media accounts and in person conversations.
+
+
+
+The app also features the ability to navigate Black Milwaukee by neighborhood. There are additional pages in the app that provide historical information on the neighborhoods.
+
+
+
+We aim to have at least 15000 downloads by the end of 2021. In the future we hope to expand the capabilities of the app to include the ability to: leave anonymous or
+
+non-anonymous tips for improvements to businesses, leave positive reviews, identify inventory and facilitate online shopping, and connect businesses directly too each other 
+
+
+
+Data:
+
+Money flows
+
+Average Revenue Per Customer
+
+New vs. Repeat Customers
+
+Customers by Zip Code
+
+Customer frequency of visit
+
+Ping customers who haven’t been back in a while
+
+Customer feedback on a transaction by transaction basis
+
+
+
+Services:
+
+Data
+
+Ad campaigns/Cashback promotions & incentives
+
+Gift Cards
+
+
+
+
+
+
+
+MKE Black maintains a website and social media presence that promotes and highlights businesses and events promoted to Black people in Milwaukee. Currently, MKE Black has 2,980 followers on Facebook and 10.1K followers on Instagram. We plan to utilize online media presence to supplement and promote the MKE Black mobile app.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MARKETING
+
+
+
+Influencers
+
+Text - Sms bump
+
+Email
+
+DEvents with 1000 or more people
+
+Shopify
+
+
+
+Market Analysis:
+
+
+
+
+
+
+
+As an economic development tool, supporting Black businesses is currently the best way to build wealth and income in black communities. The majority of job creation occurs at the small business level. Many small business suffer from lack of advertising. There currently isn’t a single place to ide A central place to find local black business.
+
+There’s clearly a demand to support Black businesses and culture in both America and in Milwaukee.
+
+
+
+Locally, Lilo Allen, a co-owner of The Bronzeville Collective, organized a “Brunching Makes You Black” event to support Coffee Makes You Black, a local black owned business, after new arise that they were struggling due to a long construction project. That event drew over 2000 responses on Facebook and drew hundreds of customers to the restaurant, including the local Alderman, during the two day event. 
+
+
+
+In addition to local events, Milwaukee is home to several organizations and institutions that teach Black history, namely the Wisconsin Black Historical Society and American’s Black Holocaust Museum:
+
+
+
+
+
+Wisconsin Black Historical Society opened in
+
+
+
+
+
+
+
+America’s Black Holocaust Museum will also open sometime in the future.
+
+
+
+
+
+
+
+MKE Black will aim to, collaborate with all of the above institutions to for mutual benefit and many will be featured on MKE Black Bus Tours.
+
+
+
+
+
+Comparable Entities
+
+
+
+Currently no other entity is doing exactly what MKE Black is doing: promoting black business, culture and history of Milwaukee through social media & bus tours. There are other organizations that promote specific black businesses, but none that showcase business and culture.
+
+
+
+Businesses it could disrupt:
+
+All
+
+As recently as 2018, www.mkeblackbusiness.com attempted to have a database of black businesses. However, they attempted to run it as a for profit, gaining revenue from ads. Ultimately they catalogue was not very thorough and the website wasn’t very user friendly. Without the catalogue and traffic to support ads, it ultimately failed.
+
+
+
+
+
+Our closest current “competitors” would be BlankSpaceMKE, an urban art cooperative with a very basic principle of spreading the message about cooperative economics – build people to build unity to build wealth to build power. [Source] BlankSpace Milwaukee held their 4th Annual Milwaukee Black Restaurant Week from April 14 - 20, 2019. The week of events at Black Businesses was designed to promote that these businesses were black owned and draw customers from people who are inclined to support them. No data has been provided on how many people in total attends the events, although media sources indicate 	. [Source] BlankSpaceMKE currently has a Facebook Group with 779 members, a Facebook page with 1,527 followers, and Instagram page with 475 followers.
+
+
+
+
+
+Another close example would be the City of Milwaukee’s MLK BID Tour. This tour, organized by the King Drive Business Improvement District (BID), took attendees to multiple
+
+locally-owned businesses along Dr. Martin Luther King Drive.
+
+
+
+
+
+
+
+Marketing Plan
+
+
+
+
+
+
+
+MKE Black will do things differently by mixing in person events and tours to promote the use of the mobile app, further supporting black businesses and establishing a culture of supporting Black-owned businesses.
+
+
+
+A staple of our marketing strategy will be “collaborative marketing” Unlike trade assosications that require a membership, MKE Black will let any black owned business have access to the resources, business research conversations, and connection network in exchange for marketing agreements. MKE Black will provide short, clear messages to companies to support and spread the word about MKE Black. By increasing our audience by connecting with the businesses we serve, MKE Black will be shown to more businesses and consumers than our marketing efforts alone could handle. 
+
+
+
+To maintain membership in the MKE Black network and have access to resources, businesses will have minimum- “collaboration”  “technology”, and “support” points to meet , in efforts to promote cooperative economics, technological development, and community building.
+
+Social Media:
+
+
+
+LinkedIn
+
+Facebook
+
+Instagram
+
+Twitter
+
+
+
+
+
+
+
+Earned Media:
+
+Organic reviews in addition to the marketing agreements.
+
+
+
+
+
+Radio:
+
+-	Iheart Radio
+
+-     88.9
+
+Digital Ads:
+
+
+
+
+
+MKE Black will primarily promote through digital marketing. In addition to posting content, ads will be created for Facebook & Instagram.
+
+
+
+
+
+Events:
+
+
+
+As determined by market research. Events to include:
+
+Webinars with partners/ collaborators
+
+Virtual business panels
+
+Live business showcases
+
+Black busines happy hours
+
+Etc.
+
+
+
+
+
+
+
+Newsletter
+
+
+
+
+
+
+
+MKE Black will maintain a listserv of contacts that sign up via the website and events. We will regularly use this list to help promote business deals, events and other things that would be beneficial to members.
+
+
+
+
+
+Canvassing
+
+MKE Black will partner with other community organizations to have information about MKE Black provided in canvassing packets provided. These organization include Black Leaders Organizing for Communities (BLOC), Safe & Sound, xz
+
+
+
+
+
+FINANCIAL INFORMATION
+
+
+
+
+
+
+
+Start-up costs:
+
+
+
+
+
+
+
+MKE Black would require start-up funds for three phases:
+
+
+
+
+
+
+
+Phase 1: MKE Black Mobile App
+
+
+
+Phase 1 would see the original launch of the MKE Black mobile app in February 2020. Upfront costs for phase 1 includes the time to locate businesses and design the app, technical costs such as the subscription to BuildFire and vendor fees to access to app marketplaces such as Google Play and Apple Store.
+
+
+
+
+
+Phase 2: MKE Black Operations Automation
+
+
+
+Phase 2 would see the adoption of tools such as help scout, Customer Relationship Management Software, digital scheduling tools, and professional web tools. MKE Black anticipates spending $1500-$2000 annually on these softwares.
+
+
+
+
+
+Phase 3: MKE Black Mobile App Upgrade
+
+
+
+
+
+
+
+Phase 3 would see the mobile app upgrade to add the additional capacities detailed above. Upfront cost would be $20,000 to pay a coder to build the app. This would include creation of the app as well as teaching staff how to maintain it. Alternatively, additional funds could be
+
+acquired to pay a coder to maintain the app. Launch of phase 3 would be contingent upon receiving/acquiring the funding.
+
+
+
+Phase 4: MKE Black Grants
+
+	Based on amount of funds raised, MKE Black would like to give back to black owned businesses, and the black community. Areas of focus will be education, to create future black entrepreneurs and professionals driven by a strong educational background.
+
+Activities / Revenue Generators
+
+Request for donations from individuals
+
+Request for donations from businesses
+
+Grant applications
+
+Collaborations for joint marketing (marketing agreements with member businesses)
+
+Joint Initiatives, where participants may:
+
+pay subscriptions
+
+be charge a one time fee
+
+Branded Material Sales
+
+Joint sale of goods with other businesses
+
+“Premium” MKE Black Membership- higher level of marketing support, special events, etc.
+
+“Connection Consulting Packages” (as we grow expertise, we could maybe sell orgs connection plans)
+
+Business “MKE Black Accreditation” (like a sticker to display in your window, would need criteria)
+
+Black owned Businesses
+
+Ally Business (supporters that are non-black owners)
+
+Expenses:
+
+
+
+
+
+
+
+Year 1
+
+
+
+Year 2
+
+
+
+Year 3
+
+
+
+Salaries & Benefits
+
+
+
+
+
+
+
+
+
+
+
+
+
+Executives
+
+
+
+0
+
+
+
+0
+
+Per executive
+
+=goal is $1000 per month, or $12000 annually
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Equipment
+
+
+
+
+
+
+
+
+
+
+
+
+
+Maintenance
+
+
+
+$1,000
+
+
+
+$1,000
+
+
+
+$1,000
+
+
+
+Marketing
+
+
+
+
+
+
+
+
+
+
+
+
+
+Facebook Ads
+
+
+
+$1,000
+
+
+
+$1,500
+
+
+
+$3,000
+
+
+
+
+
+Canvassers
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Operational Costs
+
+
+
+
+
+
+
+
+
+
+
+
+
+Website & Email
+
+
+
+$150
+
+
+
+$150
+
+
+
+$150
+
+
+
+
+
+Mobile App Platform
+
+
+
+$1,100
+
+
+
+$1,100
+
+
+
+$1,100
+
+
+
+
+
+Market vendor fees
+
+
+
+$200
+
+
+
+$200
+
+
+
+$500
+
+
+
+
+
+Printing
+
+
+
+$1,000
+
+
+
+$1,000
+
+
+
+$1,000
+
+
+
+
+
+Insurance
+
+
+
+$4,000
+
+
+
+$4,000
+
+
+
+$4,000
+
+
+
+
+
+Gifts
+
+
+
+
+
+
+
+
+
+
+
+Food/Giveaways
+
+
+
+$1,000
+
+
+
+$1,000
+
+
+
+$1,000
+
+
+
+
+
+Audit
+
+
+
+$4,000
+
+
+
+$4,000
+
+
+
+$4,000
+
+
+
+
+
+
+
+
+
+
+
+
+
+TOTAL
+
+
+
+$13450
+
+
+
+$13950
+
+
+
+$15750+$12000/ executive
+
+
+
+
+
+Revenues:
+
+
+
+Selling data
+
+Advertisements on the app
+
+Tech Services to franchisees
+
+Order Transaction Fees
+
+
+
+
+
+INvestment: 
+
+Angel Investors
+
+
+
+
+
+
+
+MKE Black wants to keep the cost of providing resources to businesses, at a base level, fre. MKE Black believes this is why most trade organizations/ Chambers of Commerce do not reach the majority of businesses that meet their criteria. 
+
+
+
+The gain will come from MKE Black having a broader range of involvement/ “members”, that with the collaborative marketing, will increase the exposure of MKE Black. T
+
+His will allow a broader base to request donations from. MKE Black Plans to ask for money for both non-profit and for-profit initiatives, as the marketing/ partnerships will provide benefit to MKE Black (monetarily or advertising).
+
+
+
+MKE Black seeks to have the following distribution of revenue generation: 
+
+Donations (business, individuals)- 40%
+
+Grants/ Foundations- 40%
+
+Intellectual Property/ Goods- 10%
+
+Premium Business Services (tailored profile,” MKE Black Status, special webinars)- 10%
+
+
+
+Projection/Estimated
+
+
+
+
+
+Year 1
+
+
+
+Year 2
+
+
+
+Year 3
+
+
+
+Foundations
+
+
+
+
+
+$40,000
+
+
+
+$70,000
+
+
+
+$100,000
+
+
+
+
+
+
+
+
+
+
+
+
+
+Merchandise Sales
+
+
+
+
+
+$1,000
+
+
+
+$1,500
+
+
+
+$3,000
+
+
+
+
+
+
+
+
+
+
+
+
+
+Individual Donors
+
+
+
+
+
+$10,000
+
+
+
+$25,000
+
+
+
+$50,000
+
+
+
+
+
+
+
+
+
+
+
+
+
+TOTAL
+
+
+
+
+
+$51,000
+
+
+
+$96,500
+
+
+
+$153,000
+
+
+
+
+
+Foundations to apply to:
+
+
+
+Bader Philanthropies
+
+
+
+Local Initiative Support Corporation (LISC)
+
+
+
+Zeidler Foundation
+
+
+
+Greater Milwaukee Foundation
+
+
+
+Kresge Foundation
+
+Ford Foundation
+
+
+
+
+
+
+
+APPENDICES
+
+
+
+
+
+
+
+
+
+
+
+Name of Company
+
+Tag Line & Logo
+
+
+
+
+
+
+
+BUSINESS PLAN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Name
+
+Company Name
+
+Address
+
+Address
+
+Phone
+
+Cell
+
+Fax
+
+e-mail
+
+website
+
+
+
+
+
+
+
+
+
+
+
+Date
+
+
+
+
+
+
+
+Confidential
+
+
+
+TABLE OF CONTENTS
+
+
+
+I.	EXECUTIVE SUMMARY	4
+
+A.	Company and Background	4
+
+B.	Market Opportunity	4
+
+C.	Management Team	4
+
+D.	Financing Required	4
+
+II. COMPANY DESCRIPTION	6
+
+A.	Ownership Information	6
+
+B.	Legal Description of the Business	6
+
+C.	Mission Statement	6
+
+D.	The Vision	6
+
+E.	Products and Services	6
+
+F.	Milestones	6
+
+G.	History of the Business	7
+
+III. THE INDUSTRY	8
+
+A.	Current Industry Status	8
+
+B.	Important Industry Trends	8
+
+IV. MARKET ANALYSIS	9
+
+A.	Target Customer	9
+
+B.	Geographic Territory	9
+
+C.	Market Size	9
+
+D.	Strongest Customer Perceived Benefit	10
+
+E.	Competition	10
+
+F.	Competitive Advantages	11
+
+G.	Pricing	11
+
+H.	Advertising & Promotions Plan	12
+
+I.	Sales Strategy	12
+
+J.	Future Markets	12
+
+V. LOCATION	14
+
+A.	Site Location Considerations	14
+
+B.	Facility Requirements	14
+
+VI. TECHNICAL CONSIDERATIONS	15
+
+A.	Process/Technology	15
+
+B.	Order Fulfillment and Customer Service	15
+
+C.	Raw Materials/Inventory	15
+
+D.	Proprietary Information	15
+
+E.	Technology Requirements	15
+
+F.	Other Operational Issues	15
+
+VII.  MANAGEMENT/PERSONNEL	17
+
+A.	Organizational Chart	17
+
+B.	Personnel Plan	17
+
+C.	Functional Job Descriptions	17
+
+D.	Qualifications of Management Team	17
+
+E.	Outside Advisors and Service Providers	19
+
+VIII. POTENTIAL RISKS, OPPORTUNITIES AND CONTINGENCY STRATEGIES	20
+
+IX. FINANCIAL ASSUMPTIONS	21
+
+A.	Start-Up Costs	21
+
+B.	Sales Forecast Assumptions	21
+
+C.	Income Projections	21
+
+D.	Sources & Uses of Funds	22
+
+E.	Accounts Receivable Assumptions	22
+
+F.	Exit Strategy	22
+
+G.	Projected Financial Statements	22
+
+APPENDIX	24
+
+
+
+
+
+I.	EXECUTIVE SUMMARY
+
+A.	Company and Background
+
+
+
+1-2 paragraphs on basic company information including:
+
+Age of company
+
+Location
+
+Stage of development (start-up, initial operations, expansion, rapid growth, stable operations OR conception, introduction, growth, maturity, innovation or decline)
+
+Legal entity
+
+Sustainable competitive advantage
+
+Commercialization strategy
+
+Founders names and/or aggregate information
+
+Current company size in employees and/or sales
+
+Major products or services
+
+B.	Market Opportunity
+
+
+
+2-4 paragraphs describing the need for your product or service
+
+Describe the current problem and how your product or service will fix it
+
+Any pertinent industry information/trends
+
+Use high quality third-party verification if possible.  This is a very critical part of the business plan so be clear and concise with descriptions of market size and trends, target customers, their needs, and your company’s solution.
+
+C.	Management Team
+
+(Team member #1 name, title) – (1-3 sentences of most critical background information)
+
+(Team member #2 name, title) – (1-3 sentences of most critical background information)
+
+(Team member #3 name, title) – (1-3 sentences of most critical background information)
+
+(Team member #4 name, title) – (1-3 sentences of most critical background information)
+
+(Team member #5 name, title) – (1-3 sentences of most critical background information, add additional management team members as necessary)
+
+Any key support groups/people including accountant, attorney, consultants, board of directors, advisory board members, etc
+
+D.	Financing Required
+
+
+
+1-2 paragraphs on explaining:
+
+How much money you will need to start your business
+
+Where you expect it to come from (include debt and equity and past and future sources of financing including your own contributions) and any amount of funding received to date
+
+What you are going to use it for
+
+Projections for sales & net profits
+
+The inset table is a summary of the information in the attached projected financial statements.  PLEASE NOTE THAT THE INFORMATION IN THIS TABLE MUST MATCH THE DETAILED PROFORMAS.)
+
+Exit strategy
+
+
+
+
+
+
+
+
+
+PROJECTED FINANCIAL SUMMARY
+
+
+
+($’s)
+
+(Year One)
+
+(Year Two)
+
+(Year Three)
+
+Revenues
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+COGS	
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+Operating Expenses
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+Net Income
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+Cash Flow
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+
+
+
+
+II. COMPANY DESCRIPTION
+
+A.	Ownership Information
+
+
+
+Legal business name
+
+Owners
+
+State in which business is headquartered &/or located
+
+Ownership structure
+
+B.	Legal Description of the Business
+
+
+
+Date organized 
+
+Type of legal entity & why this type was chosen
+
+If an LLC, the tax elections chosen
+
+In which states authorized to do business
+
+Significant intellectual property such as trademarks, copyright or patents
+
+C.	Mission Statement
+
+
+
+WHAT your business does
+
+WHO you do it for
+
+WHY you want to do it
+
+D.	The Vision
+
+
+
+Describe the future vision (goal) for your company.  It is helpful to form a clear picture in your mind of what the company will look like when it is finally done.  
+
+Explain why you started the business and/or how you recognized the needs of your target customers.  If possible, mention the problems target customers face.
+
+E.	Products and Services
+
+
+
+Provide a detailed description of each product or service that you intend to sell
+
+Identify how each product or service benefits the customer, solves a problem, or addresses an opportunity
+
+Identify the unique features & benefits of each product or service
+
+Identify and explain your 1-3 competitive positions (i.e. price, selection, service, quality or convenience)
+
+Summarize how your products or services will be marketed and who your customers are
+
+Identify intellectual property, if any (patents, trademarks, customer lists, trade secrets, strategic partnership agreements, etc.)
+
+Identify any government approvals needed or applicable regulations
+
+F.	Milestones
+
+
+
+Significant milestones achieved to date or anticipated in the next 12 months
+
+G.	History of the Business
+
+
+
+PLEASE NOTE THAT THIS SECTION APPLIES TO EXISTING BUSINESSES ONLY AND THAT THE INFORMATION IN THE FOLLOWING TABLE MUST MATCH YOUR ACTUAL FINANCIAL STATEMENTS
+
+Explain the date the business began or will begin operation
+
+Chain of ownership
+
+Material changes in product/service line, location, or capitalization
+
+If available, provide 3 years of profit and loss history – either using the chart below, as part of the appendix and reference its inclusion here, or listed as “available upon request”.  If you are not using the chart below, be sure to delete it.
+
+
+
+
+
+HISTORICAL FINANCIAL SUMMARY FOR EXISTING BUSINESS
+
+($’s)
+
+Year 
+
+Year 
+
+Year 
+
+Revenues
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+Operating Expenses
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+Net Income
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+Cash Flow
+
+(Fill In)
+
+(Fill In)
+
+(Fill In)
+
+
+
+
+
+
+
+
+
+
+
+III. THE INDUSTRY  
+
+Current Industry Status
+
+
+
+1-3 paragraphs describing the current industry including:  
+
+Your NAICS (industry) code in the U.S. Census – see http://www.census.gov/econ/census07/
+
+Industry snapshot report to describe the current status of the industry – see http://www.census.gov/econ/census/snapshots/index.html
+
+Annual sales (receipts)
+
+# of establishments
+
+5-year growth rates
+
+Size of a typical establishment
+
+If the industry is currently growing, stabilizing or declining
+
+Any additional pertinent industry information from research including information from your industry trade association(s) – Google or Associations Unlimited (only in UWM library)
+
+B.	Important Industry Trends
+
+
+
+Identify trends that will impact your industry over the next three years including:
+
+Technology
+
+Economy
+
+Political
+
+Legal
+
+Demographic
+
+Social
+
+Seasonality
+
+Sources you can use to complete this section include:  
+
+Trade associations
+
+JJ Hill Library http://www.jjhill.org/business_stages/
+
+Click on “Beginning” & Go
+
+Click on Learn More About Your Industry & Open This Section
+
+Use any of the available resources to research your industry
+
+
+
+
+
+
+
+
+
+
+
+IV. MARKET ANALYSIS
+
+A.	Target Customer
+
+
+
+Specifically describe how you will be able to identify who your target customers are.  
+
+For consumers, this is usually:
+
+Age
+
+Income
+
+Sex
+
+Profession
+
+Education
+
+Geographic location
+
+Family status
+
+Race
+
+Religion
+
+Lifestyle activities
+
+Attitudes, values & other psychographics
+
+For businesses, identify the position of the likely decision-maker and any influencers
+
+For businesses, describe identifying characteristics such as:
+
+Industry (SIC/NAICS)
+
+Annual sales
+
+# of employees
+
+Age of business
+
+Geographic location
+
+Number of locations  
+
+Note: the target market might be businesses in the distribution channel and not necessarily the end users
+
+Identify any other key markets
+
+B.	Geographic Territory
+
+
+
+Describe where your customers are geographically located
+
+Explain why are your customers located where you indicated, i.e. distance, time, traffic patterns, social and cultural considerations
+
+Explain how your chosen location matches your customer demographics
+
+C.	Market Size
+
+
+
+Calculate how many target customers there are in your geographic territory and what your share of the market will be
+
+Resources:
+
+American Factfinder – http://factfinder.census.gov – “American Community Survey
+
+Choose Milwaukee database – www.choosemilwaukee.org – maps and charts census and other data – under Regional Statistics
+
+Badger Link – http://www.badgerlink.net
+
+JJ Hill Business Stages - http://www.jjhill.org/business_stages/
+
+ D.	Strongest Customer Perceived Benefit
+
+
+
+Describe the strongest (emotional) need (benefit) perceived by the customer for your product or service.  Perceived customer benefits should be explained previously in your Target Customer section.  
+
+If possible, use third party verification and statistics.  
+
+Give specifics on the breadth (numbers) and depth (severity) of the problem
+
+Perceived emotional needs are usually as follows:
+
+Exclusivity/status
+
+Pride
+
+Security/safety
+
+Peer pressure/acceptance
+
+Belonging
+
+Self-improvement
+
+Beauty
+
+Sex
+
+Family
+
+Power
+
+Prestige
+
+Comfort
+
+Health
+
+Pleasure
+
+Advancement
+
+Praise
+
+Accomplishment
+
+Recognition
+
+Sympathy/pity
+
+Guilt
+
+Fear  
+
+E.	Competition
+
+
+
+Describe the overall competitive nature of the market
+
+Within your product or service category, describe:
+
+The number of players – list the top competitors, their location, product/service description, and summary of their strengths & weaknesses
+
+Trends in competition
+
+General level of competition for the existing customers
+
+Then mention that in the appendix there is a competitive matrix that compares your business with each of your direct competitors. Direct competitors are choices your customers are considering as an alternative to your product/service.  Because customers must research these alternatives, most companies do not have more than (approximately) 5 direct competitors.  
+
+Google competitor websites
+
+JJ Hill Business Stages - http://www.jjhill.org/business_stages/
+
+Note – competitive strengths & weaknesses can be in areas such as:
+
+Price
+
+Quality
+
+Unique features
+
+Distribution system
+
+Geographic location
+
+Discuss any indirect competitors (companies that sell different products/services as you that fill the same need as your products/services)
+
+Summarize key points
+
+F.	Competitive Advantages
+
+
+
+(Explain how your company will attempt to either compete with or work around major competitors.)
+
+
+
+(Advantage #1):  (Give a brief description of how this feature is superior to other products or services.)
+
+
+
+(Advantage #2):  (Give a brief description of how this feature is superior to other products or services.)
+
+
+
+(Advantage #3):  (Give a brief description of how this feature is superior to other products or services.)
+
+
+
+(Advantage #4):  (Give a brief description of how this feature is superior to other products or services & add additional advantages as necessary.)
+
+G.	Pricing
+
+
+
+1-2 paragraphs explaining your pricing strategy including
+
+What your pricing structure is
+
+How your prices will be determined
+
+How your prices compare to your competition
+
+Explain any of the following pricing components you will use:
+
+Quantity discounts
+
+Introductory offers
+
+Volume pricing
+
+Bundling
+
+Consider how the following factors will impact pricing:
+
+Shipping costs
+
+Warranties & maintenance contracts
+
+Return policy
+
+H.	Advertising & Promotions Plan
+
+
+
+Explain how you plan to communicate your benefits and competitive advantages to your target customers including any of the following:
+
+Direct mail
+
+Advertising
+
+Telemarketing
+
+Public relations
+
+Website
+
+Email
+
+Speaking engagements
+
+Signage
+
+Networking
+
+Trade shows
+
+Other events
+
+Explain how and why each promotional component will help you effectively reach your target customers
+
+Explain how you will measure the effectiveness of each component
+
+Provide assumptions about how you calculated the estimated cost of each component.  (This will be the marketing cost in your profit and loss statement.)
+
+
+
+Promotional Component
+
+Assumed Launch Date
+
+Estimated Cost
+
+(Name of Component #1)
+
+
+
+(Fill in)
+
+(Name of Component #2)
+
+
+
+(Fill in)
+
+(Name of Component #3)
+
+
+
+(Fill in)
+
+(Name of Component #4)
+
+
+
+(Fill in and add promotional components as necessary)
+
+I.	Sales Strategy
+
+
+
+Identify whether you will have an internal or external sales force or both
+
+# of sales people/representatives used
+
+Cost of sales force
+
+Explain the distribution process 
+
+Identify how your products/services will be distributed (i.e. through a retail store, through a distributor, shipping from a warehouse or distribution center, personal meeting with clients, etc.) 
+
+Identify who will distribute your products/services
+
+Describe any plans for licensing or royalties
+
+J.	Future Markets
+
+
+
+1-2 paragraphs on any additional markets your company might attempt to go into
+
+Include a brief plan on how and when you plan to enter them
+
+
+
+
+
+
+
+
+
+V. LOCATION
+
+A.	Site Location Considerations
+
+	
+
+Explain any special requirements for your site location including:
+
+Size
+
+Zoning
+
+Parking
+
+Lighting 
+
+Other physical character
+
+B.	Facility Requirements
+
+	 
+
+Identify whether your business needs manufacturing, retail and/or office facilities
+
+Describe the physical characteristics of the building(s) you will need for your business including:
+
+Size
+
+Cost per square foot
+
+Leasehold improvements
+
+Storage
+
+Provide architectural drawings, if available.
+
+Environmental considerations
+
+Any necessary linkages to customers or supplies such as:
+
+Traffic arteries
+
+Exposure
+
+Convenience
+
+Highway access
+
+Loading dock
+
+
+
+
+
+
+
+VI. TECHNICAL CONSIDERATIONS
+
+A.	Process/Technology
+
+	
+
+Describe the process required to manufacture, assemble or produce your product or service
+
+Identify whether the manufacturing/assembling is done internally or sub-contracted out.  If sub-contracted out, identify who will be doing what.  
+
+Compare your process to state-of-the art technology
+
+Describe your shipping, billing, and payment terms
+
+Explain any constraints or opportunities
+
+Identify any relevant trends that you predict
+
+B.	Order Fulfillment and Customer Service
+
+
+
+Describe your company’s order fulfillment and customer service practices including:
+
+Shipping
+
+Billing
+
+Payment terms
+
+C.	Raw Materials/Inventory
+
+	
+
+Describe how and where your raw materials will be sourced
+
+Identify back-up suppliers for key components
+
+Describe the availability of raw materials
+
+Define inventory requirements
+
+Explain anticipated inventory turnover
+
+D.	Proprietary Information
+
+	
+
+Explain and identify any patents, trademarks, trade secrets, strategic partnership agreements, etc.
+
+E.	Technology Requirements
+
+
+
+Describe requirements for hardware, software, and telecommunications
+
+F.	Other Operational Issues
+
+
+
+Explain other relevant issues such as those pertaining to:
+
+Safety and health
+
+Insurance and legal agreements
+
+
+
+
+
+
+
+  
+
+
+
+VII.  MANAGEMENT/PERSONNEL
+
+A.	Organizational Chart
+
+
+
+Define the expected organization structure of your business in 3 years
+
+
+
+
+
+Personnel Plan
+
+
+
+Job Title
+
+Start Date
+
+Salary
+
+Benefits (List)
+
+List job title
+
+List start date
+
+List annual or hourly salary (list hours per week)
+
+Identify benefits provided, i.e. health, life, vacation, sick, any equity in business, etc.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+C.	Functional Job Descriptions
+
+
+
+Write a brief (one paragraph or less) functional description for each job title
+
+D.	Qualifications of Management Team
+
+
+
+1-2 paragraphs on your management team focusing on anything that makes you and your team qualified to run your company.  Include information on the division of duties and, if applicable, also mention that management resumes can be found in Appendix X.
+
+(Team member #1 name, title) – (1-2 paragraphs of background information.  Include information on past experience operating or working in small businesses, industry experience, education, and/or general business expertise.)
+
+(Team member #2 name, title) – (1-2 paragraphs of background information.  Include information on past experience operating or working in small businesses, industry experience, education, and/or general business expertise.)
+
+(Team member #3 name, title) – (1-2 paragraphs of background information.  Include information on past experience operating or working in small businesses, industry experience, education, and/or general business expertise.)
+
+E.	Outside Advisors and Service Providers
+
+	
+
+Explain plans for boards of directors and/or advisors including:
+
+Names
+
+Qualifications
+
+Compensation, if applicable
+
+Ownership in company, if applicable
+
+Identify service providers such as lawyers, accountants, or consultants
+
+
+
+ Service Provider
+
+Cost per Hour 
+
+Hours per Year
+
+Name of service provider
+
+
+
+Service provider cost per hour
+
+Estimated number of hours worked per year.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+VIII. POTENTIAL RISKS, OPPORTUNITIES AND CONTINGENCY STRATEGIES
+
+Critical Risk
+
+Contingent Strategy
+
+(Name of Risk #1)
+
+(Fill in solutions/plans to limit/reduce risk)
+
+
+
+(Name of Risk #2)
+
+(Fill in solutions/plans to limit/reduce risk)
+
+
+
+(Name of Risk #3)
+
+(Fill in solutions/plans to limit/reduce risk & add additional risks and contingencies as necessary.)
+
+
+
+Potential Opportunities
+
+Contingent Strategy
+
+(Name of Opportunity #1)
+
+(Fill in plan to leverage this potential opportunity)
+
+(Name of Opportunity #2)
+
+(Fill in plan to leverage this potential opportunity)
+
+(Name of Opportunity #3)
+
+(Fill in plan to leverage this potential opportunity)
+
+(Name of Opportunity #4)
+
+(Fill in plan to leverage this potential opportunity)
+
+
+
+
+
+	
+
+
+
+
+
+
+
+IX. FINANCIAL ASSUMPTIONS
+
+Complete the financial projections using the Excel template provided and then fill in the information in this section of the business plan.
+
+A.	Start-Up Costs
+
+
+
+What are your estimated costs to start your business?  Reference the start-up costs worksheet in your appendix or complete the chart below.
+
+Start-Up Cost Description
+
+$ Amount of Start-Up Cost
+
+Actual or Anticipated Date Spent
+
+Fill in activity	
+
+Fill in cost
+
+Fill in date spent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Total Start-Up Costs
+
+Add Up Total Amount
+
+
+
+B.	Sales Forecast Assumptions
+
+	
+
+Explain the rationale for your sales forecast including your assumed market penetration rate.  The optional market capture worksheet can be used as a resource for this section.  Be sure your projections are reasonable and give any supporting information used to project the financials.
+
+
+
+
+
+YEAR ONE
+
+Name Product One:
+
+Enter product sales
+
+# unit sales
+
+Enter unit sales
+
+$ (avg.) price per unit
+
+Enter avg. price/unit 
+
+Name Product Two:
+
+Enter product sales
+
+# unit sales
+
+Enter unit sales
+
+$ (avg.) price per unit
+
+Enter avg. price/unit 
+
+Name Product Three:
+
+Enter product sales
+
+# unit sales
+
+Enter unit sales
+
+$ (avg.) price per unit
+
+Enter avg. price/unit 
+
+Other
+
+
+
+TOTAL SALES
+
+Enter total sales/year
+
+C.	Income Projections
+
+	
+
+What are your net income projections for the next three years?  If you are not showing a profit during this 3-year period, indicate when you will become profitable. 
+
+(Year 1)
+
+Projected net income
+
+(Year 2)
+
+Projected net income
+
+(Year 3)
+
+Projected net income
+
+
+
+D.	Sources & Uses of Funds
+
+
+
+How much funding do you need to cover start-up costs, operations and/or any growth?  
+
+Based on your funding needs, what sources of funding will you use?
+
+Projected Initial Investment  (Uses of Funds)
+
+Amount
+
+Land and building
+
+Fill in amount
+
+Improvements
+
+Fill in amount
+
+Fixtures and Equipment
+
+Fill in amount
+
+Start-up costs (prior to start of business)
+
+Fill in amount
+
+Working Capital (operating expenses such as employee costs, rent, utilities, marketing, etc.)
+
+Fill in amount
+
+Other
+
+Fill in amount
+
+Other
+
+Fill in amount
+
+Total
+
+Fill in amount
+
+
+
+Funding for Projected Initial Investment (Sources of Funds)
+
+Amount
+
+Owner’s Equity
+
+Fill in amount
+
+Bank Financing
+
+Fill in amount
+
+Outside Equity
+
+Fill in amount
+
+Other
+
+Fill in amount
+
+Total
+
+Fill in amount (must equal projected initial investment)
+
+E.	Accounts Receivable Assumptions
+
+	
+
+If your company sends invoices to customers, you will have Accounts Receivable.  Accounts Receivable, a use of cash, is usually calculated in terms of days sales are outstanding.  This is typically between 30 and 60 days.  Explain your Accounts Receivable cycle.  Also discuss your collections policies and invoicing processes.
+
+F.	Exit Strategy
+
+	
+
+Explain your exit strategy.  Options include:
+
+Go public
+
+Acquisition
+
+Sale
+
+Merger
+
+Buyout
+
+Franchise
+
+Hand down
+
+Close
+
+Identify your timeline for achieving the chosen exit strategy
+
+G.	Projected Financial Statements
+
+	
+
+Include the following financial statements
+
+Monthly cash flow (for three years)
+
+Year end income statement (for three years)
+
+Year end balance sheet (for three years) 
+
+Historical financial statements (if existing business)
+
+APPENDIX
+
+
+
+List any supporting documents included in your appendix i.e. resumes, corporate identity packages, marketing materials, contracts, letters of intent, etc.
+
+List document #1
+
+List document #2 
+
+List document #3
+
+
+
+
+
+Appendix (A): Competitive Matrix
+
+
+
+Competitors’ Strengths and Weaknesses
+
+
+
+(Price)
+
+(Location)
+
+(Customer Service)
+
+(Other Key Characteristics)
+
+(Other Key Characteristics)
+
+(Other Key Characteristics)
+
+(Other Key Characteristics)
+
+(Your Business)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(Competitor 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(Competitor 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(Competitor 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(Competitor 4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(Competitor 5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note – competitive strengths & weaknesses can be in areas such as:
+
+Price
+
+Quality
+
+Unique features
+
+Distribution system
+
+Geographic location
+
+============================================================
+BCC Notes.docx
+============================================================
+BLK City Collective
+
+
+
+Black. Love. Key
+
+Bold Like Knowledge
+
+Bold Love Knowledge
+
+Black Love Kuumba
+
+Bold Live Kumba
+
+Black Love Karma
+
+
+
+Marketing & Data Company
+
+
+
+Team
+
+Attorney: Jan Pierce
+
+
+
+To Do:
+
+Start a bank account
+
+Assign MKE Black Copyright to BLK City Collective?
+
+Licensing Agreement with MKE Black:
+
+$1 Non-Exclusive License
+
+Transaction Fee goes to MKE Black
+
+Right to name app in store MKE Black, disclaiming at bottom: Powered by ________ engine © of BLK City Collective
+
+Data sharing agreement
+
+Determine app features
+
+Price it out
+
+Select a designer
+
+Build marketing
+
+Website
+
+Facebook Page
+
+Instagram
+
+Launch Fundraising
+
+Debut New App
+
+Sell to other cities/orgs
+
+Maintain & make $
+
+
+
+App Features
+
+Geotagging
+
+Geocaching 
+
+verify google info 
+
+members only pages
+
+Forums
+
+Business Info:
+
+Owner (with pics)
+
+Year Founded
+
+Payment Options accepted
+
+Social Media Links
+
+Customer Accounts
+
+Business Accounts
+
+Freedom $ Balance & Transfers (including between customers)
+
+Purchases
+
+Track previous purchases
+
+Online ordering
+
+Links to Delivery Services
+
+Classified Section
+
+Verified Symbol: 51% Black-Owned, Woman, LBGT, Coop, Unionized, Living Wage Employer
+
+Offer anonymous suggestions
+
+Business Price Ranges
+
+Map view of  all businesses
+
+List of Businesses near me
+
+Filter
+
+Categories & Filers
+
+Now open 
+
+Women Owned
+
+LGBT 
+
+Coop
+
+Unionized
+
+Living Wage
+
+Gluten Free
+
+Vegan
+
+Vegetarian
+
+Live Music
+
+Business Hours (include a call to verify disclaimer)
+
+Contact info: Website, email, social media
+
+Menu & Inventory (non-food businesses)
+
+Favorites stores & items
+
+Local jobs with BOBs
+
+Education & Job Training Programs/Resources
+
+Enable user generated content
+
+Classifieds: looking for
+
+
+
+Equity
+
+Paul: The app
+
+Rick:
+
+Ayrton
+
+
+
+Revenue:
+
+Sell Data
+
+Sell Ad Space
+
+Transaction Fee
+
+
+
+Licensing
+
+$10,000 start up fee
+
+Train new people
+
+20% of revenue up to $100,000
+
+50% of transaction fee
+
+
+
+
+
+
+
+The Product:
+
+Mobile App
+
+How it makes money:
+
+Licensing
+
+Transaction Fees
+
+Gift Cards
+
+
+
+Size of the market:
+
+Black SPending Power?
+
+Competition:
+
+
+
+
+
+
+
+Businesses we could disrupt:
+
+?
+
+
+
+Board of Directors:
+
+
+
+Advisors:
+
+
+
+Investors:
+
+
+
+Ideal Exit: No exit
+
+
+
+Capital Sought: 
+
+
+
+Capital Raised
+
+
+
+HQ
+
+
+
+Founded: 2021
+
+Empoyees: None
+
+CEO: Rick Banks
+
+Website:
+
+============================================================
+Customer Needs Final Deliverable Document - Team 1.docx
+============================================================
+Customer Needs and Final Concepts
+
+
+
+
+
+
+
+
+
+
+
+
+
+Team Members:
+
+Alex Pérez Alarcon
+
+Eric Bryniarski
+
+Matthew Faller
+
+Riley Keating
+
+Sam Schulz
+
+Katie TooherJordan Vangarde
+
+
+
+
+
+
+
+Advisor:
+
+Nadiyah Johnson
+
+
+
+
+
+
+
+Date: 11/11/2022
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table of Contents
+
+1. Customer Profiles . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .2
+
+2. Data Collection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .2
+
+3. Customer Statements and Interpreted Needs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  .4
+
+4. Market Research  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .9
+
+5. Test Table . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .10
+
+6. Needs Hierarchy  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+
+7. Metrics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+
+8. Final Concepts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Customer Profiles
+
+Milwaukee Community Members
+
+These customers include Milwaukee community members who have an interest in learning about and interacting with Milwaukee’s black-owned businesses. 
+
+MKE Black Featured Business Owners
+
+These are business owners who have their businesses featured on the application and want to keep in touch with comments or how many favorites their businesses are getting. 
+
+Other Business Owners
+
+These might be business owners whose businesses are not featured on the application but will use the app to note other businesses. These customers might be using the application to determine if they want to submit an application to have their business featured on the mobile application or website. 
+
+Non-Local Consumers who support the vision of MKE Black
+
+This type of user just wants to learn about what Milwaukee has to offer, and most likely supports the mission to empower and connect with black-owned businesses in the greater Milwaukee area. 
+
+Data Collection
+
+Survey
+
+To collect data that would assist with the conceptual outline for our mobile application, the two MKE Black teams worked together to create two google form surveys. The first survey was directed towards community members who would use the application, and the second survey was directed towards business owners who would be interested in having their business featured on the MKE Black website or mobile application. 
+
+Consumer Survey This survey consisted of 14 questions intended to find the ideal experience for our end-users interacting with businesses. It yielded 41 responses used to interpret our needs hierarchy.
+
+Business Survey The business-oriented survey was meant to understand what business stakeholders desired from the app. It had 11 questions and yielded 5 incomplete responses. It did not yield sufficient responses to consider in our needs hierarchy for now.
+
+
+
+Customer Statements and Interpreted Needs
+
+Table 2: Interpretation of Customer Needs of 41 Responses
+
+
+
+#
+
+Questions
+
+Interpreted Responses
+
+ 
+
+Would you prefer to use the website or mobile app? (single response)
+
+ 
+
+1
+
+● 	Website: 22.2%
+
+● 	App: 29.2%
+
+● 	Both: 39%
+
+● 	Neither 9.8%
+
+There is substantial interest in both the website and mobile app. Our project will need to produce well-developed products in both domains.
+
+ 
+
+How would you like to interact with the businesses? If you have more specific interests, please type your answer in "Other". (multi response)
+
+ 
+
+2
+
+● 	Upvote/Like Button: 71.4%
+
+● 	Comment to Business: 68.6%
+
+● 	Favorites: 60%
+
+● 	Direct messages: 57.1%
+
+Consumers would like to see an upvote button as a way to view the popularity of a certain business. Additionally, having the ability to leave comments for the businesses and sending direct messages may be important features.
+
+ 
+
+What information would you like to see from the businesses featured on these applications? Examples:  information and facts about a company, to products they have, contact info, etc.
+
+ 
+
+3
+
+Products they offer a link to the website and proximity of the business to me
+
+Consumers would like functionality that makes access to the business contact info more convenient.
+
+4
+
+A map with locations, and a filter for type of location(i.e. food , fashion, service, etc.)
+
+Consumers want the ability to see the location of businesses from a birds eye view. Consumers want to quickly be able to visually see how far they are from certain businesses and what routes they can take.
+
+5
+
+Facts who their partners are their values
+
+Consumers want an overview of the businesses and their values. Consumers care about the mission of these businesses when deciding where to give their support. Businesses should have the ability to display a bio on the app/website.
+
+6
+
+Product information, facts about charities being ran by the company for a cause, reviews about the company’s products and new developments.
+
+Consumers want to know what the business is offering and their mission overall. Consumers care about the small details when it comes to supporting local businesses. Understanding their focus, goals, and background is crucial for consumer decisions. Businesses should have the ability to display a bio on the app/website.
+
+7
+
+Hours, menu/products, images
+
+Consumers want to see what the business offers and visually see what products/services are being offered. App/website should support external links and files from businesses. Consider things like a virtual menu or business website.
+
+ 
+
+Would you like to share businesses or info that you see from this technology on other social media? (for example, sharing it on Twitter or Facebook)
+
+ 
+
+8
+
+SMS, Instagram, Twitter, Facebook, Share button,Tiktok, Whatsapp
+
+The app/website should have the ability to share business links on a variety of common platforms.
+
+ 
+
+What other features would you desire most from the app or website in order for you to use it?
+
+ 
+
+9
+
+Black event meet ups
+
+Some consumers may want to utilize the app/website as a hub for everything related to Black social/business life in Milwaukee. Consider businesses, meetups, and possibly other events.
+
+10
+
+Tech support for the business, links to their media platforms, suggestion boxes
+
+The app/website should display the contact information and social media handles or links for businesses. Additionally the app/website should give consumers the ability to send a message and/or leave a comment for businesses to review.
+
+11
+
+Filtering by service and/or product
+
+Consumers want to be able to identify what products/services are being offered by each business. Furthermore, the app should allow consumers to quickly filter the businesses by their product/service/location category.
+
+12
+
+Color and voice feature
+
+Consumers may like to see options to change theme color and to have an option to select a button to call a business.
+
+13
+
+Pictures and where it is located
+
+Consumers want to visually see what products/services are being offered by these businesses. Additionally, they want to know where the businesses are located throughout Milwaukee
+
+14
+
+Search for keyword
+
+Consumers want to easily find specific businesses or other business related info. App/website should have a search option.
+
+15
+
+No ads
+
+Consumers do not like to be spammed with unwanted ads. Possible options to avoid ads would be to have a paid for app/website account.???? ASK TEAM!!
+
+ 
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+ 
+
+Interactivity: Having the ability to interact with other community members or business owners.
+
+ 
+
+16
+
+Average: 3.36
+
+The majority of consumers would like to be able to interact with the community and with the businesses. The app/website should incorporate functionality for comments/likes/messaging.
+
+ 
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+ 
+
+Accessibility: How easy it is to find what you are looking for within the application or website
+
+ 
+
+17
+
+Average: 4.61
+
+Consumers want ease of use. The app/website should have functionality to search/save specific businesses.
+
+ 
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+ 
+
+Accuracy: Keeping the content on the app and website up to date with current businesses.
+
+ 
+
+18
+
+Average: 4.69
+
+Consumers expect to see up-to-date information. Business info should be stored in a way that can be updated often and easily.
+
+ 
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+ 
+
+Diversity of Businesses: There are many different types of businesses featured on the app and website. (retail, restaurants, clothing, etc)
+
+ 
+
+19
+
+Average: 3.88
+
+The majority of consumers would like to see a list of diverse business types in the app/website. The app/website should be capable of hosting many different types of businesses.
+
+ 
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+ 
+
+Community Events: Different events that are being hosted across the city by local businesses are showcased on the website or app.
+
+ 
+
+ 
+
+20
+
+Average: 3.86
+
+The majority of consumers would find it useful/preferred to find community events in the app/website. The app/website should have the ability to showcase local events.
+
+ 
+
+What kind of communities/businesses would you like to see and connect with on the applications? (Like local owned retail, restaurants, service, etc)
+
+ 
+
+21
+
+Black film communities
+
+Consumers would like to see more niche businesses featured on the app/website.
+
+ 
+
+Restaurants, clothing/fashion, Any communities or businesses, retail, small businesses and influences, non-profits, grocery, local own niche services, game places,broad business scope, local gifts, opportunities to volunteer
+
+Consumers would like to see a broad range of different businesses on the app/website. App/website should be modular enough to host a broad range of businesses.
+
+22
+
+clothing/fashion
+
+Same as above.
+
+23
+
+Auto services and book stores
+
+Same as above.
+
+ 
+
+If the app/website contained coupons or discounts for these locally owned businesses, would that incentivize you to use the app more?
+
+ 
+
+24
+
+Yes 91.9%
+
+No 8.1%
+
+Consumers would like to see extra incentive to use the app. App/website should include support for coupons/discounts
+
+Market Research (Similar Tech Research Section)
+
+A few references to applications similar to our product:https://www.blappapp.com/ : Blapp App, Finding black owned businesses 
+
+https://wbbtoo.com/ : We Buy Black, a marketplace for products made from black-owned businesses 
+
+https://web.mercadomke.com/en/list : Provide online directory and platform for MKE based Latino businesses.
+
+https://www.eatokra.com/ : Online Ordering of Black-owned restaurants, has reviews for businesses.
+
+https://post21shop.com/ : Post21 Online store of products such as home goods by black creators 
+
+Benchmarking against other Applications:
+
+Feature
+
+Competitor App
+
+Our Product
+
+Show nearby black businesses in IOS and android app
+
+Blapp(Mobile): a database that resembles Google Maps, you can use the same app to find businesses in many cities.
+
+Our tech leverages local pride and organizations to make an unrivaled network of businesses on a web or mobile application.
+
+Selling products made by Black creators through an online marketplace.
+
+We buy Black (Website): Online marketplace for selling black-made products.
+
+Our tech is a platform for community-oriented businesses to visit and order from. (Services and products)
+
+A platform for businesses in Milwaukee to grow
+
+Mercadomke (Website): Provides an online marketplace and platform for Latino businesses in MKE.
+
+Our technology interacts with businesses in different ways (favorite/ newsletters /order /discover) with a user profile.
+
+Ordering and discovering Black-owned restaurants
+
+EatOkra (Website/Mobile): Directory of unclaimed restaurants to rate and explore. Provides API usage to order online. (Doordash, Uber, etc.)
+
+Our tech aims to interact with verified and bespoke business directories with various similar features.
+
+Online marketplace for home goods products created by black creators
+
+Post21 (Website): Similar to We Buy Black, focuses on modern design.
+
+Our tech interacts with local businesses as a platform to sell, discover, and stay in touch with the community. 
+
+Conclusion: Ultimately, our product differentiates itself by leveraging local organizations, businesses, and users to stimulate a networking platform with its selected stakeholders and new users.
+
+
+
+Test Table
+
+Test Table of Various Things To Test
+
+Test
+
+Description of Test
+
+Passing Requirements
+
+Pass/Fail
+
+Software App Function
+
+A pass/fail document will be created in order to verify whether certain features function properly.
+
+The application works with minimal bugs and functions as designed. 
+
+TBD
+
+Database Function
+
+A pass/fail document will be created in order to verify whether certain features function properly. (Certain functions needed: secure storage of data, updating the data as needed)
+
+The database works with no bugs and functions as designed. 
+
+TBD
+
+Compatibility with iOS and Android
+
+Determine if the mobile device is able to install and use the app.
+
+Not all phones need to comply. The app must be able to be downloaded and used successfully on 90% of current iOS and Android phones.
+
+TBD
+
+Skill Required to Navigate App
+
+Have users download and use the app. Administer a survey on the users of the app’s ease of use.
+
+In the survey, on a scale of 1 - 5, the average must be at least 3.5.
+
+(Where 1 = not easy to use, 5 = easy to use.)
+
+TBD
+
+Skill Required as Admin
+
+Administer a survey on admins managing the app (who may not be COSC-based) on how easy it is to navigate admin menus and update information as needed.
+
+In the survey, on a scale of 1 - 5, the average must be at least a 4.0 in ease of use.
+
+(Where 1 = not easy, 5 = very easy/intuitive.)
+
+TBD
+
+Modularity
+
+Input in a few test businesses of various types into the database. Check via the app what info it displays and how it displays it.
+
+The app has to be able to properly display the appropriate UI and accompanying information for any business type at least 90% of the time.
+
+TBD
+
+Maintaining Updated & Accurate Business / Organization Information
+
+Administer a survey on current users on how useful and accurate the users found the information posted about certain companies/businesses. (Usefulness and accuracy of info will be asked separately.)
+
+In the survey, on a scale of 1 - 5, the average must be at least 3.5 in usefulness and 4.0 in accuracy.
+
+(Where 1 = not useful, 5 = very useful for usefulness. For accuracy, 1 = not accurate, 5 = very accurate.)
+
+TBD
+
+Software Compatible with Future Software Updates
+
+Rollback iOS and Android devices to previous versions, and then run the app. Also, update iOS and Android devices to their latest software version, then run the app on it.
+
+The app must be compatible with future iOS and Android software updates.
+
+TBD
+
+
+
+Benchmarks and Test
+
+Software Function
+
+Cannot be verified at the moment, but upon development, a pass/fail test shall be administered.
+
+
+
+Database Function
+
+Cannot be verified at the moment, but upon development, a pass/fail test shall be administered.
+
+
+
+Compatibility with iOS and Android
+
+The app will be able to be installed and used on recent versions of iOS and Android phones.
+
+
+
+Skill Required to Navigate App
+
+The app will be easy to use for all users.
+
+
+
+Skill Required as Admin
+
+The related admin menus will be easy to use for the people reviewing business applications or updating info.
+
+
+
+Modularity
+
+The app must be modular enough such that the app can be used to host information on different business types and their different needs.
+
+
+
+Maintaining Updated & Accurate Business / Organization Information
+
+The information about other businesses/organizations will be kept up-to-date and accurate.
+
+
+
+Software Compatible with Future Software Updates
+
+The app will be developed in such a language/app that compatibility with both iOS and Android will be maintained.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Needs Hierarchy
+
+Table 4: Interpretation of Customer Responses Weighted In Importance From Least (1) to Most (5)
+
+
+
+#
+
+Need
+
+Importance
+
+1
+
+Ease of Use/Accessibility
+
+(User-friendly UI, Tools for special needs)
+
+5
+
+2
+
+Up to Date Information
+
+(Business details are updated frequently)
+
+4
+
+3
+
+Accuracy
+
+(Business details are correct)
+
+3
+
+4
+
+Interconnectivity
+
+(ability to function/connect with other app)
+
+3
+
+5
+
+Intraconnectivity
+
+(ability to interact/connect within app)
+
+3
+
+6
+
+Modularity
+
+(ability to host different business types)
+
+5
+
+7
+
+Platform Compatibility
+
+(usable on both Android and iOS)
+
+4
+
+8
+
+Theme Customization 
+
+(ability to customize color/theme)
+
+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Metrics
+
+ Table 5: Metrics Descriptions 
+
+
+
+Need Number
+
+Metric
+
+Importance
+
+Units
+
+Marginal Value
+
+Ideal Value
+
+1
+
+Skill Required for Operation
+
+5
+
+Technical Skill
+
+ Moderate
+
+Beginner
+
+7
+
+Android/IOS
+
+4
+
+Binary
+
+No
+
+Yes
+
+2
+
+Database updates
+
+4
+
+Updates Per Month
+
+Updated < Monthly
+
+Updated > Monthly
+
+6
+
+Framework compatibility for hosting different business types
+
+2
+
+% of Business types that can be hosted
+
+80% of Business types can be hosted
+
+100% business types can be hosted
+
+4
+
+Compatibility with different applications
+
+2
+
+# of compatible apps
+
+0
+
+5
+
+3
+
+Business related Information
+
+3
+
+% Accuracy of business information
+
+95% Accurate
+
+100% Accurate
+
+8
+
+Usage of different themes
+
+1
+
+% of users not using default themes
+
+50% of users using a not default theme
+
+90% of users not using a default them
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Final Concepts 
+
+Initial Concepts
+
+The initial concept of the mobile application technology discussed with the stakeholders BLK City Collective & MKE Black was: create a white-label technology that contains functionality of the existing MKE Black app, while adding new features as prioritized stretch goals. The stretch goals are defined by importance: favorite businesses for users and a total favorite count for each business page, a rating for each business, and any additional API support (Google Table, Uber, Doordash, etc) that the stakeholders deem necessary. The technology must have a self-hosted directory that is shared with a web application. It must also have a submission form for review and approval.
+
+Final Concepts
+
+The surveys solidified the input stakeholders have shared, and their vision for the application did not change much. Our end-users would like intuitive ease of use and consistent user/business profile information. This means saving favorite locations and keeping up to date with the latest business updates of those locations. Ultimately, our minimum viable product is to create white-label mobile technology replicating the functionality of the MKE Black app with a self-hosted directory (meaning all the information about a business is viewable from within the app) and submission forms. The survey clarified the stretch goals are important and is what the end user desires other than the MVP. Our final concept does not change much thankfully due to the insight available from the iteration of the current MKE Black app.
+
+Application Flowchart
+
+The mobile application will be built with similar tabs and functions to the current mobile application with additional functionality. Things that remain the same are the different tabs that are seen on the homepage of the current application. The new functionality includes the customer profiles and log in ability, the ability to create favorites, the ability to share on social media, the ability to message or contact businesses directly with feedback, the ability to comment on business pages and the ability to have a favorites list. Additionally, the app will have an admin login since the stakeholders wanted a page to manage the businesses or look at applications from new businesses. 
+
+
+
+
+
+Database Flowchart
+
+The database flowchart below describes a basic overview for the database architecture and setup. Both the website and the mobile app will be connected to one Google Firebase Realtime Database. Within the Firebase Realtime database, the data will have a few sections: Customer Data, Admin Data, and Business Data. The Customer Data section will have Authentication information (login info) as well as a favorites list per user. The admin data will have authentication info for each admin user and data for submitted applications. The business data will contain info about the businesses, such as about info to be displayed, images, etc. On the other hand Google Firebase Realtime databases also have an area to define database rules. These rules encompass security features as well as defining user authentication. 
+
+
+
+Figma Wireframe Designs
+
+Login page
+
+The logo is front and center, as it is the “cover” of the app that sets the color scheme.
+
+Email/username and password entry fields, along with “Forgot password” and “Log in”, are the first buttons to appear—offer a positive experience for the end user who might often update the app or get logged out for other reasons.
+
+Envelope/lock icons for email/password, respectively—visual indicators are important!
+
+“Create an account” is next—big, inviting that a new user can’t miss.
+
+The “or” between the login and account creation sections is important—without it, one might think to enter their information in the login email/password entry fields believing that they are in the process of creating their account, only to be met with more entry fiends after clicking “Create an account”. The “or” makes this separation clear.
+
+Don’t care about liking and reviewing? “Continue as guest” is an option, which is great for out-of-towners who simply want to grab a quick bite to eat.
+
+It’s the third option because it’s not ideal—we want to create frequent users. It’s not difficult to spot, however—we don’t want to prevent new users from finding the business they seek.
+
+Business tab
+
+The header introduces the user and creates a personalized user experience.
+
+This concept lists 6 tabs that are already featured on MKE Black, with the potential to add more in the future.
+
+Search bar up top ideally will allow the user to search both specific names, types, and keywords.
+
+Settings/more page (the “…”) option will be visible on every page.
+
+Can switch between businesses and events via a bottom slider.
+
+List of businesses
+
+Businesses can be filtered/sorted using the icon in the top left either alphabetically / by distance, or by specific items (like menu items for restaurants).
+
+The businesses appear in an evenly-spaced list with a name and a quick visual—clicking on a specific business allows the user to see the address, hours, and description.
+
+============================================================
+Deliverable 2 - Team 2.docx
+============================================================
+Deliverable 2: Customer Needs and Final Concepts
+
+
+
+
+
+
+
+
+
+
+
+
+
+Team Members:
+
+Andi Hennessey
+
+Anthony Om
+
+Chris Hampton
+
+Jake Petrie
+
+Jordan Wright
+
+Vicenzo Infusino
+
+
+
+
+
+
+
+Advisor:
+
+Nadiyah Johnson
+
+
+
+
+
+
+
+Date: 11/18/2022
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table of Contents
+
+Customer Needs and Final Concepts 						      3
+
+Data Collection								      4
+
+Customer Statements and Interpreted Needs 					      6
+
+Benchmarking									     12
+
+Needs Hierarchy								     13
+
+Metrics									     14
+
+Concepts									     15
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1 - CUSTOMER NEEDS AND FINAL CONCEPTS
+
+List Customers. Describe each Customer in depth.
+
+The team has identified four key stakeholders whose input has been taken into consideration for the construction of the BLK City Collective app. These stakeholders include young adults in the Milwaukee Community, users of the MKE Black application, businesses that are showcased on the MKE Black application (local small businesses), and local users who support the vision of MKE Black, but don’t have the application itself . The roles of these stakeholders are defined in the following subsections.
+
+Young adults in the Milwaukee community interested in local events/businesses 
+
+The main target group for the existing MKE Black website/application is for young adults in Milwaukee who have an interest in interacting with and supporting black owned local businesses. Similarly for the BLK City Collective website/application, young adults would be the ones who would primarily be utilizing it, so it is imperative that their needs and desires for an enhanced version of MKE Black directed towards other cities across the United States are met. 
+
+Users of the MKE Black Website/Application
+
+Users of the MKE Black website/application would provide a baseline of what they like about the current MKE Black website and also critiques of what they would like to see in an enhanced version of MKE Black. This stakeholder would provide information necessary to enhance the BLK City Collective’s website so that community members in other cities would utilize it. 
+
+Businesses that are showcased on the MKE Black Application
+
+Another main target group for the BLK City Collective app are the businesses that are showcased on the MKE Black application. These are business owners of locally owned Milwaukee businesses that are featured on MKE Black, and they would provide feedback on how they boost their businesses on the app. Furthermore, they can provide insight on what they would want to see in the enhanced BLK City Collective app in order to share their business information on the app. 
+
+Local Users who support the vision of MKE Black, but don’t have the application itself.
+
+Local users who support the vision of MKE Black, but don’t have the application itself are those people who just want to learn what Milwaukee has to offer and support the mission to empower underrepresented groups in the Milwaukee community. They can provide information about how they would bring representation to underrepresented groups and what they would like to see in the BLK City Collective app in order to become a user. 
+
+
+
+2 - DATA COLLECTION
+
+Share how you will be collecting data for customer insights and explain what the data collection process looks like for the product itself.
+
+Collecting Data Process: Customer Survey and Business Survey
+
+A group of individuals in the Milwaukee area were surveyed for their familiarity with the MKE Black application and website. Furthermore, after expressing their familiarity with MKE Black, the surveyed group was asked to describe what they would like to see in the enhanced website, BLK City Collective, a website not meant to replace MKE Black but to extend its goals to other communities outside of Milwaukee. The overall objective of this survey was to gain ideas of what potential customers desire for the BLK City Collective App as well as features and qualities necessary for it to succeed. In order to gain better insights on customer needs, potential customers identified which qualities (like interactivity, accuracy, diversity of businesses, etc) were most important in order for them to have the best experience with the website/app. In addition, the customers identified important features that they would like to see on the website such as the types of businesses promoted, the location of the business, and the products they provide. 
+
+For the business survey, a group of businesses in the Milwaukee area were surveyed for the type of service they provide and if they are currently featured on the MKE Black application and website. Then, the businesses were asked to identify important features that the BLK City Collective website should provide in order for them to utilize it to promote their businesses. Also, businesses provided feedback on what information the BLK City Collective website should provide to the customers about their businesses as well. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+3 - CUSTOMER STATEMENTS AND INTERPRETED NEEDS
+
+Example:
+
+Table 1: Interpretation of Customer Needs
+
+
+
+#
+
+Questions
+
+Interpreted Responses
+
+1
+
+Would you prefer to use the website or mobile app? (single response)
+
+
+
+
+
+Website: 22%
+
+App: 29.2%
+
+Both: 39%
+
+Neither 9.8%
+
+There is substantial interest in both the website and mobile app. Our project will need to produce well-developed products in both domains.
+
+2
+
+How would you like to interact with the businesses? If you have more specific interests, please type your answer in "Other". (multi response)
+
+
+
+
+
+Upvote/Like Button: 71.4%
+
+Comment to Business: 68.6%
+
+Favorites: 60%
+
+Direct messages: 57.1%
+
+Consumers would like to see an upvote button as a way to view the popularity of a certain business. Additionally, having the ability to leave comments for the businesses and sending direct messages may be important features.
+
+3
+
+What information would you like to see from the businesses featured on these applications? Examples:  information and facts about a company, to products they have, contact info, etc.
+
+
+
+
+
+Products they offer a link to the website and proximity of the business to me
+
+Consumers would like functionality that makes access to the business contact info more convenient. 
+
+
+
+A map with locations, and a filter for type of location(i.e. food , fashion, service, etc.)
+
+Consumers want the ability to see the location of businesses from a birds eye view. Consumers want to quickly be able to visually see how far they are from certain businesses and what routes they can take.
+
+
+
+Facts who their partners are their values
+
+Consumers want an overview of the businesses and their values. Consumers care about the mission of these businesses when deciding where to give their support. Businesses should have the ability to display a bio on the app/website.
+
+
+
+Product information, facts about charities being ran by the company for a cause, reviews about the company’s products and new developments.
+
+Consumers want to know what the business is offering and their mission overall. Consumers care about the small details when it comes to supporting local businesses. Understanding their focus, goals, and background is crucial for consumer decisions. Businesses should have the ability to display a bio on the app/website.
+
+
+
+Hours, menu/products, images
+
+Consumers want to see what the business offers and visually see what products/services are being offered. App/website should support external links and files from businesses. Consider things like a virtual menu or business website.
+
+4
+
+Would you like to share businesses or info that you see from this technology on other social media? (for example, sharing it on Twitter or Facebook)
+
+
+
+
+
+SMS, Instagram, Twitter, Facebook, Share button,Tiktok, Whatsapp 
+
+The app/website should have the ability to share business links on a variety of common platforms. 
+
+5
+
+What other features would you desire most from the app or website in order for you to use it?
+
+
+
+
+
+Black event meet ups
+
+Some consumers may want to utilize the app/website as a hub for everything related to Black social/business life in Milwaukee. Consider businesses, meetups, and possibly other events.
+
+
+
+Tech support for the business, links to their media platforms, suggestion boxes
+
+The app/website should display the contact information and social media handles or links for businesses. Additionally the app/website should give consumers the ability to send a message and/or leave a comment for businesses to review.
+
+
+
+Filtering by service and/or product
+
+Consumers want to be able to identify what products/services are being offered by each business. Furthermore, the app should allow consumers to quickly filter the businesses by their product/service/location category.
+
+
+
+Color and voice feature
+
+Consumers may like to see options to change theme color and to have an option to select a button to call a business.
+
+
+
+Pictures and where it is located
+
+Consumers want to visually see what products/services are being offered by these businesses. Additionally, they want to know where the businesses are located throughout Milwaukee
+
+
+
+Search for keyword
+
+Consumers want to easily find specific businesses or other business related info. App/website should have a search option.
+
+
+
+No ads
+
+Consumers do not like to be spammed with unwanted ads. Possible options to avoid ads would be to have a paid for app/website account.???? ASK TEAM!!
+
+6
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+
+
+Interactivity: Having the ability to interact with other community members or business owners.
+
+
+
+
+
+Average: 3.36
+
+The majority of consumers would like to be able to interact with the community and with the businesses. The app/website should incorporate functionality for comments/likes/messaging.
+
+7
+
+
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+
+
+Accessibility: How easy it is to find what you are looking for within the application or website
+
+
+
+
+
+Average: 4.61
+
+Consumers want ease of use. The app/website should have functionality to search/save specific businesses.
+
+8
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+
+
+Accuracy: Keeping the content on the app and website up to date with current businesses.
+
+
+
+
+
+Average: 4.69
+
+Consumers expect to see up-to-date information. Business info should be stored in a way that can be updated often and easily.
+
+9
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+
+
+Diversity of Businesses: There are many different types of businesses featured on the app and website. (retail, restaurants, clothing, etc)
+
+
+
+
+
+Average: 3.88
+
+The majority of consumers would like to see a list of diverse business types in the app/website. The app/website should be capable of hosting many different types of businesses.
+
+10
+
+Please rate how important the following options are for you to have the best experience with this technology. (1 - Not Important, 3 - Neutral, 5 - Very Important)
+
+
+
+Community Events: Different events that are being hosted across the city by local businesses are showcased on the website or app.
+
+
+
+
+
+
+
+Average: 3.86
+
+The majority of consumers would find it useful/preferred to find community events in the app/website. The app/website should have the ability to showcase local events.
+
+11
+
+What kind of communities/businesses would you like to see and connect with on the applications? (Like local owned retail, restaurants, service, etc)
+
+
+
+
+
+Black film communities
+
+Consumers would like to see more niche businesses featured on the app/website.
+
+
+
+Restaurants, clothing/fashion, Any communities or businesses, retail, small businesses and influences, non-profits, grocery, local own niche services, game places,broad business scope, local gifts, opportunities to volunteer
+
+Consumers would like to see a broad range of different businesses on the app/website. App/website should be modular enough to host a broad range of businesses. 
+
+
+
+Clothing/fashion
+
+Same as above.
+
+
+
+Auto services and book stores
+
+Same as above.
+
+12
+
+If the app/website contained coupons or discounts for these locally owned businesses, would that incentivize you to use the app more?
+
+
+
+
+
+Yes 91.9%
+
+No 8.1%
+
+Consumers would like to see extra incentive to use the app. App/website should include support for coupons/discounts
+
+
+
+Table 2: Interpretation of Business Needs - Businesses that are feature on MKE Black 
+
+
+
+#
+
+Questions
+
+Interpreted Responses
+
+1.
+
+Would you prefer to see your business featured on the website or mobile app? (single response)
+
+
+
+
+
+Website: 0%
+
+App: 0%
+
+Both: 100%
+
+Neither: 0%
+
+There is substantial interest in both the website and mobile app for businesses to boost their services. Our project will need to produce well-developed products in both domains.
+
+2
+
+Would you share exclusive offers with engaged users who contribute to your online presence? (Example: Subscribed to newsletter, left positive feedback, favorite your venues/services)
+
+
+
+
+
+Yes: 80%
+
+No: 0%
+
+Limited Amount: 20%
+
+There is substantial interest in businesses sharing exclusive offers like coupons, discounts, etc with customers who are engaged with their business. 
+
+3
+
+What information would you like featured about your business on the application/website?
+
+
+
+
+
+Background Stories - How the business came to be
+
+Location
+
+Type of Business - what they offer (food, retail, gift shop, etc)
+
+Specials
+
+It seems like most businesses want their location shared as well as background about the company and how it came to be. In addition, the type of business needs to be specified as well as any special offers.
+
+4
+
+How would you like to interact with the community members from the website or mobile app?
+
+
+
+
+
+
+
+Get contact info such as email, phone number, etc as well as their specific interests
+
+There seems to be interest with the businesses connecting with those community members who favor their services. 
+
+4 - BENCHMARKING          
+
+Table 3: Benchmarking against other Applications
+
+Feature
+
+Competitor App
+
+Our App
+
+Show local black businesses in IOS and android app
+
+Blapp(app)
+
+We will both be a app as well as a website
+
+Selling of products made by Black creators
+
+We buy Black (Website)
+
+Our app would will be more like a directory of local businesses to visit
+
+Showcase of local businesses in Milwaukee (Latino)
+
+Mercadomke (Website)
+
+MKE black will have the ability to interact with the businesses in different ways
+
+Ordering and discovering of Black owned restaurants
+
+EatOkra (Website/IOS)
+
+Our app/website will have the more ways to interact with the businesses besides ratings and reviews
+
+Online store of ordering feminine and homegoods products created by black creators
+
+Post21 (Website)
+
+Our app/website has the ability to interact with businesses 
+
+
+
+Table 4: Benchmarks and Descriptions
+
+Testing against consumer wants and shareholder desires
+
+
+
+Test
+
+Description 
+
+Passing Requirements 
+
+Pass/Fail
+
+Website Functionality 
+
+Website functionality and user experience
+
+The website functions as smoothly as possible with no visible errors
+
+TBD
+
+Database 
+
+Testing the database to determine if it functioning properly
+
+Users are able to update the database and information is usable to others
+
+TBD
+
+Website compatibility
+
+Website works on all platforms
+
+Website is available to visit on all major web browsers 
+
+TBD
+
+Website Usage
+
+Conducting surveys and performing analysis on website usage
+
+Consistent website traffic that justifies the maintenance costs
+
+TBD
+
+Modularity
+
+Ease of use when adapting the white label website to different communities. Administer surveys to communities that partake in the white label app.
+
+Survey results express that user experience while creating there version of the website was positive
+
+TBD
+
+
+
+5 - NEEDS HIERARCHY
+
+Below, we ranked the different needs which we surveyed from different users. We ranked them from least important (1) to most important (5).
+
+#
+
+Need
+
+Importance
+
+1
+
+Ease of Use/Accessibility
+
+5
+
+2
+
+Up to Date Information
+
+4
+
+3
+
+Accuracy
+
+4
+
+4
+
+Interconnectivity
+
+3
+
+5
+
+Intraconnectivity
+
+3
+
+6
+
+Modularity
+
+5
+
+7
+
+Platform Compatibility
+
+4
+
+8
+
+Theme Customization 
+
+1
+
+
+
+
+
+
+
+6 - METRICS
+
+In Table 5 we ranked our users’ needs from the needs hierarchy table. We ranked them at their marginal and ideal values for each metric that we came up with from our user (1 Being Most Needed - 7 Being Least).
+
+Table 5: Metrics Descriptions 
+
+
+
+Need Number
+
+Metric
+
+Importance
+
+Units
+
+Marginal Value
+
+Ideal Value
+
+1
+
+Skill Required for Operation
+
+5
+
+Technical Skill
+
+ Moderate
+
+Beginner
+
+7
+
+Desktop Website vs Mobile Website
+
+4
+
+Binary
+
+No
+
+Yes
+
+2
+
+Business Database updates
+
+4
+
+Updates Per Month
+
+Updated less than once per month
+
+Updated more than once per month
+
+6
+
+Framework compatibility for hosting different business types
+
+2
+
+% of Business types that can be hosted
+
+80% of Business types can be hosted
+
+100% business types can be hosted
+
+4
+
+Compatibility with different web applications (Uber, google maps, etc.)
+
+2
+
+# of compatible web app API's
+
+0
+
+5
+
+3
+
+Business related Information
+
+3
+
+% Accuracy of business information
+
+95% Accurate
+
+100% Accurate
+
+8
+
+Usage of different themes
+
+1
+
+% of users not using default themes
+
+50% of users using a not default theme
+
+90% of users not using a default them
+
+7 - CONCEPTS
+
+Describe the initial concept of the product. Share how the concept has evolved since gaining customer feedback and refining scope and approach.
+
+Example:
+
+Initial Concepts
+
+Our initial concept was to create a website that was a platform for cities to create their own version of MKE Black, for their cities called BLK City Collective. We aim to provide a platform that allows local communities to be intentional in their business support. The main goal of the BLK City Collective website is to promote minority-owned businesses as well as provide a tool for a locally based entity to take up the work of collecting information and promoting the database. In other words, the general template of the BLK City Collective app and website will be sold to a group for a city to boost underrepresented communities and their businesses. Once the enterprises get added to the app and website they will be able to interact with the users of the project. The goals defined by importance respectively are favorite businesses and display total favorite count and a rating category. The technology must have a self-hosted directory that is shared with an IOS/Android app. It must also have a submission form for review and approval.
+
+Final Concepts 
+
+Our final concept for BLK City Collective is a new mobile app and website inspired by MKE Black to help amplify their goals. BLK City Collective is not meant to replace MKE Black, but it is enhanced to reach other areas outside of Milwaukee, or other non-profits in other cities to perform a similar function that MKE Black has been able to do in Milwaukee. The technology is meant to provide business information to include type of business, location, as well as a bio of the business itself. After collecting feedback from various Milwaukee residents and businesses from the community, we determined that the most important aspects of our application are: ease of use/accessibility and up to date/accurate information. There is also a sizable demand for a way to interact with each business that could be in the form of a ranking system (5-star rating scale or upvote/downvote), public-facing comments, or communicating directly with the business itself. After interacting with the businesses, the businesses themselves would want a way to get the customers contact information like emails, phone numbers, etc. Finally, both the businesses and consumers expressed a demand for a sort of coupon/discount feature as a way to entice people to use our platform over the competitors. For example, a customer that favorited a specific business or left positive feedback, would be eligible to receive discounts for that business. 
+
+Database Flowchart (Below)
+
+The database flowchart describes the general overview for the database architecture. For both the website and the app it will use Google Firebase Realtime Database. The Firebase Realtime database data will have certain sections such as Customer Data, Admin Data, and Business Data. The Customer Data section will have authentication information and favorites list per user. The admin data will have authentication information for each admin user and data for submitted applications. The business data will contain information about the businesses. There is also an area to define database rules in Firebase which will include security features and defining user authentication.
+
+Figure 1: Flowchart Database Access
+
+Website Flowchart (Below)
+
+The website is built with a customer login and an admin login in. The customer log in will allow the user to create an account or sign up. After the user will be redirected to the home page which allows the user to either view their profile or click on a tab they would like to view. Some of the functionalities that will be included are customer profiles, login ability, create favorites, share on social media, message businesses directly with feedback, comment on business pages, and to have a favorites list. The admin login will allow the stakeholders to manage the business and check to see if new businesses have applied. 
+
+
+
+Figure 2: Flowchart of Website Functionality
+
+
+
+
+
+
+
+
+
+
+
+
+
+	Above is an example of the two login pages that would appear when you first go to the website. One button redirects the user to their appropriate login. There's a login page for businesses and a login page for general users/customers.
+
+
+
+The above image is the home page. The home page is what the user sees when they login and open the MKE Black Website. Attached above we have a sample demo of our home page with all the interactivity shown in the wireframe. The user is given the option to visit any of the seven pages by pressing the respective buttons displayed on the screen since it contains a banner which will link the user to other parts of the site. It also is showcasing some of the businesses on the featured businesses section. 
+
+
+
+
+
+	Here is a draft of the type of content that could appear on a page for any given business. There's room for images, a business description, user reviews of the business, and a way to get in contact with the business itself. The contact information section would also include the location of the business.
+
+============================================================
+Deliverable 3_ Business Plan Team 2.docx
+============================================================
+MKE Black - Website Team
+
+Business Plan
+
+					
+
+
+
+Team Members:
+
+Andi Hennessey
+
+Anthony Om
+
+Chris Hampton
+
+Jake Petrie
+
+Jordan Wright
+
+Vicenzo Infusino
+
+					
+
+Advisor:
+
+Nadiyah Johnson
+
+					
+
+Date: December 16th 2022
+
+					
+
+
+
+
+
+
+
+				
+
+			
+
+	
+
+	
+
+		
+
+Table of Contents
+
+					
+
+1. Product and Customer Definition ....................................................................................4
+
+Introduction to Product ..........................................................................................................4
+
+Description of Problem ..........................................................................................................4 
+
+Primary Customer .................................................................................................................5 
+
+User Story .............................................................................................................................6 
+
+Stakeholders .........................................................................................................................7
+
+Key Performance Indicators (KPIs) .......................................................................................6
+
+Interoperability.......................................................................................................................11 
+
+Uptime requirements............................................................................................................. 12		
+
+2. Market Survey ...................................................................................................................13
+
+Geographic Region ...............................................................................................................13 
+
+Market Size Estimation..........................................................................................................13
+
+ Competition...........................................................................................................................13 
+
+Value Proposition ..................................................................................................................14
+
+Broad Market Risks...............................................................................................................15 
+
+Product Risks........................................................................................................................	16		
+
+3. Sales and Service Models ................................................................................................16
+
+Awareness, Advertising and Branding ...................................................................................16
+
+Sales Channels and Strategy ................................................................................................17 
+
+Feature structuring by license key .........................................................................................17 
+
+Deployment........................................................................................................................... 18
+
+Training.................................................................................................................................19
+
+Monitoring and Service........................................................................................................19
+
+					
+
+4. Legal ................................................................................................................................20
+
+Patent Infringement and Filing.............................................................................................20 
+
+
+
+License Agreement .............................................................................................................21 
+
+
+
+Regulatory and Quality System ...........................................................................................21
+
+					
+
+5. Financial Justification .....................................................................................................21
+
+Development Cost...............................................................................................................21 
+
+Financial Rollup...................................................................................................................22
+
+Product and Customer Definition
+
+Introduction to Product
+
+<Describe the essence of what your product will do. This is your “elevator pitch” - you have 1 minute. 2 or 3 brief, to the point, sentences.> 
+
+BLK City Collective is a new website inspired by MKE Black to help amplify their goals of increasing visibility to small and local black-owned businesses to promote investment, appreciation, and awareness for underrepresented communities outside of Milwaukee; however, it is not designed to replace MKE Black, but enhanced to reach other areas outside of Milwaukee to perform a similar function that MKE Black has done here in Milwaukee. Our product is to create a website to host BLK City Collective for the MKE Black Company, so they can distribute it as a framework to other cities across the US to bring representation of local minority owned businesses in each city. The BLK City Collective website will provide business information such as type of business, location, products, as well as the bio of the business itself, and it will also provide a site for community members to locate and interact with specific minority owned businesses in their respective geographic region. 
+
+
+
+Description of Problem
+
+<Describe what problem your product will solve. 1 to 2 paragraphs.> 
+
+Across the world, there seems to be a glaring discrepancy of representation of people who typically are underrepresented in communities compared to those who are not. Furthermore, it is very hard for communities made up of black people, women, labor supporters, etc, to support themselves without access to the knowledge of where their colleagues are and a means of connection. The problem lies within these underrepresented groups because there is a lack of public voice, and a lack of understanding of how to help these segmented groups. The vision of BLK City Collective is to create communities that elevate traditionally underrepresented voices up to have representation in their respective communities. This product, the BLK City Collective website, will allow members of underrepresented communities to find these minority owned businesses and support them intentionally. BLK City Collective’s overall mission is to “Put the UNITY back in Community”, and its focus is to Build, Leverage, and Keep (BLK) interaction between minority owned (specifically Black owned) businesses and their local communities. 
+
+
+
+Primary Customer
+
+<Describe your primary (or Target) customer. 1 to 2 paragraphs.> 
+
+The primary customers for BLK City Collective website is aimed towards young adults within underrepresented communities as well as minority or Black owned businesses that would like to have themselves advertised on the BLK City Collective website. Young adults who are interested in learning about and interacting with Black owned businesses will use this product to gain better insight on what the Black owned businesses are like in the community they’re currently in, and how to support them. For the current MKE Black application and website, young adults are the main target group, and similarly for the BLK City Collective website/application, young adults would be the ones who would primarily be utilizing it, so it is imperative that their needs and desires for an enhanced version of MKE Black directed towards other cities across the United States are met. 
+
+In addition, black owned businesses would utilize the website as a means to advertise themselves and their businesses to users of the website. Businesses would be the major backbone of the website because in order for the website to be successful in boosting an inclusive community and creating representation, black owned businesses would need to be featured on the website. Without businesses to be featured on the BLK City Collective website, young adult users would not be able to interact with businesses and discover Black owned services. By creating an account for their business, businesses would be able to interact with community members around them as well as boost their services that they offer. 
+
+
+
+User Story(s)
+
+<Tell a short story about a fictitious user and how, when, and why they will use your product and what changes. Do not go overboard. Keep this to 1 or 2 paragraphs, one half of a page.>
+
+End User(Business):
+
+Jacob is a 32 year old black business owner that started his own musical instrument business in Jackson, Mississippi. The business itself specializes in the selling, and repairing of a variety of musical instruments. From woodwind instruments to big brass instruments, but Jacob’s business also offers African Drumming lessons for those that are interested. The problem he has is advertising his business to the local community, and his current advertising methods aren’t leaving much of an impact in the community. Flyers, signs, and a small social media presence fail to bring in enough customers to turn a proper profit. What Jacob would like is a platform where he could post information about his business and location, and share that to all of those in the local community that use this same web platform.
+
+End User (Customer):
+
+Jalah is a 25 year old recent college graduate from Loyola Chicago, and she recently moved to Atlanta, Georgia after pursuing a full-time job opportunity. She’s never visited Atlanta before, and she’s been pretty homesick as of late since her family lives in Chicago, and she has had a hard time making new friends within her community. Also, since her parents are immigrants from Nigeria, she misses their homestyle Nigerian cooking. Jalah has been seeking a way to connect with fellow community members as well as finding local Nigerian restaurants that serve authentic food. In addition, Jalah believes that apps like Yelp and Tripadvisor are too generic for her, and she desires to use a website that is more locally and community focused. Overall, her goal is to utilize a website that will help connect her with the Atlanta community around her, and find restaurants and other businesses that provide Nigerian food and products to connect her with home. 
+
+Stakeholders
+
+<In a bulleted list, identify ALL stakeholders of a product and give a short description of each stakeholder (one sentence). Include your primary customer in this list. Examples include key customer roles, customer finance, sales staff, deployment staff, service staff, accounting staff,  etc. Bullet list of 2 to 7 items, each followed with a brief definition. > 
+
+Consumers/Users of the BLK City Collective Website - Specifically Young Adults
+
+These young adult consumers are the primary user and target group of the BLK City Collective Website. These stakeholders will be the ones that use the BLK City Collective Website the most to find Black owned-businesses/events, and to learn more about Black owned businesses and events in the community. 
+
+Business Owners that would like to be featured on BLK City Collective Website
+
+The business owners will be the ones applying to the BLK City Collective website/application to have their business featured. They will be the ones responsible for providing accurate information about their business for the BLK City Collective website, and the most important stakeholder for this website to succeed. Without any businesses to feature, this website will not succeed. 
+
+MKE Black Company Executives
+
+The MKE Black Company Executives will be the ones in charge of selling the BLK City Collective to other cities, and will be the ones marketing the BLK City Collective website. 
+
+People in charge of maintaining the shared database for BLK City Collective
+
+These people will be hired by BLK City collective to help maintain the information in the shared database that the app and websites will access. They are responsible for keeping the database secure and up to date with accurate information. 
+
+Us - as Software Developers
+
+We as Software Developers are responsible for designing the front and back end of the website. We are responsible for working with the MKE Black Executives to make sure that BLK City Collective website is up to their standards. Also, we have to implement user feedback, updating, and changing the UI to better the user experience.
+
+
+
+Key Performance Indicators (KPI) 
+
+<For each Stakeholder, describe the 1 to 5 features that your product is absolutely required to fulfill that stakeholder’s needs to justify purchasing your product. If you miss your KPIs, your product will be a failure. KPIs are usually presented as a bulleted list per Stakeholder as short phrases. This section is very important! After your document is complete, you should print out your KPIs and hang them on your wall, really. Each Stakeholder becomes a separate subsection with KPIs. Each Stakeholder should have a bullet list of 1 to 5 features with a brief  description.>
+
+BLK City Collective - The Businesses Featured and Young Adult Users 
+
+A functional white labeled website 
+
+This is a website that can be populated with info from a database. In order for the businesses and young adult users to utilize this product, the website should be able to populate with different businesses (along with their accurate information), and allow interaction between a consumer and a business. It also should be user friendly, so young adults are able to discover local community events and businesses. The website should contain a login page, one for users and one for businesses, so that businesses can interact with customers who favorite their business (and see if their business information is accurate), and customers can interact with businesses as well. The website should contain all of the features of the current MKE Black Website like a list of all the businesses and type of business, location services of all the businesses, and a way for businesses to submit their information for review. 
+
+Database
+
+The database should be shared between the mobile application and the website. It should be kept up to date with the businesses (not including those that don’t exist) and secure. 
+
+Documentation 
+
+Documentation on how to use the website and database will be provided. 
+
+Code
+
+Source code will also be provided for this website and database as well. 
+
+MKE Black Company Executives 
+
+A website  
+
+For the MKE Black Company Executives, they would desire the BLK City Collectie website to contain all of the features of the current MKE Black Website like a list of all the businesses and type of business, location services of all the businesses, and a way for businesses to submit their information for review. 
+
+Database
+
+The database should be shared between the mobile application and the website. It should be kept up to date with the businesses (not including those that don’t exist) and secure. The MKE Black Executives will have to approve of this database and make sure it is functioning. 
+
+Documentation 
+
+We will provide documentation on how to use the website and database. It will be reviewed by the MKE Black Executives since they are the ones selling BLK City Collective. 
+
+Code
+
+Source code will also be provided for this website and database as well. It will also be reviewed by the MKE Black Executives since they are the ones selling BLK City Collective.
+
+People in charge of maintaining the shared database for BLK City Collective
+
+Database
+
+The database should be shared between the mobile application and the website and be easy to access. It should be able to be maintained, and updated easily.  
+
+Documentation
+
+Documentation about the database will be provided to those who are operating it. 
+
+Interoperability 
+
+<Is your product stand alone or does it need to be integrated with other systems to be  functional? Explain. Do standards exist for this integration? If so, which ones? Are they mature  or developing standards? Interoperability usually becomes a “Risk” later. 1-2 sentences or explain that it does not apply and why.> 
+
+The web application will work hand in hand with its mobile application counterpart as they will utilize a shared database for storing information about its users and the businesses. The information that will be stored is information about the business itself, what their services are, and their location as well as the user’s information. Ideally, the only standard we have is to make sure that the information is displayed in the same manner across both the mobile app and the web app.
+
+
+
+Uptime requirements 
+
+<Some products are “mission critical”, including some healthcare, airline, and other  transportation applications. As such, there may be a “100% uptime” requirement. This is  achieved through extensive software testing and redundant hardware failover systems. This will  drive software selections such as database capabilities and hardware specifications (e.g.,  RAID). Is your product mission critical? Why or why not? If your software crashes, what is the  reboot process? If your product is 98% reliable, how many hours a year is it down? Very  explicitly answer the question “Is 98% reliability acceptable to your primary customer?” Or, is  this a simple app that you can just reboot when necessary? 1 sentence to 1 paragraph.>
+
+
+
+Due to the web application serving as more of a resource and info center for black owned businesses, the web application is not seen as “Mission critical”. The uptime for the web application may vary depending on where the white labeled product is being applied to, but at minimum we expect at least an uptime of 96% so that users and businesses can interact with each other. It’s important to keep both the website and the business’ information up to date. For that reason, we expect some downtime is needed for that regard to make sure all the businesses are still active.
+
+
+
+Market Survey 
+
+Geographic Region 
+
+<Where do you plan to sell or deploy this product? U.S.? Wisconsin? Globabally? Developing  countries in Africa? All developing countries? 1- 2 sentences.> 
+
+Our original plan is to deploy this product in major cities across the United States. 
+
+
+
+Market Size Estimation
+
+<Quantify, quantify, quantify. Quantify and refine. The buzz right now is “Total Addressable Market”. In a large company, this section is usually written by someone in marketing, but,  today, that is you also. What is the size of your broad market? Eg. If this is a healthcare  product, how much is spent on healthcare globally every year? In the U.S.? If this is a  radiology product, how much is spent in the radiology subcomponent? How many hospitals are  there in the U.S.? how many radiology departments? How many radiologists? How many CT  scanners? Google is your friend. Be sure to REFERENCE YOUR SOURCES properly at the  bottom of this page. Keep this section to 2-5 sentences or bullets.> 
+
+
+
+BLK City collective expects at least 10K users to utilize the website. It’s also expected for this market size to grow once this white labeled website is adapted and implemented in areas across the US. The MKE Black Executives expect a future growth of 20 organizations (cities) across the US with at least 10,000 users in each city which includes businesses and consumers. 
+
+
+
+Competition
+
+<What products compete with your product? Make a list of companies and product names, if  applicable, perhaps as a table. What differentiates your product from your competitors? This is  important. 2-3 sentences.>
+
+There are other products that will compete with the BLK City Collective website. What makes us different is that we will be an app as well as a website, it will be more like a directory of local businesses to visit and it will have other ways to interact with the businesses besides likes and ratings. Also, most importantly the BLK City Collective website will be more community centered and run by local organizations instead of a global database. It will feature a way for businesses to interact with the consumers as well as a way for the consumers to interact with a business (i.e. favoriting a business)
+
+
+
+Competitors
+
+Blapp(app)
+
+We Buy Black (Website)
+
+Mercadomke (Website)
+
+EatOkra (Website/IOS)
+
+Post21 (Website)
+
+Value Proposition
+
+<In one sentence, concisely state the primary advantage(s) of your product over that of your  competitors. If this is an open source bug fix project, concisely state the primary value which  your bug fixes will bring to users. 1 sentence> 
+
+Compared to other competitors, our product specializes in bringing a wide variety of consumers and businesses together in their respective communities, especially through the use of the favoriting and direct message system built into the website. 
+
+
+
+Broad Market Risks
+
+<Are there very broad changes in technology possible (think of the extinction of the phone  landline) which would obsolete your product? When? What could derail the sellability of your  product? These are often called “Market Disruptors” or “Market Forecasts”. These usually come in two flavors: “Technology Disruptors” (e.g., AI or 5G) or “Economic Disruptors” (e.g., possibility of a recession in 2020, trade wars). Find one of these lists from a “think tank” or other source, re-create the list here and describe how each risk will or will not affect your product. Think  Google query. This list does not need to be complete. The intent is to grasp the concept. However, you must accurately reference your list. Because this section does not need to be complete, limit this section to 5 bullets/topics as examples with a very brief description of  whether or not this may affect your product, perhaps as a table. > 
+
+
+
+Topic
+
+Impact
+
+Brief Reasoning
+
+Economic Recession
+
+3
+
+Patrons will not have as much disposable income therefore negatively affecting the businesses this website supports.
+
+Portability Trend
+
+4
+
+There’s a trend of making things more portable and more convenient to use. However, this trend can be circumvented thanks to the development of the app version of our product. For the website however, it can be problematic since most people using their phones when looking for restaurants
+
+Application Trend
+
+3
+
+There is also a trend of more people tending to utilize an app over a website since it is easier to navigate, and it can be run on smaller/more portable devices. This is a risk because the website might not be as widely used as the application, but it will still be important.
+
+COVID-19 Pandemic
+
+2
+
+Since the pandemic, remote work and community involvement has been at a lower rate. We are now coming out of a pandemic, and more people are starting to go out to restaurants, bars, etc, but if another wave of COVID occurred, many users might not go out to support local community events or businesses.
+
+
+
+Impact risk 1(lowest) - 5(highest)
+
+
+
+Product Risks
+
+<Can you think of any other risk which might directly affect this product? > 
+
+
+
+With any product there is a possibility of risks. Some of the risks that might directly affect this product include data security issues, interconnectivity issues, possible funding for database storage, etc. Another risk is if the stakeholders decide to upgrade or change the database, users' information can get lost in the process, and if no local entity is willing to take on the responsibility of running the database for that specific city. Finally, this product might have the risk of being overshadowed by its already existing competitors. 
+
+
+
+Sales and Service Models
+
+Awareness, Advertising, and Branding
+
+<How will your potential customers be made aware of your new product? Will you advertise? If  so, where might you advertise? How? Do you need demo sw licenses or coordinated demo data sets? Demo account login? How might you train your sales people? Branding - what might you do to keep the product consistently recognizable? Logo? RBG Color scheme? Think of Starbucks or Apple as branding examples. Limit this section to 3-6 bullet points.> 
+
+Social Media like Instagram, Facebook, etc
+
+Direct Peer to Peer Conversation between community members
+
+Partnerships with other Local Organizations to expand base reach
+
+Non-profit webinars with public relation focus points
+
+Logo: 
+
+Sales Strategy and Channels
+
+<There are two primary sales strategies, with many, many variations. The first is business-to business, or B2B. This is your company selling to another company who typically has direct  sales people. B2B usually involves far fewer business customers, but each of these customers  manage their own sales reps, set sales volumes, incentives, and commissions. These  secondary companies are often called sales channels. The second strategy is business-to customer, or B2C. This is also called direct sales or retail. It may be storefront (brick and  mortar) or web-based. These transactions are typically higher volume, lower tech/lower touch  sales. Even if it is open source, describe which sales model may better suit your product and why. 1-2  sentences. >
+
+BLK City Collective plans to use business-to-business sales channels and a direct sales campaign. The direct sales campaign includes cold calling and reaching out to other communities, organizations, and locations that would benefit from our product the most. When handling business-to-business sales, they plan to do demonstrations of the product to show the website’s pricing, features, and functions. Also, this includes explaining how the businesses will benefit from using the website in terms of increasing their user base, reach, and productivity. They also want to turn to rich media consulting groups to conduct surveys to help spread word about our product far and wide. Overall, BLK City Collective plans to utilize the MKE Black’s application user base, and use this as a source point on how to sell this to other local entities of different cities. 
+
+
+
+Feature structuring by license key
+
+<In other words, how does your sales department want to be able to structure contacts for  pricing? This is critical to be able to hit certain price points> 
+
+<How will your customers want to pick and choose features, if applicable? Will they always  want to pay for all features (single bundle)? For complex systems, there is almost always a  core platform key and then license keys for features. Will there be data volume, transaction  
+
+limit, or per user (1-10 concurrent users or 10 accounts?) licenses? Do you need multiple  license keys or a single license? 1-3 sentences or bullets. > 
+
+Licensing will be conducted using a Saas model style of sku’s 1 and 3 year subscription models with language for renewals and a percentage of increase based on increased cost to host the instance. 
+
+Standard and Advanced licensing connected to features to be unlocked within the applications API’s or services included.  
+
+Support will be a line item to produce revenue and also support the platform. 
+
+
+
+Deployment
+
+<How will your product be deployed and where can it be installed? Onsite local (on prem) or  can it be in the cloud? Will it be a container on a vm? Who will deploy it - your company or the  customer? Do you plan to write an installation guide? Will site specific configuration  parameters be required? 2-5 sentences/bullets.> 
+
+BLK City Collective plans to have the website and app be 100% cloud hosted. They will hire some technological personnel or partners to host and manage these white labeled products through Cloud services. The MKE Black executives will be the group to deploy BLK City Collective, and a guide for the code, the database design, and the product itself will be written. 
+
+
+
+Training
+
+<Who will train your customers? Do you need to train other Stakeholders as well as your  primary customer? Will you send trainers on site? Remote training over video conferencing?  Webinars stored on YouTube? A “Khan Academy” or “TED Talk” approach? Will you need  special training accounts or data sets? Do you envision written training materials? 1-3 sentences.> 
+
+When we turn over the material we have to the MKE Black Executives, we will leave various remote training tools, materials, and youtube videos that we used to help make the product. Documentation on how to use the website and database will be provided as well as the source code in which we used to design the website. A clickable demo and other presentations shall be left behind to serve as a reference point for how the website should look and function. 
+
+
+
+Monitoring and Service 
+
+<Will your product need to be monitored real-time? Will it notify a local administrator or your  service team when conditions begin to reach limits (e.g., disk space low, CPU utilization high,  backlog processing events over high water mark, etc.). Will there be a centralized error log repository and standardized error log format and code system (YES!)? Will there be service  tools required to be developed to clean up a database or restart services? 1 paragraph  describing service and tool strategy.>
+
+The white label product will not be monitored in real time. The website will be updated on an as needed basis as more general feedback is received from both the customers and businesses that make use of the product. Also, the MKE Black executives claimed that BLK City Collective would be working with other tech firms to support, manage, and update the website’s firmware and UI/UX. This partnering with local technology firms for support and service related to technical updates/upgrades of firmware and API’s.
+
+
+
+Legal
+
+Patent infringement and Filing 
+
+<Have you run a patent check to ensure that there is no patent infringement? While a  true/complete patent check is not required, describe how to run a cursory patent check. Did you find anything which may be relevant? 2-3 sentences. Is there a business opportunity to file a patent with this product? Defensive patents can be  very valuable in the event of being sued. Offensive patents can increase the value of the  company, as a matter of fact it can be the value of a company. “IP play” Will you attempt to file for a patent? 1-2 sentences> 
+
+Currently, there doesn’t seem to be a patent infringement. A cursory patent check was searched for by searching for keywords which differentiate our product with something generic such as google maps. The ‘Patent public search: USPTO’ (2) website was used to search for technology that might be similar. Cursory results returned nothing similar that might infringe on a patent. BLK City Collective’s technology requires a patent to protect its ability to maintain its exclusive white-labeled tech. For our purposes, offensive patent strategy would be beneficial as selling the rights for our technology is vital. Due to cost, a defensive strategy would most likely be the starting point. According to the MKE Black Executives, yes, there will be a desire to add a legal terms and conditions response page for the website. They plan to work with the law and entrepreneurship clinic at Marquette to develop this future response. The legal team and MKE Black executives will handle this portion. 
+
+License Agreement
+
+<There are the terms and conditions of a license, usually written by a team of lawyers. If this is  an open source product, exactly which Open Source license will you use? Where will this  License Agreement be stored? In Github? Include a URL link. 1-2 sentence.> 
+
+BLK City Collective requires legal terms and conditions, in order to state how we will be using and storing people's data. This will be done by the legal team for BLK City Collective. Further research to cover what is needed in the Terms and Conditions will also be done by the legal team of BLK City Collective. It is our idea that BLK City Collective technology will not be open source.
+
+
+
+Regulatory and Quality System
+
+<Do you believe your product will be subject to regulatory oversight? E.g., FDA, EU CE  Marking, ISO 9001, etc. 1 - 2 sentences> 
+
+As we know, the BLK City Collective website that we’re making does not require the aid of a regulatory or quality system. Simply put, there’s nothing that needs heavy regulation as the website servers mainly to inform the customers users about black owned businesses while providing business users a platform to effectively advertise themselves. The main oversight would be to comply with IEEE coding standards.
+
+
+
+Financial Justification
+
+Deployment Cost
+
+<Estimate the ballpark number of hours to implement, assume the cost of a developer at  $20/hour and the cost of any subject matter expert, if any needed, at $150/hour. After calculating these costs, add 80% to each figure to compensate for the company incurred cost of  benefits (health insurance, vision/dental, Soc Sec taxes, etc.). Do you need to purchase any  hardware? Do you need any cloud computing storage or processing? List all expenses. Any  other expenses you foresee? Include a column in the table specifying where the costs are solid  or estimates. Keep to 1 table with an explanatory paragraph following.> 
+
+Expense
+
+Solid/Estimated Cost
+
+Cost (Dollars)
+
+Developer
+
+Solid
+
+$24,192
+
+Patent cost
+
+Estimated
+
+$3,000 - $6,000 dependent on the strategy
+
+Firebase Database 
+
+Estimated
+
+$10.65/month (For Milwaukee Market) or $127.50 per year
+
+TOTAL
+
+—
+
+Around $27,500
+
+
+
+Developer cost: 6 developers working 8 hours a week for 14 weeks at $20/hour is $13,440 with an additional 80% overhead cost on top = $24,192.
+
+Patent cost varies - dependent on strategy
+
+The database usage is pay as you go and is very flexible. Using higher than expected values for the Milwaukee market, Google Firebase estimates a figure of less than $11 per month.	
+
+BLK City Collective has no budget for this regarding development allocated at this time.
+
+
+
+Financial Rollup
+
+<How much revenue do you need to be a viable company? The number 3x development cost  is often used in software products to pay for sales, service, etc. Estimate the number of sales in year 1, year 2, and year 3 as a % of total addressable market Multiply number of sales by estimated license fee(or your pricing model). Add in any additional fees (e.g., service, other software licenses?) Can you make money? If this product is intended to be open source, estimate how much funding you will need to  generate (which will just be considered a loss). Realize that companies will often create and  “donate” open source software for other reasons, often adoption or promotion. Also, consider whether or not revenue could be generated from your product which is not  software license based, e.g., consulting, installation, training, maintenance, etc. 1-2 paragraphs  total and/or a table to illustrate the above information.> 
+
+To start off, there is an expected 10K users upgrade from the MKE Black app. With other communities, organizations, and locations this number will grow. Future growth goals of 20 organizations with approximately 10k each, totalling 200K in future estimated users of the platform. Currently a flat pay model is the default. However, for larger markets such as Chicago, it would be wise to invoke a pay as you go model. Conservative estimates to turn a profit according to our Development costs would need to total more than $2,276.65 per month in an annual calendar to even the book during the first year. Considering maintenance costs, the development cost for the following year will be much lower. Estimated net revenue goal of $3,000/month would profit in the first year. The licensing and implementation pricing is yet to be determined, but if each organization was charged $500 dollars per month, it would take 6 organizations to profit the first year. Some additional charges such as maintenance, training, and other administrative costs could also be passed onto the organization as well. In the Midwest, there's a large amount of cities that could have multiple organizations within it. The midwest has 45 cities that have at least 115K people within it. During the first year, if we make a low estimate of 2 potential organizations per city to sell our whitelabeled tech, we have the potential to reach a large portion of these. To turn a profit off the initial investment in the first year, 6% of the midwestern market needs to be reached. In the second year, to reach the eventual goal of 20 organizations, 22% of the midwestern needs to be addressed. By the third year, further expansion into other US regions will considerably enlarge feasible target cities.	
+
+References:
+
+Nelson, R. (2019, March). 5-Year market forecast: App store and google play spending will grow 120% to reach $156 billion by 2023. Sensor Tower - Market-Leading Digital & Mobile Intelligence. Retrieved December 15, 2022, from https://sensortower.com/blog/sensor-tower-app-market-forecast-2023
+
+Patent public search: USPTO - extended window. USPTO. (n.d.). Retrieved December 15, 2022, from https://ppubs.uspto.gov/pubwebapp/

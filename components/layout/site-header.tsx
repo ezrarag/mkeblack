@@ -54,6 +54,7 @@ export function SiteHeader() {
         { href: "/admin", label: "Admin workspace" },
         { href: "/admin/homepage", label: "Homepage editor" },
         { href: "/admin/businesses", label: "Business manager" },
+        { href: "/admin/claims", label: "Pending claims" },
         { href: "/admin/import", label: "Import spreadsheet" },
         { href: "/admin/team", label: "Team access" },
       ]
