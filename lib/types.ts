@@ -19,6 +19,7 @@ export type DailyHours = {
 export type BusinessHours = Record<DayKey, DailyHours>;
 
 export type BusinessSource = "import" | "manual" | "self-submitted";
+export type HoursSource = "manual" | "google_places" | "imported_text";
 
 export type ClaimInviteStatus = "not_invited" | "pending" | "claimed";
 
@@ -38,6 +39,34 @@ export type BusinessTag = {
   adminOnly: boolean;
   createdAt: Date | null;
   usageCount: number;
+};
+
+export type BusinessTeamMember = {
+  id: string;
+  uid: string | null;
+  name: string;
+  role: string;
+  bio: string;
+  photoUrl: string;
+  linkedinUrl: string;
+  instagramUrl: string;
+  order: number;
+  isOwner: boolean;
+  visible: boolean;
+  addedAt: Date | null;
+};
+
+export type BusinessTeamMemberFormValues = {
+  uid: string;
+  name: string;
+  role: string;
+  bio: string;
+  photoUrl: string;
+  linkedinUrl: string;
+  instagramUrl: string;
+  order: number;
+  isOwner: boolean;
+  visible: boolean;
 };
 
 export type HomepageLink = {
@@ -176,9 +205,13 @@ export type Business = {
   neighborhood: string;
   tags: string[];
   hours: BusinessHours;
+  hoursSource: HoursSource | null;
+  hoursSkipped: boolean;
+  hoursLastSynced: Date | null;
   photos: string[];
   ownerUid: string | null;
   active: boolean;
+  hasTeamProfiles: boolean;
   source: BusinessSource;
   importedAt: Date | null;
   claimInviteStatus: ClaimInviteStatus;
@@ -252,4 +285,37 @@ export type BusinessClaimInvite = {
   createdAt: Date | null;
   claimedAt: Date | null;
   claimedByUid: string | null;
+};
+
+export type AdminHoursSyncResultStatus =
+  | "found"
+  | "not_found"
+  | "approved"
+  | "skipped"
+  | "error";
+
+export type AdminHoursSyncResult = {
+  businessId: string;
+  businessName: string;
+  address: string;
+  placeId: string | null;
+  matchedName: string;
+  proposedHours: BusinessHours | null;
+  status: AdminHoursSyncResultStatus;
+  message: string;
+  reviewedAt: Date | null;
+};
+
+export type AdminSyncSessionStatus = "running" | "completed" | "failed";
+
+export type AdminSyncSession = {
+  id: string;
+  status: AdminSyncSessionStatus;
+  processed: number;
+  total: number;
+  candidateBusinessIds: string[];
+  results: AdminHoursSyncResult[];
+  startedAt: Date | null;
+  updatedAt: Date | null;
+  lastBatchAt: Date | null;
 };

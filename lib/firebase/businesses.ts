@@ -6,6 +6,7 @@ import {
   createBusinessDuplicateKey,
   normalizeBusinessRecord
 } from "@/lib/businesses";
+import { hasNoStructuredHours } from "@/lib/hours-sync";
 import {
   getFirebaseDb,
   getFirebaseStorage,
@@ -195,7 +196,10 @@ export async function saveBusiness(
     {
       id: businessId,
       ...payload,
-      ownerUid: payload.ownerUid || null
+      ownerUid: payload.ownerUid || null,
+      hoursSource: hasNoStructuredHours(payload.hours) ? null : "manual",
+      hoursSkipped: false,
+      hoursLastSynced: firestoreModule.serverTimestamp()
     },
     { merge: true }
   );
@@ -393,9 +397,13 @@ export async function importBusinesses(
       neighborhood,
       tags,
       hours: createClosedBusinessHours(),
+      hoursSource: row.hoursText?.trim() ? "imported_text" : null,
+      hoursSkipped: false,
+      hoursLastSynced: null,
       photos: [],
       ownerUid: null,
       active: true,
+      hasTeamProfiles: false,
       source: "import",
       importedAt: firestoreModule.serverTimestamp(),
       claimInviteStatus: "not_invited",

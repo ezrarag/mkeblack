@@ -623,8 +623,12 @@ export function BusinessEditorForm({
                   photos: values.photos,
                   ownerUid: values.ownerUid || null,
                   active: values.active,
+                  hasTeamProfiles: false,
                   source: values.source,
                   importedAt: null,
+                  hoursSource: null,
+                  hoursSkipped: false,
+                  hoursLastSynced: null,
                   claimInviteStatus: "not_invited",
                   claimInvitedAt: null,
                   location: values.location

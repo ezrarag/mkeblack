@@ -3,6 +3,7 @@ import {
   BusinessClaimInvite,
   BusinessFormValues,
   BusinessSource,
+  HoursSource,
   ClaimInviteStatus
 } from "@/lib/types";
 import {
@@ -186,6 +187,18 @@ export function normalizeClaimInviteStatus(value: unknown): ClaimInviteStatus {
   return "not_invited";
 }
 
+function normalizeHoursSource(value: unknown): HoursSource | null {
+  if (
+    value === "manual" ||
+    value === "google_places" ||
+    value === "imported_text"
+  ) {
+    return value;
+  }
+
+  return null;
+}
+
 export function normalizeBusinessRecord(value: unknown, id: string): Business {
   const record = isRecord(value) ? value : {};
   const ownerUid = stringValue(record.ownerUid).trim() || null;
@@ -205,11 +218,15 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
     neighborhood: stringValue(record.neighborhood).trim(),
     tags: stringArrayValue(record.tags),
     hours: normalizeHours(record.hours),
+    hoursSource: normalizeHoursSource(record.hoursSource),
+    hoursSkipped: booleanValue(record.hoursSkipped, false),
+    hoursLastSynced: parseDateValue(record.hoursLastSynced),
     photos: Array.isArray(record.photos)
       ? record.photos.filter((photo): photo is string => typeof photo === "string")
       : [],
     ownerUid,
     active: booleanValue(record.active, true),
+    hasTeamProfiles: booleanValue(record.hasTeamProfiles, false),
     source,
     importedAt: parseDateValue(record.importedAt),
     claimInviteStatus: normalizeClaimInviteStatus(record.claimInviteStatus),

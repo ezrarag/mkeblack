@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
+import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
 import { businessToFormValues } from "@/lib/businesses";
@@ -25,6 +26,7 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"listing" | "team">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -172,18 +174,39 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
           </div>
         ) : (
           <div className="mt-6">
-            <BusinessEditorForm
-              initialValues={businessToFormValues(business)}
-              title="Full business editor"
-              description="Update all public listing fields, normalize imported hours, refine the map pin, and queue an owner-claim invite when the email is ready."
-              submitLabel="Save business"
-              onSubmit={handleSave}
-              onUploadPhotos={handleUpload}
-              onRemovePhoto={handleRemove}
-              saving={saving}
-              uploading={uploading}
-              showAdminFields
-            />
+            <div className="mb-6 flex flex-wrap gap-2 rounded-[2rem] border border-line bg-panel/80 p-2">
+              {(["listing", "team"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`rounded-full px-5 py-3 text-sm transition ${
+                    activeTab === tab
+                      ? "bg-accent text-canvas"
+                      : "text-stone-200 hover:bg-accent/10 hover:text-accentSoft"
+                  }`}
+                >
+                  {tab === "listing" ? "Listing" : "Team"}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "listing" ? (
+              <BusinessEditorForm
+                initialValues={businessToFormValues(business)}
+                title="Full business editor"
+                description="Update all public listing fields, normalize imported hours, refine the map pin, and queue an owner-claim invite when the email is ready."
+                submitLabel="Save business"
+                onSubmit={handleSave}
+                onUploadPhotos={handleUpload}
+                onRemovePhoto={handleRemove}
+                saving={saving}
+                uploading={uploading}
+                showAdminFields
+              />
+            ) : (
+              <BusinessTeamManager businessId={business.id} showUidField />
+            )}
           </div>
         )}
       </section>

@@ -20,6 +20,12 @@ service cloud.firestore {
       return signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
+    function ownsBusinessById(businessId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businesses/$(businessId))
+        && get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid;
+    }
+
     function isSelf(uid) {
       return signedIn() && request.auth.uid == uid;
     }
@@ -133,8 +139,8 @@ service cloud.firestore {
 
     // ── Business team (subcollection) ────────────────────────────────────────
     match /businesses/{businessId}/team/{memberId} {
-      allow read: if resource.data.visible == true || isAdmin() || ownsBusiness();
-      allow write: if isAdmin() || ownsBusiness();
+      allow read: if resource.data.visible == true || isAdmin() || ownsBusinessById(businessId);
+      allow write: if isAdmin() || ownsBusinessById(businessId);
     }
 
     // ── Google Workspace cache ────────────────────────────────────────────────

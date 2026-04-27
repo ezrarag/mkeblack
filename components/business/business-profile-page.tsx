@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BusinessGallery } from "@/components/business/business-gallery";
+import { BusinessTeamSection } from "@/components/business/business-team-section";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { getWeeklyHours } from "@/lib/business-hours";
@@ -111,6 +112,8 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
               {business.description}
             </p>
           </div>
+
+          <BusinessTeamSection business={business} />
 
           <div className="mt-6 rounded-[2.4rem] border border-line bg-panel/80 p-4 sm:p-5">
             <p className="mb-4 px-2 text-sm uppercase tracking-[0.26em] text-accentSoft">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
+import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { BusinessClaimSearch } from "@/components/dashboard/business-claim-search";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
@@ -22,6 +23,7 @@ export function DashboardPageContent() {
   const { business, loading, error } = useBusiness(profile?.businessId ?? "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"listing" | "team">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -190,21 +192,41 @@ export function DashboardPageContent() {
           </div>
 
         ) : (
-          /* ── Listing editor ── */
           <div className="mt-6">
-            <BusinessEditorForm
-              initialValues={businessToFormValues(business)}
-              title="Edit your listing"
-              description="Your changes go live on the public directory as soon as you save. Start with hours — that's the #1 thing people filter by."
-              submitLabel="Save changes"
-              onSubmit={handleSave}
-              onUploadPhotos={handleUpload}
-              onRemovePhoto={handleRemove}
-              saving={saving}
-              uploading={uploading}
-              showAdminFields={false}
-              showInternalFields={false}
-            />
+            <div className="mb-6 flex flex-wrap gap-2 rounded-[2rem] border border-line bg-panel/80 p-2">
+              {(["listing", "team"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`rounded-full px-5 py-3 text-sm transition ${
+                    activeTab === tab
+                      ? "bg-accent text-canvas"
+                      : "text-stone-200 hover:bg-accent/10 hover:text-accentSoft"
+                  }`}
+                >
+                  {tab === "listing" ? "Listing" : "Team"}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "listing" ? (
+              <BusinessEditorForm
+                initialValues={businessToFormValues(business)}
+                title="Edit your listing"
+                description="Your changes go live on the public directory as soon as you save. Start with hours — that's the #1 thing people filter by."
+                submitLabel="Save changes"
+                onSubmit={handleSave}
+                onUploadPhotos={handleUpload}
+                onRemovePhoto={handleRemove}
+                saving={saving}
+                uploading={uploading}
+                showAdminFields={false}
+                showInternalFields={false}
+              />
+            ) : (
+              <BusinessTeamManager businessId={business.id} />
+            )}
           </div>
         )}
 
