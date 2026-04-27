@@ -34,7 +34,7 @@ function getDraftValue(tag: BusinessTag, drafts: Record<string, DraftTag>) {
   );
 }
 
-export function TagManagementPage() {
+function TagManagementContent() {
   const { tags, loading, error } = useBusinessTags();
   const [drafts, setDrafts] = useState<Record<string, DraftTag>>({});
   const [newLabel, setNewLabel] = useState("");
@@ -190,8 +190,7 @@ export function TagManagementPage() {
   }
 
   return (
-    <ProtectedRoute requireAdmin>
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
@@ -436,7 +435,14 @@ export function TagManagementPage() {
             </div>
           </div>
         )}
-      </section>
+    </section>
+  );
+}
+
+export function TagManagementPage() {
+  return (
+    <ProtectedRoute requireAdmin>
+      <TagManagementContent />
     </ProtectedRoute>
   );
 }

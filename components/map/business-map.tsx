@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MILWAUKEE_CENTER } from "@/lib/constants";
 import { isBusinessOpenNow } from "@/lib/business-hours";
 import { mapboxToken } from "@/lib/firebase/client";
+import { getGoogleMapsDirectionsUrl } from "@/lib/directions";
 import { getNeighborhoodBounds } from "@/lib/neighborhood";
 import { Business, NeighborhoodGeoJsonFeature } from "@/lib/types";
 
@@ -150,9 +151,16 @@ function businessFeatureCollection(businesses: Business[]) {
   };
 }
 
-function popupHtml(business: Business) {
+function popupHtml(
+  business: Business,
+  userLocation?: { lat: number; lng: number } | null
+) {
   const isOpen = isBusinessOpenNow(business.hours);
   const statusClass = isOpen ? "background:#22c55e" : "background:#ef4444";
+  const directionsUrl = getGoogleMapsDirectionsUrl(
+    business.location,
+    userLocation
+  );
 
   return `
     <div style="min-width:190px;color:#1c1917;font-family:system-ui,sans-serif">
@@ -162,7 +170,10 @@ function popupHtml(business: Business) {
         <span style="width:8px;height:8px;border-radius:999px;${statusClass}"></span>
         ${isOpen ? "Open now" : "Closed"}
       </div>
-      <a href="/business/${encodeURIComponent(business.id)}" style="display:inline-block;margin-top:10px;color:#8d5f00;font-size:12px;font-weight:700">View listing &rarr;</a>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <a href="/business/${encodeURIComponent(business.id)}" style="color:#8d5f00;font-size:12px;font-weight:700">View listing &rarr;</a>
+        <a href="${directionsUrl}" target="_blank" rel="noreferrer" style="color:#2563eb;font-size:12px;font-weight:700">Directions &rarr;</a>
+      </div>
     </div>
   `;
 }
@@ -179,6 +190,7 @@ export function BusinessMap({
   const mapRef = useRef<MapboxMap | null>(null);
   const popupRef = useRef<MapboxPopup | null>(null);
   const businessesRef = useRef(businesses);
+  const userLocationRef = useRef(userLocation);
   const onBusinessSelectRef = useRef(onBusinessSelect);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -187,6 +199,10 @@ export function BusinessMap({
   useEffect(() => {
     businessesRef.current = businesses;
   }, [businesses]);
+
+  useEffect(() => {
+    userLocationRef.current = userLocation;
+  }, [userLocation]);
 
   useEffect(() => {
     onBusinessSelectRef.current = onBusinessSelect;
@@ -303,7 +319,7 @@ export function BusinessMap({
             if (business) {
               popupRef.current
                 ?.setLngLat([business.location.lng, business.location.lat])
-                .setHTML(popupHtml(business))
+                .setHTML(popupHtml(business, userLocationRef.current))
                 .addTo(map);
               onBusinessSelectRef.current?.(business);
             }
@@ -491,9 +507,9 @@ export function BusinessMap({
     });
     popupRef.current
       ?.setLngLat([business.location.lng, business.location.lat])
-      .setHTML(popupHtml(business))
+      .setHTML(popupHtml(business, userLocation))
       .addTo(map);
-  }, [businesses, loaded, selectedBusinessId]);
+  }, [businesses, loaded, selectedBusinessId, userLocation]);
 
   if (!mapboxToken) {
     return (

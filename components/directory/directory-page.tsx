@@ -6,6 +6,7 @@ import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { BUSINESS_CATEGORIES } from "@/lib/constants";
 import { getDayKeyFromDate, isBusinessOpenOnDay } from "@/lib/business-hours";
+import { getGoogleMapsDirectionsUrl } from "@/lib/directions";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { useBusinesses } from "@/hooks/use-businesses";
 import { useNeighborhoods } from "@/hooks/use-neighborhoods";
@@ -244,6 +245,11 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           layout={layout}
           selectedDay={selectedDay}
           distanceMiles={getDistanceMiles(business)}
+          directionsUrl={
+            sortByDistance && userLocation
+              ? getGoogleMapsDirectionsUrl(business.location, userLocation)
+              : undefined
+          }
           isHighlighted={selectedBusinessId === business.id}
           onSelect={handleBusinessSelect}
         />

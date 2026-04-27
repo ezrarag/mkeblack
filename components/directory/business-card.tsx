@@ -13,6 +13,7 @@ type BusinessCardProps = {
   layout: "grid" | "list";
   selectedDay: DayKey | "all";
   distanceMiles?: number;
+  directionsUrl?: string;
   isHighlighted?: boolean;
   onSelect?: (business: Business) => void;
 };
@@ -22,6 +23,7 @@ export function BusinessCard({
   layout,
   selectedDay,
   distanceMiles,
+  directionsUrl,
   isHighlighted = false,
   onSelect
 }: BusinessCardProps) {
@@ -40,10 +42,16 @@ export function BusinessCard({
     .toUpperCase();
 
   return (
-    <Link
-      href={`/business/${business.id}`}
-      onClick={(event) => {
+    <article
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={() => {
         if (onSelect) {
+          onSelect(business);
+        }
+      }}
+      onKeyDown={(event) => {
+        if (onSelect && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
           onSelect(business);
         }
@@ -114,11 +122,28 @@ export function BusinessCard({
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
           <p className="text-sm text-stone-200">{hoursLabel}</p>
-          <span className="text-xs uppercase tracking-[0.24em] text-accentSoft">
-            View profile
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            {directionsUrl ? (
+              <a
+                href={directionsUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className="rounded-full border border-accent/35 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accentSoft transition hover:bg-accent/15"
+              >
+                Directions
+              </a>
+            ) : null}
+            <Link
+              href={`/business/${business.id}`}
+              onClick={(event) => event.stopPropagation()}
+              className="text-xs uppercase tracking-[0.24em] text-accentSoft"
+            >
+              View profile
+            </Link>
+          </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
