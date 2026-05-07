@@ -115,9 +115,9 @@ export function AdminClaimsPage() {
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8 space-y-6">
 
-        <div className="rounded-[2.4rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">Admin</p>
-          <h1 className="mt-3 font-display text-5xl leading-none text-ink">
+          <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink">
             Pending claims.
           </h1>
           <p className="mt-4 text-sm leading-8 text-stone-300">
@@ -134,7 +134,7 @@ export function AdminClaimsPage() {
           </div>
         )}
 
-        <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
               Awaiting verification
@@ -176,7 +176,7 @@ export function AdminClaimsPage() {
                       type="button"
                       onClick={() => handleVerify(claim, true)}
                       disabled={actingId === claim.id}
-                      className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-canvas hover:bg-accentSoft transition disabled:opacity-50"
+                      className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white hover:bg-accentSoft transition disabled:opacity-50"
                     >
                       Approve
                     </button>

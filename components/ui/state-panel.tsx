@@ -8,8 +8,8 @@ type StatePanelProps = {
 
 export function StatePanel({ title, description, action }: StatePanelProps) {
   return (
-    <div className="rounded-[2rem] border border-line bg-panel/80 p-8 shadow-glow">
-      <h2 className="font-display text-3xl text-ink">{title}</h2>
+    <div className="rounded-xl border border-line bg-panel/80 p-8 shadow-glow">
+      <h2 className="font-display text-2xl font-bold text-ink">{title}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-300">
         {description}
       </p>

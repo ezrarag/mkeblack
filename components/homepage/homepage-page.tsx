@@ -6,13 +6,15 @@ import DOMPurify from "dompurify";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MarketplaceListingCard } from "@/components/marketplace/marketplace-listing-card";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useHomepageModules } from "@/hooks/use-homepage-modules";
 import { useLatestArticles } from "@/hooks/use-latest-articles";
 import { useMemberDiscounts } from "@/hooks/use-member-discounts";
+import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
 import { HOMEPAGE_MODULE_LABELS } from "@/lib/homepage";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
-import { ArticleSummary, HomepageModule, MemberDiscount } from "@/lib/types";
+import { ArticleSummary, HomepageModule, MarketplaceListing, MemberDiscount } from "@/lib/types";
 import { isExternalHref } from "@/lib/utils";
 
 function SmartLink({
@@ -58,7 +60,7 @@ function formatPublishedDate(value: Date | null) {
 
 function ArticleCard({ article }: { article: ArticleSummary }) {
   const wrapperClassName =
-    "group flex h-full flex-col overflow-hidden rounded-[2rem] border border-line bg-panelAlt/75 transition hover:border-accent/40 hover:bg-panelAlt/85";
+    "group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panelAlt/75 transition hover:border-accent/40 hover:bg-panelAlt/85";
 
   const content = (
     <>
@@ -74,18 +76,18 @@ function ArticleCard({ article }: { article: ArticleSummary }) {
 
       <div className="flex flex-1 flex-col p-6">
         {article.publishedAt ? (
-          <p className="text-xs uppercase tracking-[0.24em] text-accentSoft">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
             {formatPublishedDate(article.publishedAt)}
           </p>
         ) : null}
-        <h3 className="mt-3 font-display text-3xl leading-tight text-ink">
+        <h3 className="mt-3 font-display text-xl font-bold leading-snug text-ink">
           {article.title}
         </h3>
         <p className="mt-4 flex-1 text-sm leading-7 text-stone-300">
           {article.excerpt || "Read the latest feature from the MKE Black newsroom."}
         </p>
-        <span className="mt-6 text-sm font-medium text-accentSoft transition group-hover:text-ink">
-          Read story
+        <span className="mt-6 text-sm font-semibold text-accent transition group-hover:text-accent">
+          Read story →
         </span>
       </div>
     </>
@@ -109,18 +111,20 @@ function renderHomepageModule(
   articlesError: string | null,
   discounts: MemberDiscount[],
   discountsLoading: boolean,
-  discountsError: string | null
+  discountsError: string | null,
+  featuredListings: MarketplaceListing[],
+  listingsLoading: boolean
 ) {
   switch (module.type) {
     case "hero":
       return (
-        <section className="relative overflow-hidden border-b border-line bg-[radial-gradient(circle_at_top_left,rgba(212,160,23,0.26),transparent_26%),radial-gradient(circle_at_80%_25%,rgba(240,205,115,0.18),transparent_24%),linear-gradient(180deg,rgba(17,17,17,0.96),rgba(10,10,10,1))]">
+        <section className="relative overflow-hidden border-b border-line bg-[radial-gradient(circle_at_top_left,rgba(236,32,36,0.14),transparent_28%),radial-gradient(circle_at_88%_35%,rgba(11,143,58,0.09),transparent_26%),linear-gradient(180deg,rgba(36,35,35,0.98),rgba(10,10,10,1))]">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
             <div className="max-w-4xl">
-              <p className="text-sm uppercase tracking-[0.32em] text-accentSoft">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">
                 {module.title || HOMEPAGE_MODULE_LABELS.hero}
               </p>
-              <h1 className="mt-5 font-display text-5xl leading-none text-ink sm:text-6xl lg:text-7xl">
+              <h1 className="mt-5 font-display text-5xl font-black leading-tight text-ink sm:text-6xl lg:text-7xl">
                 {module.content.headline || "Shape a live homepage from Firestore."}
               </h1>
               <p className="mt-6 max-w-3xl text-base leading-8 text-stone-200 sm:text-lg">
@@ -132,7 +136,7 @@ function renderHomepageModule(
                   {module.content.ctaPrimary.href ? (
                     <SmartLink
                       href={module.content.ctaPrimary.href}
-                      className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                      className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
                     >
                       {module.content.ctaPrimary.label || "Learn more"}
                     </SmartLink>
@@ -140,7 +144,7 @@ function renderHomepageModule(
                   {module.content.ctaSecondary.href ? (
                     <SmartLink
                       href={module.content.ctaSecondary.href}
-                      className="rounded-full border border-line bg-panel/30 px-6 py-3 text-sm font-medium text-ink transition hover:border-accent/40 hover:bg-accent/10 hover:text-accentSoft"
+                      className="rounded-full border border-line bg-white/5 px-6 py-3 text-sm font-medium text-ink transition hover:border-accent/40 hover:bg-accent/10"
                     >
                       {module.content.ctaSecondary.label || "Explore"}
                     </SmartLink>
@@ -155,10 +159,10 @@ function renderHomepageModule(
     case "featured_articles":
       return (
         <section id="stories" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
+          <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
                   {module.title || HOMEPAGE_MODULE_LABELS.featured_articles}
                 </p>
                 {module.content.description ? (
@@ -171,7 +175,7 @@ function renderHomepageModule(
               {module.content.ctaHref ? (
                 <SmartLink
                   href={module.content.ctaHref}
-                  className="rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  className="rounded-full border border-accent/40 bg-accent/10 px-5 py-3 text-sm font-semibold text-accent transition hover:bg-accent/15"
                 >
                   {module.content.ctaLabel || "View all stories"}
                 </SmartLink>
@@ -187,7 +191,7 @@ function renderHomepageModule(
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
-                    className="h-[360px] animate-pulse rounded-[2rem] border border-line bg-panelAlt/75"
+                    className="h-[360px] animate-pulse rounded-2xl border border-line bg-panelAlt/75"
                   />
                 ))}
               </div>
@@ -198,7 +202,7 @@ function renderHomepageModule(
                 ))}
               </div>
             ) : (
-              <div className="mt-8 rounded-[2rem] border border-dashed border-line bg-canvas/30 p-6 text-sm leading-7 text-stone-300">
+              <div className="mt-8 rounded-2xl border border-dashed border-line bg-canvas/30 p-6 text-sm leading-7 text-stone-300">
                 No published articles are available yet.
               </div>
             )}
@@ -217,9 +221,9 @@ function renderHomepageModule(
 
       return (
         <section id="membership" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="grid gap-8 rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
+          <div className="grid gap-8 rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
             <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
                 {module.title || HOMEPAGE_MODULE_LABELS.membership_cta}
               </p>
               {module.content.description ? (
@@ -231,7 +235,7 @@ function renderHomepageModule(
                 <div className="mt-8">
                   <SmartLink
                     href={module.content.cta.href}
-                    className="inline-flex rounded-full bg-accent px-6 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                    className="inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
                   >
                     {module.content.cta.label || "Become a member"}
                   </SmartLink>
@@ -239,7 +243,7 @@ function renderHomepageModule(
               ) : null}
             </div>
 
-            <div className="rounded-[2rem] border border-line bg-panelAlt/70 p-6">
+            <div className="rounded-2xl border border-line bg-panelAlt/70 p-6">
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Membership benefits
               </p>
@@ -260,9 +264,9 @@ function renderHomepageModule(
     case "member_discounts":
       return (
         <section id="discounts" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
+          <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
             <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
                 {module.title || HOMEPAGE_MODULE_LABELS.member_discounts}
               </p>
               {module.content.description ? (
@@ -281,7 +285,7 @@ function renderHomepageModule(
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
-                    className="h-60 animate-pulse rounded-[2rem] border border-line bg-panelAlt/75"
+                    className="h-60 animate-pulse rounded-2xl border border-line bg-panelAlt/75"
                   />
                 ))}
               </div>
@@ -293,7 +297,7 @@ function renderHomepageModule(
                     href={discount.businessUrl || undefined}
                     target={discount.businessUrl ? "_blank" : undefined}
                     rel={discount.businessUrl ? "noreferrer" : undefined}
-                    className="group rounded-[2rem] border border-line bg-panelAlt/75 p-6 transition hover:border-accent/40 hover:bg-panelAlt/85"
+                    className="group rounded-2xl border border-line bg-panelAlt/75 p-6 transition hover:border-accent/40 hover:bg-panelAlt/85"
                   >
                     <div className="flex items-start gap-4">
                       {discount.logoUrl ? (
@@ -311,7 +315,7 @@ function renderHomepageModule(
                       )}
 
                       <div className="min-w-0">
-                        <h3 className="font-display text-3xl leading-tight text-ink">
+                        <h3 className="font-display text-lg font-bold leading-snug text-ink">
                           {discount.businessName}
                         </h3>
                         <p className="mt-3 text-sm leading-7 text-stone-300">
@@ -321,7 +325,7 @@ function renderHomepageModule(
                     </div>
 
                     {discount.businessUrl ? (
-                      <p className="mt-6 text-sm font-medium text-accentSoft transition group-hover:text-ink">
+                      <p className="mt-6 text-sm font-semibold text-accent transition group-hover:text-ink">
                         Visit business
                       </p>
                     ) : null}
@@ -329,7 +333,7 @@ function renderHomepageModule(
                 ))}
               </div>
             ) : (
-              <div className="mt-8 rounded-[2rem] border border-dashed border-line bg-canvas/30 p-6 text-sm leading-7 text-stone-300">
+              <div className="mt-8 rounded-2xl border border-dashed border-line bg-canvas/30 p-6 text-sm leading-7 text-stone-300">
                 {module.content.emptyState || "Fresh member offers are on the way."}
               </div>
             )}
@@ -340,9 +344,9 @@ function renderHomepageModule(
     case "editorial":
       return (
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="grid gap-8 rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
+          <div className="grid gap-8 rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
             {module.content.imageUrl ? (
-              <div className="overflow-hidden rounded-[2rem] border border-line bg-canvas/60">
+              <div className="overflow-hidden rounded-2xl border border-line bg-canvas/60">
                 <img
                   src={module.content.imageUrl}
                   alt={module.title}
@@ -352,7 +356,7 @@ function renderHomepageModule(
             ) : null}
 
             <div className={module.content.imageUrl ? "" : "lg:col-span-2"}>
-              <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
                 {module.title || HOMEPAGE_MODULE_LABELS.editorial}
               </p>
               <div className="mt-5">
@@ -364,7 +368,7 @@ function renderHomepageModule(
                       return (
                         <h2
                           {...properties}
-                          className="font-display text-4xl leading-tight text-ink sm:text-5xl"
+                          className="font-display text-3xl font-black leading-tight text-ink sm:text-4xl"
                         />
                       );
                     },
@@ -373,7 +377,7 @@ function renderHomepageModule(
                       return (
                         <h3
                           {...properties}
-                          className="mt-8 font-display text-3xl leading-tight text-ink"
+                          className="mt-8 font-display text-2xl font-bold leading-tight text-ink"
                         />
                       );
                     },
@@ -406,7 +410,7 @@ function renderHomepageModule(
                           href={href}
                           target={isExternalHref(href) ? "_blank" : undefined}
                           rel={isExternalHref(href) ? "noreferrer" : undefined}
-                          className="text-accentSoft underline decoration-accent/40 underline-offset-4"
+                          className="text-accent underline decoration-accent/40 underline-offset-4"
                         >
                           {children}
                         </a>
@@ -434,14 +438,14 @@ function renderHomepageModule(
     case "custom":
       return (
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+          <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
             {module.title ? (
-              <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
                 {module.title}
               </p>
             ) : null}
             <div
-              className="mt-5 text-stone-200 [&_a]:text-accentSoft [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-4 [&_blockquote]:border-l-2 [&_blockquote]:border-accent/35 [&_blockquote]:pl-5 [&_h1]:font-display [&_h1]:text-4xl [&_h1]:text-ink [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-3xl [&_h2]:text-ink [&_li]:ml-5 [&_li]:list-disc [&_p]:mt-4 [&_p]:leading-8"
+              className="mt-5 text-stone-200 [&_a]:text-accent [&_a]:underline [&_a]:decoration-accent/40 [&_a]:underline-offset-4 [&_blockquote]:border-l-2 [&_blockquote]:border-accent/35 [&_blockquote]:pl-5 [&_h1]:font-display [&_h1]:text-3xl [&_h1]:font-black [&_h1]:text-ink [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-ink [&_li]:ml-5 [&_li]:list-disc [&_p]:mt-4 [&_p]:leading-8"
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(module.content.html)
               }}
@@ -449,6 +453,58 @@ function renderHomepageModule(
           </div>
         </section>
       );
+
+    case "marketplace": {
+      const maxItems = module.content.maxItems ?? 6;
+      const slice = featuredListings.slice(0, maxItems);
+      return (
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                  {module.title || HOMEPAGE_MODULE_LABELS.marketplace}
+                </p>
+                {module.content.description ? (
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-300">
+                    {module.content.description}
+                  </p>
+                ) : null}
+              </div>
+              {module.content.ctaHref ? (
+                <SmartLink
+                  href={module.content.ctaHref}
+                  className="rounded-full border border-accent/40 bg-accent/10 px-5 py-3 text-sm font-semibold text-accent transition hover:bg-accent/15"
+                >
+                  {module.content.ctaLabel || "Browse marketplace"}
+                </SmartLink>
+              ) : null}
+            </div>
+
+            {listingsLoading ? (
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-[3/4] animate-pulse rounded-2xl border border-line bg-panelAlt/75"
+                  />
+                ))}
+              </div>
+            ) : slice.length ? (
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {slice.map((listing) => (
+                  <MarketplaceListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-8 rounded-2xl border border-dashed border-line bg-canvas/30 p-6 text-sm leading-7 text-stone-300">
+                No featured marketplace listings yet.
+              </div>
+            )}
+          </div>
+        </section>
+      );
+    }
   }
 }
 
@@ -464,6 +520,10 @@ export function HomepagePage() {
     loading: discountsLoading,
     error: discountsError
   } = useMemberDiscounts(true);
+  const {
+    listings: allFeaturedListings,
+    loading: listingsLoading
+  } = useMarketplaceListings({ availableOnly: true });
 
   if (!isFirebaseConfigured) {
     return (
@@ -491,7 +551,7 @@ export function HomepagePage() {
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="h-64 animate-pulse rounded-[2.5rem] border border-line bg-panel/75"
+              className="h-64 animate-pulse rounded-2xl border border-line bg-panel/75"
             />
           ))}
         </div>
@@ -527,7 +587,9 @@ export function HomepagePage() {
             articlesError,
             discounts,
             discountsLoading,
-            discountsError
+            discountsError,
+            allFeaturedListings.filter((l) => l.featured),
+            listingsLoading
           )}
         </motion.div>
       ))}

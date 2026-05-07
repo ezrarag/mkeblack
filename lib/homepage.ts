@@ -7,6 +7,7 @@ import {
   HomepageLink,
   HomepageModule,
   HomepageModuleType,
+  MarketplaceHomepageModule,
   MemberDiscount,
   MemberDiscountsHomepageModule,
   MembershipCtaHomepageModule
@@ -27,7 +28,8 @@ export const HOMEPAGE_MODULE_TYPES: HomepageModuleType[] = [
   "membership_cta",
   "member_discounts",
   "editorial",
-  "custom"
+  "custom",
+  "marketplace"
 ];
 
 export const HOMEPAGE_MODULE_LABELS: Record<HomepageModuleType, string> = {
@@ -36,7 +38,8 @@ export const HOMEPAGE_MODULE_LABELS: Record<HomepageModuleType, string> = {
   membership_cta: "Membership CTA",
   member_discounts: "Member discounts",
   editorial: "Editorial",
-  custom: "Custom HTML"
+  custom: "Custom HTML",
+  marketplace: "Marketplace"
 };
 
 function isRecord(value: unknown): value is FirestoreRecord {
@@ -137,6 +140,19 @@ function normalizeCustomContent(value: unknown): CustomHomepageModule["content"]
 
   return {
     html: stringValue(record.html)
+  };
+}
+
+function normalizeMarketplaceContent(
+  value: unknown
+): MarketplaceHomepageModule["content"] {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    description: stringValue(record.description).trim(),
+    maxItems: numberValue(record.maxItems, 6),
+    ctaLabel: stringValue(record.ctaLabel).trim(),
+    ctaHref: normalizeHref(stringValue(record.ctaHref))
   };
 }
 
@@ -262,6 +278,20 @@ export function createHomepageModuleDraft(type: HomepageModuleType): HomepageMod
           html: "<div><p>Add custom homepage HTML here.</p></div>"
         }
       };
+    case "marketplace":
+      return {
+        id: "",
+        type,
+        title: "Marketplace",
+        visible: true,
+        order: 0,
+        content: {
+          description: "Browse products and services from Milwaukee's Black-owned businesses.",
+          maxItems: 6,
+          ctaLabel: "Browse marketplace",
+          ctaHref: "/marketplace"
+        }
+      };
   }
 }
 
@@ -304,6 +334,11 @@ export function cloneHomepageModule(module: HomepageModule): HomepageModule {
           benefits: [...module.content.benefits],
           cta: { ...module.content.cta }
         }
+      };
+    case "marketplace":
+      return {
+        ...module,
+        content: { ...module.content }
       };
   }
 }
@@ -373,6 +408,15 @@ export function normalizeHomepageModule(
         order,
         content: normalizeCustomContent(record.content)
       };
+    case "marketplace":
+      return {
+        id,
+        type,
+        title,
+        visible,
+        order,
+        content: normalizeMarketplaceContent(record.content)
+      };
   }
 }
 
@@ -437,6 +481,18 @@ export function serializeHomepageModule(module: HomepageModule) {
         ...baseValues,
         content: {
           html: module.content.html
+        }
+      };
+    case "marketplace":
+      return {
+        ...baseValues,
+        content: {
+          description: module.content.description.trim(),
+          maxItems: Number.isFinite(module.content.maxItems)
+            ? module.content.maxItems
+            : 6,
+          ctaLabel: module.content.ctaLabel.trim(),
+          ctaHref: normalizeHref(module.content.ctaHref)
         }
       };
   }

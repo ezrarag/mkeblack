@@ -108,7 +108,7 @@ function HomepageModuleRow({
       dragControls={dragControls}
       className="list-none"
     >
-      <div className="flex flex-wrap items-center gap-4 rounded-[2rem] border border-line bg-panelAlt/70 p-4">
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-panelAlt/70 p-4">
         <SortHandle controls={dragControls} label={`Reorder ${module.title}`} />
 
         <div className="min-w-0 flex-1">
@@ -165,7 +165,7 @@ function MemberDiscountRow({
       dragControls={dragControls}
       className="list-none"
     >
-      <div className="flex flex-wrap items-center gap-4 rounded-[2rem] border border-line bg-panelAlt/70 p-4">
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-panelAlt/70 p-4">
         <SortHandle
           controls={dragControls}
           label={`Reorder ${discount.businessName || "discount"}`}
@@ -231,7 +231,7 @@ function ModuleEditor({
             <p className="text-xs uppercase tracking-[0.24em] text-accentSoft">
               {panelTitle}
             </p>
-            <h2 className="mt-2 font-display text-4xl leading-none text-ink">
+            <h2 className="mt-2 font-display text-4xl font-black leading-tight text-ink">
               Edit module
             </h2>
           </div>
@@ -648,7 +648,7 @@ function ModuleEditor({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+            className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
           >
             {saving ? "Saving..." : "Save module"}
           </button>
@@ -687,7 +687,7 @@ function MemberDiscountEditor({
             <p className="text-xs uppercase tracking-[0.24em] text-accentSoft">
               Member discount editor
             </p>
-            <h2 className="mt-2 font-display text-4xl leading-none text-ink">
+            <h2 className="mt-2 font-display text-4xl font-black leading-tight text-ink">
               Edit offer
             </h2>
           </div>
@@ -786,7 +786,7 @@ function MemberDiscountEditor({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+            className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
           >
             {saving ? "Saving..." : "Save discount"}
           </button>
@@ -977,13 +977,13 @@ export function HomepageAdminPage() {
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Homepage workspace
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 Control the public homepage.
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
@@ -1005,7 +1005,7 @@ export function HomepageAdminPage() {
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Total modules
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {modulesLoading ? "--" : modules.length}
               </p>
             </div>
@@ -1013,7 +1013,7 @@ export function HomepageAdminPage() {
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Visible modules
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {modulesLoading ? "--" : modules.filter((module) => module.visible).length}
               </p>
             </div>
@@ -1021,7 +1021,7 @@ export function HomepageAdminPage() {
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Active discounts
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {discountsLoading ? "--" : discounts.filter((discount) => discount.active).length}
               </p>
             </div>
@@ -1042,7 +1042,7 @@ export function HomepageAdminPage() {
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
           <div className="space-y-6">
-            <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+            <div className="rounded-2xl border border-line bg-panel/85 p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
@@ -1056,7 +1056,7 @@ export function HomepageAdminPage() {
                 <button
                   type="button"
                   onClick={() => setShowTypePicker((current) => !current)}
-                  className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                  className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
                 >
                   Add module
                 </button>
@@ -1087,7 +1087,7 @@ export function HomepageAdminPage() {
                   {Array.from({ length: 4 }).map((_, index) => (
                     <div
                       key={index}
-                      className="h-24 animate-pulse rounded-[2rem] border border-line bg-panelAlt/70"
+                      className="h-24 animate-pulse rounded-xl border border-line bg-panelAlt/70"
                     />
                   ))}
                 </div>
@@ -1128,14 +1128,14 @@ export function HomepageAdminPage() {
                   ))}
                 </Reorder.Group>
               ) : (
-                <div className="mt-5 rounded-[2rem] border border-dashed border-line bg-canvas/35 p-6 text-sm text-stone-300">
+                <div className="mt-5 rounded-xl border border-dashed border-line bg-canvas/35 p-6 text-sm text-stone-300">
                   Add a module to start composing the homepage.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+          <div className="rounded-2xl border border-line bg-panel/85 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
@@ -1148,7 +1148,7 @@ export function HomepageAdminPage() {
               <button
                 type="button"
                 onClick={() => void handleCreateDiscount()}
-                className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
               >
                 New discount
               </button>
@@ -1159,7 +1159,7 @@ export function HomepageAdminPage() {
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="h-24 animate-pulse rounded-[2rem] border border-line bg-panelAlt/70"
+                    className="h-24 animate-pulse rounded-xl border border-line bg-panelAlt/70"
                   />
                 ))}
               </div>
@@ -1203,7 +1203,7 @@ export function HomepageAdminPage() {
                 ))}
               </Reorder.Group>
             ) : (
-              <div className="mt-5 rounded-[2rem] border border-dashed border-line bg-canvas/35 p-6 text-sm text-stone-300">
+              <div className="mt-5 rounded-xl border border-dashed border-line bg-canvas/35 p-6 text-sm text-stone-300">
                 Add the first member discount to populate the homepage offer section.
               </div>
             )}

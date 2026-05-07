@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { BusinessGallery } from "@/components/business/business-gallery";
 import { BusinessTeamSection } from "@/components/business/business-team-section";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 import { getWeeklyHours } from "@/lib/business-hours";
 import { useBusiness } from "@/hooks/use-business";
 import { useBusinessTags } from "@/hooks/use-business-tags";
+import { useAuth } from "@/components/providers/auth-provider";
+import { addLocalRecentView, persistRecentView } from "@/lib/recent-views";
 import { BusinessTag } from "@/lib/types";
 
 type BusinessProfilePageProps = {
@@ -17,11 +21,21 @@ type BusinessProfilePageProps = {
 export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const { business, loading, error } = useBusiness(businessId);
   const { tags: businessTags } = useBusinessTags();
+  const { user } = useAuth();
+
+  // Track this view: localStorage always, Firebase if signed in
+  useEffect(() => {
+    if (!business) return;
+    addLocalRecentView(business);
+    if (user) {
+      void persistRecentView(user.uid, business);
+    }
+  }, [business, user]);
 
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="h-[440px] animate-pulse rounded-[2.4rem] border border-line bg-panel/70" />
+        <div className="h-[440px] animate-pulse rounded-2xl border border-line bg-panel/70" />
       </div>
     );
   }
@@ -35,7 +49,7 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           action={
             <Link
               href="/"
-              className="inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+              className="inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
             >
               Return to directory
             </Link>
@@ -55,13 +69,24 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
         <div>
-          <div className="rounded-[2.4rem] border border-line bg-panel/80 p-5 shadow-glow sm:p-6">
-            <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
-              {business.category}
-            </p>
-            <h1 className="mt-4 font-display text-5xl leading-none text-ink sm:text-6xl">
+          <div className="rounded-2xl border border-line bg-panel/80 p-5 shadow-glow sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+                {business.category}
+              </p>
+              <FavoriteButton business={business} className="shrink-0" />
+            </div>
+            <h1 className="mt-4 font-display text-4xl font-black leading-tight text-ink sm:text-5xl">
               {business.name}
             </h1>
+            {business.solidarityMember ? (
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="text-xs font-semibold text-success">
+                  Solidarity Circle Member
+                </span>
+              </div>
+            ) : null}
             {profileTags.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
                 {profileTags.map((tag) => (
@@ -85,8 +110,8 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           </div>
 
           {business.instagramReelUrl ? (
-            <div className="mt-6 rounded-[2.4rem] border border-line bg-panel/80 p-6">
-              <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
+            <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
                 Featured reel
               </p>
               <p className="mt-4 text-sm leading-8 text-stone-300">
@@ -97,15 +122,15 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                 href={business.instagramReelUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-5 inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                className="mt-5 inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
               >
                 Watch on Instagram
               </a>
             </div>
           ) : null}
 
-          <div className="mt-6 rounded-[2.4rem] border border-line bg-panel/80 p-6">
-            <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
+          <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
               About this business
             </p>
             <p className="mt-4 text-sm leading-8 text-stone-300">
@@ -115,8 +140,8 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
 
           <BusinessTeamSection business={business} />
 
-          <div className="mt-6 rounded-[2.4rem] border border-line bg-panel/80 p-4 sm:p-5">
-            <p className="mb-4 px-2 text-sm uppercase tracking-[0.26em] text-accentSoft">
+          <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-4 sm:p-5">
+            <p className="mb-4 px-2 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
               Location
             </p>
             <BusinessMap businesses={[business]} />
@@ -124,8 +149,8 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-[2.4rem] border border-line bg-panel/85 p-6">
-            <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
+          <div className="rounded-2xl border border-line bg-panel/85 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
               Contact
             </p>
             <div className="mt-5 space-y-4 text-sm leading-7 text-stone-200">
@@ -178,12 +203,12 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             </div>
           </div>
 
-          <div className="rounded-[2.4rem] border border-line bg-panel/85 p-6">
-            <p className="text-sm uppercase tracking-[0.26em] text-accentSoft">
+          <div className="rounded-2xl border border-line bg-panel/85 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
               Weekly hours
             </p>
             {business.hoursText ? (
-              <div className="mt-5 rounded-3xl border border-line bg-panelAlt/70 p-4">
+              <div className="mt-5 rounded-xl border border-line bg-panelAlt/70 p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">
                   Imported hours note
                 </p>

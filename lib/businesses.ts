@@ -240,7 +240,10 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
         isRecord(record.location) ? record.location.lng : undefined,
         MILWAUKEE_CENTER.lng
       )
-    }
+    },
+    solidarityMember: booleanValue(record.solidarityMember, false),
+    solidarityMemberSince: parseDateValue(record.solidarityMemberSince),
+    solidarityMemberExpiry: parseDateValue(record.solidarityMemberExpiry)
   };
 }
 

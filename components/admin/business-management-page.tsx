@@ -182,13 +182,13 @@ export function BusinessManagementPage() {
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Business manager
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 Manage imported and manual listings.
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
@@ -226,7 +226,7 @@ export function BusinessManagementPage() {
           </div>
         ) : null}
 
-        <div className="mt-6 rounded-[2.2rem] border border-line bg-panel/85 p-5">
+        <div className="mt-6 rounded-2xl border border-line bg-panel/85 p-5">
           <div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr]">
             <div>
               <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
@@ -319,7 +319,7 @@ export function BusinessManagementPage() {
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="h-20 animate-pulse rounded-[2rem] border border-line bg-panel/70"
+                className="h-20 animate-pulse rounded-xl border border-line bg-panel/70"
               />
             ))}
           </div>
@@ -328,7 +328,7 @@ export function BusinessManagementPage() {
             <StatePanel title="Unable to load businesses" description={error} />
           </div>
         ) : filteredBusinesses.length ? (
-          <div className="mt-6 overflow-hidden rounded-[2.2rem] border border-line bg-panel/85">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-panel/85">
             <div className="overflow-x-auto">
               <table className="min-w-[1400px] divide-y divide-line text-left text-sm">
                 <thead className="bg-panelAlt/80">
@@ -487,7 +487,7 @@ export function BusinessManagementPage() {
                               type="button"
                               onClick={() => void handleSaveRow(business.id)}
                               disabled={savingId === business.id}
-                              className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                              className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
                             >
                               {savingId === business.id ? "Saving..." : "Save"}
                             </button>

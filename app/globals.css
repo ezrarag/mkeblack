@@ -2,9 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Brand CSS Variables ────────────────────────────────────────────────── */
+/* These mirror lib/brand-config.ts and are available for inline styles,     */
+/* Mapbox popups, and any context where Tailwind classes cannot be used.     */
+
 :root {
   color-scheme: dark;
+
+  /* Core palette */
+  --mke-red: #EC2024;
+  --mke-red-bright: #FF4040;
+  --mke-green: #0B8F3A;
+  --ready-aim-go-gold: #FFC107;
+
+  --brand-black: #000000;
+  --brand-charcoal: #242323;
+  --brand-canvas: #0A0A0A;
+  --brand-white: #FFFFFF;
+  --brand-off-white: #F7F7F3;
+
+  /* Semantic */
+  --color-canvas: #0A0A0A;
+  --color-panel: #111111;
+  --color-panel-alt: #161616;
+  --color-ink: #F7F7F3;
+  --color-muted: #6B7280;
+  --color-accent: #EC2024;
+  --color-accent-soft: #FF4040;
+  --color-line: rgba(255, 255, 255, 0.10);
+  --color-success: #0B8F3A;
+  --color-danger: #ef4444;
+
+  /* Typography */
+  --font-display: /* set by next/font */ system-ui, sans-serif;
+  --font-sans: /* set by next/font */ system-ui, sans-serif;
 }
+
+/* ─── Base Reset ─────────────────────────────────────────────────────────── */
 
 html {
   scroll-behavior: smooth;
@@ -20,13 +54,15 @@ a {
 }
 
 * {
-  border-color: rgba(212, 160, 23, 0.15);
+  border-color: rgba(255, 255, 255, 0.10);
 }
+
+/* ─── Form Controls ──────────────────────────────────────────────────────── */
 
 input:not([type="checkbox"]):not([type="file"]),
 textarea,
 select {
-  @apply w-full rounded-2xl border border-line bg-panelAlt/90 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-500 focus:border-accent/50 focus:ring-2 focus:ring-accent/15;
+  @apply w-full rounded-xl border border-line bg-panelAlt/90 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-500 focus:border-accent/50 focus:ring-2 focus:ring-accent/15;
 }
 
 textarea {
@@ -35,7 +71,7 @@ textarea {
 }
 
 input[type="checkbox"] {
-  accent-color: #d4a017;
+  accent-color: var(--mke-red);
 }
 
 button:disabled {

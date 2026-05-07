@@ -23,6 +23,7 @@ type AuthContextValue = {
   loading: boolean;
   isAdmin: boolean;
   hasAdminAccess: boolean;
+  isVisitor: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue>({
@@ -30,7 +31,8 @@ const AuthContext = createContext<AuthContextValue>({
   profile: null,
   loading: true,
   isAdmin: false,
-  hasAdminAccess: false
+  hasAdminAccess: false,
+  isVisitor: false
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -39,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const hasAdminAccess = isAdmin || profile?.role === "admin";
+  const isVisitor =
+    !loading && !!user && !hasAdminAccess && profile?.role !== "business";
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -132,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, isAdmin, hasAdminAccess }}
+      value={{ user, profile, loading, isAdmin, hasAdminAccess, isVisitor }}
     >
       {children}
     </AuthContext.Provider>

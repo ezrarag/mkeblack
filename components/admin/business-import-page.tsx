@@ -296,13 +296,13 @@ export function BusinessImportPage() {
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Spreadsheet import
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 Import businesses from Excel or CSV.
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
@@ -326,7 +326,7 @@ export function BusinessImportPage() {
         ) : null}
 
         <div className="mt-6 space-y-6">
-          <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+          <div className="rounded-2xl border border-line bg-panel/85 p-5">
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
               Step 1 · Upload
             </p>
@@ -342,13 +342,13 @@ export function BusinessImportPage() {
                 setDragActive(false);
               }}
               onDrop={onDrop}
-              className={`mt-5 flex min-h-[220px] w-full flex-col items-center justify-center rounded-[2rem] border border-dashed px-6 py-10 text-center transition ${
+              className={`mt-5 flex min-h-[220px] w-full flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center transition ${
                 dragActive
                   ? "border-accent/55 bg-accent/10"
                   : "border-line bg-canvas/30 hover:border-accent/35 hover:bg-panelAlt/50"
               }`}
             >
-              <p className="font-display text-3xl text-ink">
+              <p className="font-display text-2xl font-bold text-ink">
                 Drop a spreadsheet here
               </p>
               <p className="mt-3 text-sm leading-7 text-stone-300">
@@ -369,7 +369,7 @@ export function BusinessImportPage() {
             />
 
             {parsedFile ? (
-              <div className="mt-6 overflow-hidden rounded-[2rem] border border-line">
+              <div className="mt-6 overflow-hidden rounded-xl border border-line">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-line text-left text-sm">
                     <thead className="bg-panelAlt/80">
@@ -402,7 +402,7 @@ export function BusinessImportPage() {
           </div>
 
           {parsedFile ? (
-            <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+            <div className="rounded-2xl border border-line bg-panel/85 p-5">
               <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
                 Step 2 · Column mapping
               </p>
@@ -436,7 +436,7 @@ export function BusinessImportPage() {
           ) : null}
 
           {parsedFile ? (
-            <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+            <div className="rounded-2xl border border-line bg-panel/85 p-5">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
@@ -456,7 +456,7 @@ export function BusinessImportPage() {
                     !mappings.category ||
                     !reviewedRows.length
                   }
-                  className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft"
+                  className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
                 >
                   {processing ? "Importing..." : "Import"}
                 </button>
@@ -480,7 +480,7 @@ export function BusinessImportPage() {
                 </div>
               ) : null}
 
-              <div className="mt-6 overflow-hidden rounded-[2rem] border border-line">
+              <div className="mt-6 overflow-hidden rounded-xl border border-line">
                 <div className="max-h-[480px] overflow-auto">
                   <table className="min-w-full divide-y divide-line text-left text-sm">
                     <thead className="sticky top-0 bg-panelAlt/90">

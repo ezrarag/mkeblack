@@ -511,3 +511,19 @@ export async function claimBusinessListing(
     { merge: true }
   );
 }
+
+export async function setBusinessSolidarityMembership(
+  businessId: string,
+  data: {
+    solidarityMember: boolean;
+    solidarityMemberSince: Date | null;
+    solidarityMemberExpiry: Date | null;
+  }
+) {
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  await firestoreModule.updateDoc(firestoreModule.doc(db, "businesses", businessId), {
+    solidarityMember: data.solidarityMember,
+    solidarityMemberSince: data.solidarityMemberSince ?? null,
+    solidarityMemberExpiry: data.solidarityMemberExpiry ?? null
+  });
+}

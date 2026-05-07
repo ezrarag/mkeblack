@@ -107,7 +107,7 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
           action={
             <Link
               href="/login"
-              className="inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+              className="inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
             >
               Go to login
             </Link>
@@ -126,7 +126,7 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
           action={
             <Link
               href="/login"
-              className="inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+              className="inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
             >
               Sign in
             </Link>
@@ -139,11 +139,11 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
   return (
     <section className="mx-auto flex min-h-[calc(100vh-96px)] max-w-6xl items-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2.4rem] border border-line bg-panel/80 p-8 shadow-glow sm:p-10">
+        <div className="rounded-2xl border border-line bg-panel/80 p-8 shadow-glow sm:p-10">
           <p className="text-sm uppercase tracking-[0.32em] text-accentSoft">
             Claim listing
           </p>
-          <h1 className="mt-4 font-display text-5xl leading-none text-ink sm:text-6xl">
+          <h1 className="mt-4 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
             Claim {invite.businessName}.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-stone-300">
@@ -153,11 +153,11 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
           </p>
         </div>
 
-        <div className="rounded-[2.4rem] border border-line bg-panel/90 p-8 sm:p-10">
+        <div className="rounded-2xl border border-line bg-panel/90 p-8 sm:p-10">
           <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
             Create account
           </p>
-          <h2 className="mt-3 font-display text-4xl text-ink">Set your password</h2>
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink">Set your password</h2>
 
           <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
             <div>
@@ -200,7 +200,7 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft"
+              className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
             >
               {submitting ? "Claiming..." : "Create account and claim listing"}
             </button>

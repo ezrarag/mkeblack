@@ -269,13 +269,13 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="rounded-[2.6rem] border border-line bg-panel/75 p-6 shadow-glow sm:p-8 lg:p-10">
+      <div className="rounded-2xl border border-line bg-panel/75 p-6 shadow-glow sm:p-8 lg:p-10">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-accentSoft">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-accent">
               Milwaukee directory
             </p>
-            <h1 className="mt-4 max-w-3xl font-display text-5xl leading-none text-ink sm:text-6xl lg:text-7xl">
+            <h1 className="mt-4 max-w-3xl font-display text-4xl font-black leading-tight text-ink sm:text-5xl lg:text-6xl">
               Find Black-owned Milwaukee businesses by the day they&apos;re open.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
@@ -286,34 +286,34 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-3xl border border-line bg-panelAlt/75 p-5">
+            <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Live listings
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {loading ? "--" : businesses.length}
               </p>
             </div>
-            <div className="rounded-3xl border border-line bg-panelAlt/75 p-5">
+            <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Highlighted day
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {selectedDay === "all" ? "All" : titleCase(selectedDay).slice(0, 3)}
               </p>
             </div>
-            <div className="rounded-3xl border border-line bg-panelAlt/75 p-5">
+            <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Map mode
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 Live
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-10 rounded-[2rem] border border-line bg-canvas/40 p-4 sm:p-5">
+        <div className="mt-10 rounded-xl border border-line bg-canvas/40 p-4 sm:p-5">
           <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr_auto_auto]">
             <div>
               <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
@@ -367,7 +367,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   onClick={() => setLayout("grid")}
                   className={`rounded-full px-4 py-3 text-sm transition ${
                     layout === "grid"
-                      ? "bg-accent text-canvas"
+                      ? "bg-accent text-white"
                       : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                   }`}
                 >
@@ -378,7 +378,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   onClick={() => setLayout("list")}
                   className={`rounded-full px-4 py-3 text-sm transition ${
                     layout === "list"
-                      ? "bg-accent text-canvas"
+                      ? "bg-accent text-white"
                       : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                   }`}
                 >
@@ -396,7 +396,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 disabled={geolocating}
                 className={`w-full rounded-full px-4 py-3 text-sm transition ${
                   sortByDistance
-                    ? "bg-accent text-canvas"
+                    ? "bg-accent text-white"
                     : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                 }`}
               >
@@ -434,7 +434,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           </div>
 
           {locationMessage || neighborhoodsError || tagsError ? (
-            <div className="mt-4 rounded-3xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-stone-100">
+            <div className="mt-4 rounded-xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-stone-100">
               {locationMessage ?? neighborhoodsError ?? tagsError}
             </div>
           ) : null}
@@ -449,7 +449,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 {tagsExpanded ? "Hide tags" : "Show tags"}
                 {selectedTags.length ? ` (${selectedTags.length})` : ""}
               </button>
-              <p className="hidden text-xs uppercase tracking-[0.26em] text-accentSoft md:block">
+              <p className="hidden text-xs font-semibold uppercase tracking-[0.24em] text-accent md:block">
                 Tags
               </p>
               <div className="flex rounded-full border border-line bg-panelAlt/70 p-1">
@@ -460,8 +460,8 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                     onClick={() => setTagMatchMode(mode)}
                     className={`rounded-full px-3 py-1.5 text-xs transition ${
                       tagMatchMode === mode
-                        ? "bg-accent text-canvas"
-                        : "text-stone-300 hover:text-accentSoft"
+                        ? "bg-accent text-white"
+                        : "text-stone-300 hover:text-ink"
                     }`}
                   >
                     Match {mode}
@@ -483,7 +483,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                           onClick={() => toggleSelectedTag(tag.slug)}
                           className={`rounded-full px-4 py-2 text-sm transition ${
                             selected
-                              ? "border border-accent bg-accent text-canvas"
+                              ? "border border-accent bg-accent text-white"
                               : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                           }`}
                         >
@@ -502,7 +502,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           </div>
 
           <div className="mt-5">
-            <p className="mb-3 text-xs uppercase tracking-[0.26em] text-accentSoft">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
               Open on
             </p>
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -511,7 +511,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 onClick={() => setSelectedDay("all")}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
                   selectedDay === "all"
-                    ? "bg-accent text-canvas"
+                    ? "bg-accent text-white"
                     : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                 }`}
               >
@@ -524,7 +524,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   onClick={() => setSelectedDay(day)}
                   className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
                     selectedDay === day
-                      ? "bg-accent text-canvas"
+                      ? "bg-accent text-white"
                       : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                   }`}
                 >
@@ -561,7 +561,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="h-[360px] animate-pulse rounded-[2rem] border border-line bg-panel/70"
+              className="h-[360px] animate-pulse rounded-xl border border-line bg-panel/70"
             />
           ))}
         </div>
@@ -580,7 +580,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
               onClick={() => setMobileMapEnabled((current) => !current)}
               className={`rounded-full px-4 py-2 text-sm transition ${
                 mobileMapEnabled
-                  ? "bg-accent text-canvas"
+                  ? "bg-accent text-white"
                   : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
               }`}
             >

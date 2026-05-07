@@ -52,7 +52,7 @@ function normalizeNeighborhoodRecord(
   };
 }
 
-export async function getMilwaukeeNeighborhoods() {
+export async function getMilwaukeeNeighborhoods(options?: { cacheMissing?: boolean }) {
   const { db, firestoreModule } = await getFirestoreHelpers();
   const collectionReference = firestoreModule.collection(db, COLLECTION_NAME);
   const snapshot = await firestoreModule.getDocs(collectionReference);
@@ -70,14 +70,16 @@ export async function getMilwaukeeNeighborhoods() {
 
   const neighborhoods = await fetchOfficialMilwaukeeNeighborhoods();
 
-  await Promise.all(
-    neighborhoods.map((neighborhood) =>
-      firestoreModule.setDoc(
-        firestoreModule.doc(db, COLLECTION_NAME, neighborhood.id),
-        neighborhood
+  if (options?.cacheMissing) {
+    await Promise.all(
+      neighborhoods.map((neighborhood) =>
+        firestoreModule.setDoc(
+          firestoreModule.doc(db, COLLECTION_NAME, neighborhood.id),
+          neighborhood
+        )
       )
-    )
-  );
+    );
+  }
 
   return neighborhoods.sort((left, right) => left.name.localeCompare(right.name));
 }

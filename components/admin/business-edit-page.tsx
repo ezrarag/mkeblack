@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { BusinessTeamManager } from "@/components/forms/business-team-manager";
+import { BusinessMembershipPanel } from "@/components/admin/business-membership-panel";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
 import { businessToFormValues } from "@/lib/businesses";
@@ -26,7 +27,7 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [inviting, setInviting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"listing" | "team">("listing");
+  const [activeTab, setActiveTab] = useState<"listing" | "team" | "membership">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -112,13 +113,13 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Business edit
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 {loading ? "Loading..." : business?.name || "Business"}
               </h1>
             </div>
@@ -174,19 +175,19 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
           </div>
         ) : (
           <div className="mt-6">
-            <div className="mb-6 flex flex-wrap gap-2 rounded-[2rem] border border-line bg-panel/80 p-2">
-              {(["listing", "team"] as const).map((tab) => (
+            <div className="mb-6 flex flex-wrap gap-2 rounded-xl border border-line bg-panel/80 p-2">
+              {(["listing", "team", "membership"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
                   className={`rounded-full px-5 py-3 text-sm transition ${
                     activeTab === tab
-                      ? "bg-accent text-canvas"
+                      ? "bg-accent text-white"
                       : "text-stone-200 hover:bg-accent/10 hover:text-accentSoft"
                   }`}
                 >
-                  {tab === "listing" ? "Listing" : "Team"}
+                  {tab === "listing" ? "Listing" : tab === "team" ? "Team" : "Membership"}
                 </button>
               ))}
             </div>
@@ -204,8 +205,10 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
                 uploading={uploading}
                 showAdminFields
               />
-            ) : (
+            ) : activeTab === "team" ? (
               <BusinessTeamManager businessId={business.id} showUidField />
+            ) : (
+              <BusinessMembershipPanel business={business} />
             )}
           </div>
         )}

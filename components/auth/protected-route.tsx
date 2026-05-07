@@ -53,7 +53,7 @@ export function ProtectedRoute({
           <div className="flex flex-col gap-4">
             <Link
               href="/dashboard"
-              className="inline-flex w-fit rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+              className="inline-flex w-fit rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
             >
               Go to dashboard
             </Link>

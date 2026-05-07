@@ -124,9 +124,30 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── Marketplace listings ─────────────────────────────────────────────────
+    match /marketplace_listings/{listingId} {
+      // Public reads only when available; admins and the owning business see all
+      allow read: if resource.data.available == true
+                  || isAdmin()
+                  || ownsBusinessById(resource.data.businessId);
+      // Only the owning business (Solidarity members) or admin can create/update
+      allow create: if isAdmin()
+                    || ownsBusinessById(request.resource.data.businessId);
+      allow update: if isAdmin()
+                    || ownsBusinessById(resource.data.businessId);
+      allow delete: if isAdmin()
+                    || ownsBusinessById(resource.data.businessId);
+    }
+
     // ── Consumer favorites (subcollection under users) ───────────────────────
     match /users/{uid}/favorites/{businessId} {
       allow read: if true;
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ── Recent views (subcollection under users) ─────────────────────────────
+    match /users/{uid}/recent_views/{businessId} {
+      allow read: if isSelf(uid) || isAdmin();
       allow write: if signedIn() && request.auth.uid == uid;
     }
 

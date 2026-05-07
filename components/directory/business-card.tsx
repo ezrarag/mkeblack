@@ -7,6 +7,7 @@ import {
 } from "@/lib/business-hours";
 import { Business, DayKey } from "@/lib/types";
 import { titleCase } from "@/lib/utils";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 
 type BusinessCardProps = {
   business: Business;
@@ -56,15 +57,15 @@ export function BusinessCard({
           onSelect(business);
         }
       }}
-      className={`group overflow-hidden rounded-[2rem] border bg-panel/80 transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-glow ${
+      className={`group overflow-hidden rounded-2xl border bg-panel/80 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-glow ${
         isHighlighted ? "border-accent shadow-glow" : "border-line"
       } ${
-        layout === "list" ? "grid gap-0 md:grid-cols-[280px_minmax(0,1fr)]" : ""
+        layout === "list" ? "grid gap-0 md:grid-cols-[260px_minmax(0,1fr)]" : ""
       }`}
     >
       <div
         className={`relative overflow-hidden ${
-          layout === "list" ? "h-full min-h-[220px]" : "aspect-[4/3]"
+          layout === "list" ? "h-full min-h-[200px]" : "aspect-[4/3]"
         }`}
       >
         {previewPhoto ? (
@@ -72,56 +73,62 @@ export function BusinessCard({
             src={previewPhoto}
             alt={business.name}
             fill
-            sizes={layout === "list" ? "(min-width: 768px) 280px, 100vw" : "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"}
+            sizes={layout === "list" ? "(min-width: 768px) 260px, 100vw" : "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"}
             className="object-cover transition duration-500 group-hover:scale-[1.02]"
           />
         ) : (
-          <div
-            className="flex h-full items-center justify-center bg-gradient-to-br from-accent/30 via-accent/10 to-transparent font-display text-4xl text-accentSoft"
-          >
+          <div className="flex h-full items-center justify-center bg-panelAlt font-display text-3xl font-black text-stone-500">
             {initials}
           </div>
         )}
-        <div className="absolute left-4 top-4 rounded-full border border-black/10 bg-black/65 px-3 py-1 text-xs uppercase tracking-[0.22em] text-accentSoft">
+        <div className="absolute left-3 top-3 rounded-full border border-black/20 bg-black/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-200">
           {business.category}
         </div>
         {typeof distanceMiles === "number" ? (
-          <div className="absolute bottom-4 left-4 rounded-full border border-accent/35 bg-canvas/85 px-3 py-1 text-xs font-semibold text-accentSoft">
+          <div className="absolute bottom-3 left-3 rounded-full border border-white/20 bg-black/75 px-2.5 py-1 text-[10px] font-bold text-white">
             {distanceMiles.toFixed(1)} mi
           </div>
         ) : null}
+        {business.solidarityMember ? (
+          <div className="absolute bottom-3 right-3 rounded-full border border-success/50 bg-black/80 px-2.5 py-1 text-[10px] font-semibold text-success">
+            ★ Solidarity Circle
+          </div>
+        ) : null}
+        <div className="absolute right-3 top-3">
+          <FavoriteButton business={business} />
+        </div>
       </div>
 
-      <div className="flex flex-col justify-between p-5 sm:p-6">
+      <div className="flex flex-col justify-between p-4 sm:p-5">
         <div>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="font-display text-3xl text-ink">{business.name}</h3>
-              <p className="mt-2 text-sm text-stone-400">{business.address}</p>
+              <h3 className="font-display text-xl font-bold leading-snug text-ink">{business.name}</h3>
+              <p className="mt-1 text-xs text-stone-400">{business.address}</p>
               {business.neighborhood ? (
-                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
                   {business.neighborhood}
                 </p>
               ) : null}
             </div>
             <span
-              className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] ${
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] ${
                 isOpen
-                  ? "border border-success/35 bg-success/10 text-success"
-                  : "border border-danger/35 bg-danger/10 text-rose-200"
+                  ? "border border-success/40 bg-success/10 text-success"
+                  : "border border-danger/40 bg-danger/10 text-rose-300"
               }`}
             >
-              {isOpen ? "Open now" : "Closed"}
+              {isOpen ? "Open" : "Closed"}
             </span>
           </div>
 
-          <p className="mt-4 max-h-[5.25rem] overflow-hidden text-sm leading-7 text-stone-300">
+          <p className="mt-3 max-h-[4.5rem] overflow-hidden text-sm leading-6 text-stone-300">
             {business.description || "Community-rooted Milwaukee business listing."}
           </p>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
-          <p className="text-sm text-stone-200">{hoursLabel}</p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+          <p className="text-xs text-stone-300">{hoursLabel}</p>
           <div className="flex flex-wrap items-center gap-3">
             {directionsUrl ? (
               <a
@@ -129,7 +136,7 @@ export function BusinessCard({
                 target="_blank"
                 rel="noreferrer"
                 onClick={(event) => event.stopPropagation()}
-                className="rounded-full border border-accent/35 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accentSoft transition hover:bg-accent/15"
+                className="rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent transition hover:bg-accent/20"
               >
                 Directions
               </a>
@@ -137,7 +144,7 @@ export function BusinessCard({
             <Link
               href={`/business/${business.id}`}
               onClick={(event) => event.stopPropagation()}
-              className="text-xs uppercase tracking-[0.24em] text-accentSoft"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-accent transition hover:text-accentSoft"
             >
               View profile
             </Link>

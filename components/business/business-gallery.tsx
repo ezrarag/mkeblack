@@ -17,10 +17,10 @@ export function BusinessGallery({ name, photos }: BusinessGalleryProps) {
 
   if (!photos.length) {
     return (
-      <div className="flex aspect-[16/10] items-center justify-center rounded-[2.2rem] border border-line bg-gradient-to-br from-accent/20 via-panelAlt to-panel text-center">
+      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-line bg-panelAlt text-center">
         <div>
-          <p className="font-display text-5xl text-accentSoft">{name}</p>
-          <p className="mt-3 text-sm uppercase tracking-[0.26em] text-muted">
+          <p className="font-display text-4xl font-black text-stone-400">{name}</p>
+          <p className="mt-3 text-xs uppercase tracking-[0.24em] text-muted">
             Photo gallery coming soon
           </p>
         </div>
@@ -30,7 +30,7 @@ export function BusinessGallery({ name, photos }: BusinessGalleryProps) {
 
   return (
     <div>
-      <div className="relative aspect-[16/10] overflow-hidden rounded-[2.2rem] border border-line bg-panel">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-line bg-panel">
         <Image
           src={photos[activePhoto]}
           alt={name}

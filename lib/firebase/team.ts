@@ -6,7 +6,8 @@ import {
 } from "@/lib/firebase/client";
 import {
   BusinessTeamMember,
-  BusinessTeamMemberFormValues
+  BusinessTeamMemberFormValues,
+  TeamMemberRoleType
 } from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
 
@@ -51,6 +52,20 @@ function parseDateValue(value: unknown) {
   return null;
 }
 
+/**
+ * Derives roleType with full backward compatibility.
+ * - New docs have an explicit roleType field.
+ * - Legacy docs only have isOwner:true — map those to "owner".
+ * - Everything else defaults to "team".
+ */
+function normalizeRoleType(record: FirestoreRecord): TeamMemberRoleType {
+  const rt = record.roleType;
+  if (rt === "owner" || rt === "co_owner" || rt === "team") return rt;
+  // Legacy: fall back to isOwner boolean
+  if (booleanValue(record.isOwner, false)) return "owner";
+  return "team";
+}
+
 function sanitizeFilename(name: string) {
   return name.replace(/[^a-zA-Z0-9.-]+/g, "-").toLowerCase();
 }
@@ -65,10 +80,7 @@ async function getFirestoreHelpers() {
     throw new Error("Firestore is not available in this environment.");
   }
 
-  return {
-    db,
-    firestoreModule
-  };
+  return { db, firestoreModule };
 }
 
 async function getStorageHelpers() {
@@ -81,10 +93,7 @@ async function getStorageHelpers() {
     throw new Error("Firebase Storage is not available in this environment.");
   }
 
-  return {
-    storage,
-    storageModule
-  };
+  return { storage, storageModule };
 }
 
 export function normalizeBusinessTeamMemberRecord(
@@ -92,30 +101,46 @@ export function normalizeBusinessTeamMemberRecord(
   id: string
 ): BusinessTeamMember {
   const record = isRecord(value) ? value : {};
+  const roleType = normalizeRoleType(record);
 
   return {
     id,
     uid: stringValue(record.uid).trim() || null,
     name: stringValue(record.name).trim(),
     role: stringValue(record.role).trim(),
-    bio: stringValue(record.bio).trim().slice(0, 300),
+    roleType,
+    title: stringValue(record.title).trim(),
+    pronouns: stringValue(record.pronouns).trim(),
+    bio: stringValue(record.bio).trim().slice(0, 400),
     photoUrl: stringValue(record.photoUrl).trim(),
     linkedinUrl: stringValue(record.linkedinUrl).trim(),
     instagramUrl: stringValue(record.instagramUrl).trim(),
+    facebookUrl: stringValue(record.facebookUrl).trim(),
+    tiktokUrl: stringValue(record.tiktokUrl).trim(),
+    email: stringValue(record.email).trim(),
+    phone: stringValue(record.phone).trim(),
+    website: stringValue(record.website).trim(),
+    displayContact: booleanValue(record.displayContact, false),
     order: numberValue(record.order),
-    isOwner: booleanValue(record.isOwner),
+    isOwner: roleType === "owner", // always derived, never stored raw
     visible: booleanValue(record.visible, true),
     addedAt: parseDateValue(record.addedAt)
   };
 }
 
-export function sortBusinessTeamMembers(members: BusinessTeamMember[]) {
-  return [...members].sort((left, right) => {
-    if (left.isOwner !== right.isOwner) {
-      return left.isOwner ? -1 : 1;
-    }
+/** Priority weight for sorting: owner < co_owner < team */
+function roleTypePriority(roleType: TeamMemberRoleType): number {
+  if (roleType === "owner") return 0;
+  if (roleType === "co_owner") return 1;
+  return 2;
+}
 
-    return left.order - right.order || left.name.localeCompare(right.name);
+export function sortBusinessTeamMembers(members: BusinessTeamMember[]) {
+  return [...members].sort((a, b) => {
+    const priorityDiff =
+      roleTypePriority(a.roleType) - roleTypePriority(b.roleType);
+    if (priorityDiff !== 0) return priorityDiff;
+    return a.order - b.order || a.name.localeCompare(b.name);
   });
 }
 
@@ -126,10 +151,19 @@ export function createTeamMemberDraft(
     uid: "",
     name: "",
     role: "",
+    roleType: "team",
+    title: "",
+    pronouns: "",
     bio: "",
     photoUrl: "",
     linkedinUrl: "",
     instagramUrl: "",
+    facebookUrl: "",
+    tiktokUrl: "",
+    email: "",
+    phone: "",
+    website: "",
+    displayContact: false,
     order,
     isOwner: false,
     visible: true
@@ -143,10 +177,19 @@ export function teamMemberToFormValues(
     uid: member.uid ?? "",
     name: member.name,
     role: member.role,
+    roleType: member.roleType,
+    title: member.title,
+    pronouns: member.pronouns,
     bio: member.bio,
     photoUrl: member.photoUrl,
     linkedinUrl: member.linkedinUrl,
     instagramUrl: member.instagramUrl,
+    facebookUrl: member.facebookUrl,
+    tiktokUrl: member.tiktokUrl,
+    email: member.email,
+    phone: member.phone,
+    website: member.website,
+    displayContact: member.displayContact,
     order: member.order,
     isOwner: member.isOwner,
     visible: member.visible
@@ -154,16 +197,27 @@ export function teamMemberToFormValues(
 }
 
 function normalizeTeamMemberPayload(values: BusinessTeamMemberFormValues) {
+  const roleType: TeamMemberRoleType = values.roleType;
   return {
     uid: values.uid.trim() || null,
     name: values.name.trim(),
     role: values.role.trim(),
-    bio: values.bio.trim().slice(0, 300),
+    roleType,
+    title: values.title.trim(),
+    pronouns: values.pronouns.trim(),
+    bio: values.bio.trim().slice(0, 400),
     photoUrl: values.photoUrl.trim(),
     linkedinUrl: normalizeUrl(values.linkedinUrl.trim()),
     instagramUrl: normalizeUrl(values.instagramUrl.trim()),
+    facebookUrl: normalizeUrl(values.facebookUrl.trim()),
+    tiktokUrl: normalizeUrl(values.tiktokUrl.trim()),
+    email: values.email.trim(),
+    phone: values.phone.trim(),
+    website: normalizeUrl(values.website.trim()),
+    displayContact: Boolean(values.displayContact),
     order: Number(values.order),
-    isOwner: Boolean(values.isOwner),
+    // isOwner kept in sync so legacy reads still work
+    isOwner: roleType === "owner",
     visible: Boolean(values.visible)
   };
 }
@@ -199,16 +253,28 @@ export async function saveBusinessTeamMember(
   const memberReference = memberId
     ? firestoreModule.doc(db, "businesses", businessId, "team", memberId)
     : firestoreModule.doc(collectionReference);
+
   const memberSnapshot = await firestoreModule.getDoc(memberReference);
   const payload = normalizeTeamMemberPayload(values);
   const batch = firestoreModule.writeBatch(db);
 
-  if (payload.isOwner) {
+  if (payload.roleType === "owner") {
+    // Demote any other existing owner to co_owner so there is only one primary owner.
+    // Co-owners and team members are left unchanged.
     const existingMembersSnapshot = await firestoreModule.getDocs(collectionReference);
-
     existingMembersSnapshot.docs.forEach((document) => {
       if (document.id !== memberReference.id) {
-        batch.set(document.ref, { isOwner: false }, { merge: true });
+        const data = document.data();
+        // Detect owner using both new roleType field and legacy isOwner boolean
+        const existingRoleType: string =
+          data.roleType ?? (booleanValue(data.isOwner) ? "owner" : "team");
+        if (existingRoleType === "owner") {
+          batch.set(
+            document.ref,
+            { roleType: "co_owner", isOwner: false },
+            { merge: true }
+          );
+        }
       }
     });
   }

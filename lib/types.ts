@@ -41,16 +41,35 @@ export type BusinessTag = {
   usageCount: number;
 };
 
+export type TeamMemberRoleType = "owner" | "co_owner" | "team";
+
 export type BusinessTeamMember = {
   id: string;
   uid: string | null;
   name: string;
+  /** Display role label, e.g. "Chef", "Operations Manager" */
   role: string;
+  /** Structural role — drives sort order and public headings */
+  roleType: TeamMemberRoleType;
+  /** Optional honorific / title, e.g. "Dr.", "Rev." */
+  title: string;
+  pronouns: string;
   bio: string;
   photoUrl: string;
   linkedinUrl: string;
   instagramUrl: string;
+  facebookUrl: string;
+  tiktokUrl: string;
+  /** Optional contact email shown publicly when displayContact is true */
+  email: string;
+  /** Optional contact phone shown publicly when displayContact is true */
+  phone: string;
+  /** Optional personal/business website */
+  website: string;
+  /** Whether to show email/phone/website on the public profile */
+  displayContact: boolean;
   order: number;
+  /** Kept for backward compatibility; derived from roleType === "owner" */
   isOwner: boolean;
   visible: boolean;
   addedAt: Date | null;
@@ -60,11 +79,21 @@ export type BusinessTeamMemberFormValues = {
   uid: string;
   name: string;
   role: string;
+  roleType: TeamMemberRoleType;
+  title: string;
+  pronouns: string;
   bio: string;
   photoUrl: string;
   linkedinUrl: string;
   instagramUrl: string;
+  facebookUrl: string;
+  tiktokUrl: string;
+  email: string;
+  phone: string;
+  website: string;
+  displayContact: boolean;
   order: number;
+  /** Derived from roleType === "owner"; kept for write-path backward compat */
   isOwner: boolean;
   visible: boolean;
 };
@@ -80,7 +109,69 @@ export type HomepageModuleType =
   | "membership_cta"
   | "member_discounts"
   | "editorial"
-  | "custom";
+  | "custom"
+  | "marketplace";
+
+// ── Marketplace ──────────────────────────────────────────────────────────────
+
+export const MARKETPLACE_LISTING_CATEGORIES = [
+  "Food & Drink",
+  "Beauty & Grooming",
+  "Apparel & Accessories",
+  "Art & Creative",
+  "Health & Wellness",
+  "Home & Living",
+  "Professional Services",
+  "Events & Experiences",
+  "Digital",
+  "Other"
+] as const;
+
+export type MarketplaceListingCategory =
+  (typeof MARKETPLACE_LISTING_CATEGORIES)[number];
+
+export type MarketplaceListing = {
+  id: string;
+  businessId: string;
+  businessName: string;
+  /** Denormalized from the business; drives Solidarity badge on card */
+  businessSolidarity: boolean;
+  name: string;
+  description: string;
+  /** 0 = free / contact for pricing */
+  priceCents: number;
+  photoUrl: string;
+  category: string;
+  available: boolean;
+  featured: boolean;
+  /** External purchase/order URL; if empty falls back to business profile */
+  orderUrl: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketplaceListingFormValues = {
+  name: string;
+  description: string;
+  priceCents: number;
+  photoUrl: string;
+  category: string;
+  available: boolean;
+  orderUrl: string;
+};
+
+/** Phase 1 stub — no payments processed yet */
+export type MarketplaceOrder = {
+  id: string;
+  listingId: string;
+  businessId: string;
+  customerUid: string | null;
+  customerEmail: string;
+  status: "pending";
+  createdAt: Date | null;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 type HomepageModuleBase<T extends HomepageModuleType, C> = {
   id: string;
@@ -142,13 +233,24 @@ export type CustomHomepageModule = HomepageModuleBase<
   }
 >;
 
+export type MarketplaceHomepageModule = HomepageModuleBase<
+  "marketplace",
+  {
+    description: string;
+    maxItems: number;
+    ctaLabel: string;
+    ctaHref: string;
+  }
+>;
+
 export type HomepageModule =
   | HeroHomepageModule
   | FeaturedArticlesHomepageModule
   | MembershipCtaHomepageModule
   | MemberDiscountsHomepageModule
   | EditorialHomepageModule
-  | CustomHomepageModule;
+  | CustomHomepageModule
+  | MarketplaceHomepageModule;
 
 export type MemberDiscount = {
   id: string;
@@ -220,9 +322,36 @@ export type Business = {
     lat: number;
     lng: number;
   };
+  solidarityMember: boolean;
+  solidarityMemberSince: Date | null;
+  solidarityMemberExpiry: Date | null;
 };
 
-export type UserRole = "business" | "admin";
+export type SolidarityMemberStatus = "active" | "expired" | "comp" | "pending";
+
+export type SolidarityMember = {
+  id: string;
+  email: string;
+  name: string;
+  uid: string | null;
+  businessId: string | null;
+  status: SolidarityMemberStatus;
+  joinedAt: Date | null;
+  expiresAt: Date | null;
+  notes: string;
+  paymentSource: "givebutter" | "stripe" | "comp" | "manual";
+  paymentReference: string;
+};
+
+export type BenefitType = {
+  id: string;
+  label: string;
+  description: string;
+  active: boolean;
+  order: number;
+};
+
+export type UserRole = "business" | "admin" | "visitor";
 
 export type UserProfile = {
   uid: string;

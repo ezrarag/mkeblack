@@ -11,7 +11,7 @@ type FooterLink = {
 
 function FooterNavLink({ href, label, external }: FooterLink) {
   const className =
-    "text-sm leading-7 text-stone-300 transition hover:text-accentSoft";
+    "text-sm leading-7 text-stone-300 transition hover:text-ink";
 
   if (external) {
     return (
@@ -31,53 +31,53 @@ function FooterNavLink({ href, label, external }: FooterLink) {
 const exploreLinks: FooterLink[] = [
   { href: "/", label: "Homepage" },
   { href: "/directory", label: "Business directory" },
-  { href: "/#stories", label: "Featured stories" },
-  { href: "/#membership", label: "Membership" },
-  { href: "/#discounts", label: "Member discounts" }
+  { href: "/marketplace", label: "Marketplace" },
+  { href: "/about", label: "About MKE Black" },
+  { href: "/what-we-do", label: "What we do" },
+  { href: "/who-we-are", label: "Who we are" },
+  { href: "/news-articles", label: "News & articles" },
+  { href: "/events", label: "Events" },
+  { href: "/experiences", label: "Experiences" },
+  { href: "/membership", label: "Solidarity Circle" },
+  { href: "/contact", label: "Contact" }
 ];
 
 export function SiteFooter() {
   const { user, hasAdminAccess } = useAuth();
 
-  // Build owner/admin links based on auth state
   const businessLinks: FooterLink[] = [];
 
   if (!user) {
-    // Logged out — show login entry points with ?next= so they land in the right place
     businessLinks.push(
       { href: "/login", label: "Business owner login" },
       { href: "/login?next=/admin", label: "Admin login" }
     );
   } else if (hasAdminAccess) {
-    // Logged in as admin — show all admin routes
     businessLinks.push(
       { href: "/admin", label: "Admin workspace" },
       { href: "/admin/homepage", label: "Homepage editor" },
       { href: "/admin/businesses", label: "Business manager" },
+      { href: "/admin/marketplace", label: "Marketplace" },
+      { href: "/admin/members", label: "Solidarity Circle" },
       { href: "/admin/import", label: "Import spreadsheet" },
       { href: "/dashboard", label: "Owner dashboard" }
     );
   } else {
-    // Logged in as business owner
     businessLinks.push(
       { href: "/dashboard", label: "My listing" },
-      {
-        href: "https://www.mkeblack.org/contact",
-        label: "Submit a business",
-        external: true
-      }
+      { href: "/contact", label: "Submit a business" }
     );
   }
 
   return (
-    <footer className="relative border-t border-line bg-panel/55">
+    <footer className="relative border-t border-line bg-charcoal/80">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
           <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-accentSoft">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent">
               MKE Black
             </p>
-            <h2 className="mt-4 max-w-sm font-display text-4xl leading-none text-ink">
+            <h2 className="mt-4 max-w-sm font-display text-3xl font-black leading-tight text-ink">
               Milwaukee&apos;s Black business community, all in one place.
             </h2>
             <p className="mt-5 max-w-md text-sm leading-8 text-stone-300">
@@ -85,6 +85,32 @@ export function SiteFooter() {
               offers, and reach the right team without overloading the top
               navigation.
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href="https://www.facebook.com/MKEBlack"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
+              >
+                Facebook
+              </a>
+              <a
+                href="https://www.instagram.com/mkeblack"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
+              >
+                Instagram
+              </a>
+              <a
+                href="https://twitter.com/mkeblack"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
+              >
+                Twitter / X
+              </a>
+            </div>
           </div>
 
           <div>
@@ -109,29 +135,61 @@ export function SiteFooter() {
             </nav>
           </div>
 
-          <div className="rounded-[2rem] border border-line bg-panelAlt/70 p-6">
-            <p className="text-xs uppercase tracking-[0.26em] text-muted">
-              Contact
-            </p>
-            <p className="mt-4 text-sm leading-7 text-stone-300">
-              Questions, directory corrections, partnerships, and new business
-              submissions should all funnel through one contact path.
-            </p>
-            <a
-              href="https://www.mkeblack.org/contact"
-              className="mt-6 inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
-            >
-              Open contact form
-            </a>
-            <p className="mt-4 text-xs uppercase tracking-[0.22em] text-muted">
-              Milwaukee, Wisconsin
-            </p>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-line bg-panel/70 p-6">
+              <p className="text-xs uppercase tracking-[0.26em] text-muted">
+                Contact
+              </p>
+              <p className="mt-4 text-sm leading-7 text-stone-300">
+                Questions, directory corrections, partnerships, and new business
+                submissions — all through one contact path.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-6 inline-flex rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
+              >
+                Open contact form
+              </Link>
+              <p className="mt-4 text-xs uppercase tracking-[0.22em] text-muted">
+                Milwaukee, Wisconsin
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-success/25 bg-success/5 p-6">
+              <p className="text-xs uppercase tracking-[0.26em] text-muted">
+                Support the mission
+              </p>
+              <p className="mt-3 text-sm leading-7 text-stone-300">
+                Your donation directly funds the directory, events, and community
+                programs that drive Black community wealth.
+              </p>
+              <a
+                href="https://www.mkeblack.org/donate"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex rounded-full border border-success/50 bg-success/10 px-5 py-2.5 text-sm font-semibold text-success transition hover:bg-success/20 hover:text-white"
+              >
+                Donate
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-line/80 pt-6 text-xs uppercase tracking-[0.24em] text-muted">
-          <p>{new Date().getFullYear()} MKE Black</p>
-          <p>Directory discovery, owner updates, and community connection.</p>
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-xs text-muted">
+          <p className="uppercase tracking-[0.22em]">{new Date().getFullYear()} MKE Black</p>
+          <p className="uppercase tracking-[0.22em]">Directory discovery, owner updates, and community connection.</p>
+          <p>
+            Powered by the{" "}
+            <a
+              href="https://readyaimgo.io"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-stone-400 transition hover:text-ink"
+            >
+              ReadyAimGo
+            </a>{" "}
+            platform
+          </p>
         </div>
       </div>
     </footer>

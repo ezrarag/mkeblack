@@ -163,16 +163,16 @@ function popupHtml(
   );
 
   return `
-    <div style="min-width:190px;color:#1c1917;font-family:system-ui,sans-serif">
-      <div style="font-weight:700;font-size:14px;line-height:1.3">${escapeHtml(business.name)}</div>
-      <div style="margin-top:4px;color:#78716c;font-size:12px">${escapeHtml(business.category)}</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:#44403c">
+    <div style="min-width:190px;background:#111111;color:#f7f7f3;font-family:system-ui,sans-serif;border-radius:8px;padding:2px">
+      <div style="font-weight:700;font-size:14px;line-height:1.35">${escapeHtml(business.name)}</div>
+      <div style="margin-top:3px;color:#9ca3af;font-size:12px">${escapeHtml(business.category)}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;color:#d1d5db">
         <span style="width:8px;height:8px;border-radius:999px;${statusClass}"></span>
         ${isOpen ? "Open now" : "Closed"}
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <a href="/business/${encodeURIComponent(business.id)}" style="color:#8d5f00;font-size:12px;font-weight:700">View listing &rarr;</a>
-        <a href="${directionsUrl}" target="_blank" rel="noreferrer" style="color:#2563eb;font-size:12px;font-weight:700">Directions &rarr;</a>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+        <a href="/business/${encodeURIComponent(business.id)}" style="color:#EC2024;font-size:12px;font-weight:700">View listing &rarr;</a>
+        <a href="${directionsUrl}" target="_blank" rel="noreferrer" style="color:#3b82f6;font-size:12px;font-weight:700">Directions &rarr;</a>
       </div>
     </div>
   `;
@@ -253,9 +253,9 @@ export function BusinessMap({
             source: BUSINESSES_SOURCE_ID,
             filter: ["has", "point_count"],
             paint: {
-              "circle-color": "#D4A017",
+              "circle-color": "#EC2024",
               "circle-radius": ["step", ["get", "point_count"], 18, 25, 24, 60, 32],
-              "circle-opacity": 0.9,
+              "circle-opacity": 0.92,
               "circle-stroke-color": "#0b0b0b",
               "circle-stroke-width": 2
             }
@@ -272,7 +272,7 @@ export function BusinessMap({
               "text-size": 12
             },
             paint: {
-              "text-color": "#0b0b0b"
+              "text-color": "#ffffff"
             }
           });
 
@@ -282,7 +282,7 @@ export function BusinessMap({
             source: BUSINESSES_SOURCE_ID,
             filter: ["!", ["has", "point_count"]],
             paint: {
-              "circle-color": "#f8d56b",
+              "circle-color": "#FF4040",
               "circle-radius": 7,
               "circle-stroke-color": "#0b0b0b",
               "circle-stroke-width": 2
@@ -413,8 +413,8 @@ export function BusinessMap({
         type: "fill",
         source: NEIGHBORHOOD_SOURCE_ID,
         paint: {
-          "fill-color": "#D4A017",
-          "fill-opacity": 0.15
+          "fill-color": "#EC2024",
+          "fill-opacity": 0.10
         }
       },
       "business-clusters"
@@ -425,8 +425,8 @@ export function BusinessMap({
         type: "line",
         source: NEIGHBORHOOD_SOURCE_ID,
         paint: {
-          "line-color": "#D4A017",
-          "line-width": 3
+          "line-color": "#EC2024",
+          "line-width": 2.5
         }
       },
       "business-clusters"
@@ -514,7 +514,7 @@ export function BusinessMap({
   if (!mapboxToken) {
     return (
       <div
-        className={`flex items-center justify-center rounded-[2rem] border border-line bg-panel/80 p-8 text-center text-sm leading-7 text-stone-300 ${heightClassName}`}
+        className={`flex items-center justify-center rounded-2xl border border-line bg-panel/80 p-8 text-center text-sm leading-7 text-stone-300 ${heightClassName}`}
       >
         Add <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> to render the directory map.
       </div>
@@ -524,7 +524,7 @@ export function BusinessMap({
   if (loadError) {
     return (
       <div
-        className={`flex items-center justify-center rounded-[2rem] border border-danger/35 bg-danger/10 p-8 text-center text-sm leading-7 text-stone-100 ${heightClassName}`}
+        className={`flex items-center justify-center rounded-2xl border border-danger/35 bg-danger/10 p-8 text-center text-sm leading-7 text-stone-100 ${heightClassName}`}
       >
         {loadError}
       </div>
@@ -532,7 +532,7 @@ export function BusinessMap({
   }
 
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-line bg-panel/80 shadow-glow">
+    <div className="overflow-hidden rounded-2xl border border-line bg-panel/80 shadow-glow">
       <div ref={containerRef} className={`w-full ${heightClassName}`} />
     </div>
   );

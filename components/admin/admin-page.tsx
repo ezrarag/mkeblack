@@ -144,13 +144,13 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="grid gap-4 lg:grid-cols-3">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Admin workspace
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 Review every listing.
               </h1>
               <div className="mt-6">
@@ -192,7 +192,7 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Total listings
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {loading ? "--" : businesses.length}
               </p>
             </div>
@@ -200,7 +200,7 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Active listings
               </p>
-              <p className="mt-2 font-display text-4xl text-accentSoft">
+              <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {loading ? "--" : activeCount}
               </p>
             </div>
@@ -220,7 +220,7 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
         ) : null}
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
-          <aside className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+          <aside className="rounded-2xl border border-line bg-panel/85 p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
                 Listings
@@ -232,7 +232,7 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
                   setSelectedBusinessId(null);
                   setDraftValues(createBusinessDraft());
                 }}
-                className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
               >
                 New listing
               </button>

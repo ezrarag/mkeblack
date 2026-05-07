@@ -100,11 +100,11 @@ export function LoginForm() {
       <div className="grid w-full gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 
         {/* Left — value prop */}
-        <div className="rounded-[2.4rem] border border-line bg-panel/80 p-8 shadow-glow sm:p-10">
+        <div className="rounded-2xl border border-line bg-panel/80 p-8 shadow-glow sm:p-10">
           <p className="text-sm uppercase tracking-[0.32em] text-accentSoft">
             Business access
           </p>
-          <h1 className="mt-4 font-display text-5xl leading-none text-ink sm:text-6xl">
+          <h1 className="mt-4 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
             Update your MKE Black listing in real time.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-stone-300">
@@ -126,9 +126,9 @@ export function LoginForm() {
         </div>
 
         {/* Right — sign in form */}
-        <div className="rounded-[2.4rem] border border-line bg-panel/90 p-8 sm:p-10">
+        <div className="rounded-2xl border border-line bg-panel/90 p-8 sm:p-10">
           <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">Sign in</p>
-          <h2 className="mt-3 font-display text-4xl text-ink">Business login</h2>
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink">Business login</h2>
           <p className="mt-4 text-sm leading-7 text-stone-300">
             Use your email and password, or sign in with Google. Contact the
             directory team if you need admin access or a linked business profile.
@@ -136,7 +136,7 @@ export function LoginForm() {
 
           {/* ── In-app browser warning ── */}
           {inAppBrowser && (
-            <div className="mt-6 rounded-[1.6rem] border border-amber-500/40 bg-amber-500/10 px-5 py-5">
+            <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-5 py-5">
               <p className="text-sm font-semibold text-amber-300">
                 Open in your browser to sign in
               </p>
@@ -253,7 +253,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={isSubmitting || !isFirebaseConfigured}
-              className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft disabled:opacity-50"
+              className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
             >
               {submitting ? "Signing in…" : "Sign in with email"}
             </button>

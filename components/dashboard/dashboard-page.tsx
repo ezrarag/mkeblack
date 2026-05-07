@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { BusinessTeamManager } from "@/components/forms/business-team-manager";
+import { BusinessMarketplaceManager } from "@/components/marketplace/business-marketplace-manager";
 import { BusinessClaimSearch } from "@/components/dashboard/business-claim-search";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
@@ -23,7 +24,7 @@ export function DashboardPageContent() {
   const { business, loading, error } = useBusiness(profile?.businessId ?? "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"listing" | "team">("listing");
+  const [activeTab, setActiveTab] = useState<"listing" | "team" | "marketplace">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -84,13 +85,13 @@ export function DashboardPageContent() {
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* ── Header ── */}
-        <div className="rounded-[2.5rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Owner dashboard
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 {loading
                   ? "Loading your listing…"
                   : business
@@ -152,7 +153,7 @@ export function DashboardPageContent() {
         {loading ? (
           <div className="mt-6 space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 animate-pulse rounded-[2rem] border border-line bg-panel/60" />
+              <div key={i} className="h-24 animate-pulse rounded-xl border border-line bg-panel/60" />
             ))}
           </div>
 
@@ -183,7 +184,7 @@ export function DashboardPageContent() {
               action={
                 <a
                   href="https://www.mkeblack.org/contact"
-                  className="inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                  className="inline-flex rounded-full bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
                 >
                   Contact MKE Black
                 </a>
@@ -193,19 +194,23 @@ export function DashboardPageContent() {
 
         ) : (
           <div className="mt-6">
-            <div className="mb-6 flex flex-wrap gap-2 rounded-[2rem] border border-line bg-panel/80 p-2">
-              {(["listing", "team"] as const).map((tab) => (
+            <div className="mb-6 flex flex-wrap gap-2 rounded-xl border border-line bg-panel/80 p-2">
+              {(["listing", "team", "marketplace"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
                   className={`rounded-full px-5 py-3 text-sm transition ${
                     activeTab === tab
-                      ? "bg-accent text-canvas"
+                      ? "bg-accent text-white"
                       : "text-stone-200 hover:bg-accent/10 hover:text-accentSoft"
                   }`}
                 >
-                  {tab === "listing" ? "Listing" : "Team"}
+                  {tab === "listing"
+                    ? "Listing"
+                    : tab === "team"
+                    ? "Team"
+                    : "Marketplace"}
                 </button>
               ))}
             </div>
@@ -224,8 +229,14 @@ export function DashboardPageContent() {
                 showAdminFields={false}
                 showInternalFields={false}
               />
-            ) : (
+            ) : activeTab === "team" ? (
               <BusinessTeamManager businessId={business.id} />
+            ) : (
+              <BusinessMarketplaceManager
+                businessId={business.id}
+                businessName={business.name}
+                isSolidarityMember={business.solidarityMember}
+              />
             )}
           </div>
         )}

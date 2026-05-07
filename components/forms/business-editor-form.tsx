@@ -197,7 +197,7 @@ export function BusinessEditorForm({
     <form onSubmit={handleSubmit} className="space-y-6">
 
       {/* ── Core info ──────────────────────────────────────────────── */}
-      <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
+      <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
         <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
           {title}
         </p>
@@ -349,7 +349,7 @@ export function BusinessEditorForm({
       </div>
 
       {/* ── Tags ───────────────────────────────────────────────────── */}
-      <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
+      <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
         <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
           Tags
         </p>
@@ -394,7 +394,7 @@ export function BusinessEditorForm({
                           onClick={() => toggleTag(tag.slug)}
                           className={`rounded-full px-4 py-2 text-sm transition ${
                             selected
-                              ? "border border-accent bg-accent text-canvas"
+                              ? "border border-accent bg-accent text-white"
                               : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                           }`}
                         >
@@ -416,7 +416,7 @@ export function BusinessEditorForm({
       </div>
 
       {/* ── Hours ──────────────────────────────────────────────────── */}
-      <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
+      <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
         <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
           Weekly hours
         </p>
@@ -445,7 +445,7 @@ export function BusinessEditorForm({
       </div>
 
       {/* ── Photos ─────────────────────────────────────────────────── */}
-      <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
+      <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
@@ -459,7 +459,7 @@ export function BusinessEditorForm({
           </div>
 
           {onUploadPhotos ? (
-            <label className="inline-flex cursor-pointer items-center rounded-full bg-accent px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accentSoft">
+            <label className="inline-flex cursor-pointer items-center rounded-full bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft">
               {uploading ? "Uploading…" : "Upload photos"}
               <input
                 type="file"
@@ -477,7 +477,7 @@ export function BusinessEditorForm({
             {values.photos.map((photo) => (
               <div
                 key={photo}
-                className="overflow-hidden rounded-[1.6rem] border border-line bg-panelAlt/70"
+                className="overflow-hidden rounded-xl border border-line bg-panelAlt/70"
               >
                 <div className="relative aspect-[4/3]">
                   <Image
@@ -514,7 +514,7 @@ export function BusinessEditorForm({
 
       {/* ── Admin controls (admin workspace only) ──────────────────── */}
       {showAdminFields ? (
-        <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-7">
+        <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
           <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
             Admin controls
           </p>
@@ -631,7 +631,10 @@ export function BusinessEditorForm({
                   hoursLastSynced: null,
                   claimInviteStatus: "not_invited",
                   claimInvitedAt: null,
-                  location: values.location
+                  location: values.location,
+                  solidarityMember: false,
+                  solidarityMemberSince: null,
+                  solidarityMemberExpiry: null
                 }
               ]}
               heightClassName="h-[340px]"
@@ -659,7 +662,7 @@ export function BusinessEditorForm({
         <button
           type="submit"
           disabled={saving}
-          className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft"
+          className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
         >
           {saving ? "Saving…" : submitLabel}
         </button>

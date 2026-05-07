@@ -22,6 +22,9 @@ service firebase.storage {
         && firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid;
     }
 
+    // Covers team photos  (businesses/{id}/team-photos/),
+    // gallery photos      (businesses/{id}/photos/),
+    // and marketplace     (businesses/{id}/marketplace/).
     match /businesses/{businessId}/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin() || ownsBusiness(businessId);

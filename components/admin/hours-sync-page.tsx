@@ -300,7 +300,7 @@ export function HoursSyncPage() {
     return (
       <ProtectedRoute requireAdmin>
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="h-40 animate-pulse rounded-[2.4rem] border border-line bg-panel/70" />
+          <div className="h-40 animate-pulse rounded-2xl border border-line bg-panel/70" />
         </div>
       </ProtectedRoute>
     );
@@ -319,13 +319,13 @@ export function HoursSyncPage() {
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Hours sync
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 Recover missing weekly hours.
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
@@ -356,11 +356,11 @@ export function HoursSyncPage() {
         ) : null}
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6">
+          <div className="rounded-2xl border border-line bg-panel/85 p-6">
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
               Step 1 — Scope
             </p>
-            <h2 className="mt-3 font-display text-3xl text-ink">
+            <h2 className="mt-3 font-display text-2xl font-bold text-ink">
               {eligibleCount} businesses have no hours set.
             </h2>
             <p className="mt-4 text-sm leading-7 text-stone-400">
@@ -371,13 +371,13 @@ export function HoursSyncPage() {
               type="button"
               onClick={() => void handleStartSync()}
               disabled={starting || processing || !eligibleCount}
-              className="mt-6 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:cursor-not-allowed disabled:opacity-60"
             >
               {starting ? "Starting..." : "Start sync"}
             </button>
           </div>
 
-          <div className="rounded-[2.2rem] border border-line bg-panel/85 p-6">
+          <div className="rounded-2xl border border-line bg-panel/85 p-6">
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
               Step 2 — Live progress
             </p>
@@ -412,7 +412,7 @@ export function HoursSyncPage() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-8">
+        <div className="mt-6 rounded-2xl border border-line bg-panel/85 p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
             Step 3 — Review queue
           </p>
@@ -436,7 +436,7 @@ export function HoursSyncPage() {
                 return (
                   <div
                     key={result.businessId}
-                    className="rounded-[2rem] border border-line bg-panelAlt/60 p-5"
+                    className="rounded-xl border border-line bg-panelAlt/60 p-5"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
@@ -465,7 +465,7 @@ export function HoursSyncPage() {
                               type="button"
                               onClick={() => void handleApprove(result, draftHours)}
                               disabled={actingId === result.businessId}
-                              className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-canvas transition hover:bg-accentSoft disabled:opacity-50"
+                              className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
                             >
                               Approve
                             </button>
@@ -497,7 +497,7 @@ export function HoursSyncPage() {
                     </div>
 
                     {isEditing && isFound ? (
-                      <div className="mt-5 rounded-[1.8rem] border border-line bg-panel/70 p-5">
+                      <div className="mt-5 rounded-xl border border-line bg-panel/70 p-5">
                         <HoursEditor
                           hours={draftHours}
                           onChange={(day, field, value) =>
@@ -509,7 +509,7 @@ export function HoursSyncPage() {
                             type="button"
                             onClick={() => void handleApprove(result, draftHours)}
                             disabled={actingId === result.businessId}
-                            className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft disabled:opacity-50"
+                            className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
                           >
                             Approve edited hours
                           </button>

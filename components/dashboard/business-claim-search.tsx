@@ -182,11 +182,11 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
   }
 
   return (
-    <div className="mt-6 rounded-[2.2rem] border border-line bg-panel/85 p-6 sm:p-8">
+    <div className="mt-6 rounded-2xl border border-line bg-panel/85 p-6 sm:p-8">
       <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
         Find your business
       </p>
-      <h2 className="mt-3 font-display text-3xl text-ink">
+      <h2 className="mt-3 font-display text-2xl font-bold text-ink">
         Search and claim your listing
       </h2>
       <p className="mt-3 text-sm leading-7 text-stone-400">
@@ -207,7 +207,7 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
         <button
           type="submit"
           disabled={searching}
-          className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft disabled:opacity-50"
+          className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
         >
           {searching ? "Searching…" : "Search"}
         </button>
@@ -267,7 +267,7 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
                       type="button"
                       onClick={() => handleClaim(b)}
                       disabled={claiming === b.id}
-                      className="shrink-0 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-canvas transition hover:bg-accentSoft disabled:opacity-50"
+                      className="shrink-0 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
                     >
                       {claiming === b.id ? "Claiming…" : "Claim this listing"}
                     </button>

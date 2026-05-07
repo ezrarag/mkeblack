@@ -191,13 +191,13 @@ function TagManagementContent() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-[2.6rem] border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
+        <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
                 Tag manager
               </p>
-              <h1 className="mt-3 font-display text-5xl leading-none text-ink sm:text-6xl">
+              <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
                 Manage directory filters.
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
@@ -227,7 +227,7 @@ function TagManagementContent() {
         ) : null}
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+          <div className="rounded-2xl border border-line bg-panel/85 p-5">
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
               Add tag
             </p>
@@ -281,14 +281,14 @@ function TagManagementContent() {
                 type="button"
                 onClick={() => void handleAddTag()}
                 disabled={saving || !newLabel.trim()}
-                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-accentSoft"
+                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
               >
                 Add tag
               </button>
             </div>
           </div>
 
-          <div className="rounded-[2.2rem] border border-line bg-panel/85 p-5">
+          <div className="rounded-2xl border border-line bg-panel/85 p-5">
             <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
               Merge tags
             </p>
@@ -340,13 +340,13 @@ function TagManagementContent() {
         </div>
 
         {loading ? (
-          <div className="mt-6 h-48 animate-pulse rounded-[2.2rem] border border-line bg-panel/70" />
+          <div className="mt-6 h-48 animate-pulse rounded-2xl border border-line bg-panel/70" />
         ) : error ? (
           <div className="mt-6">
             <StatePanel title="Unable to load tags" description={error} />
           </div>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-[2.2rem] border border-line bg-panel/85">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-panel/85">
             <div className="overflow-x-auto">
               <table className="min-w-[1100px] divide-y divide-line text-left text-sm">
                 <thead className="bg-panelAlt/80">
@@ -422,7 +422,7 @@ function TagManagementContent() {
                             type="button"
                             onClick={() => void handleSaveTag(tag)}
                             disabled={busyTagId === tag.id}
-                            className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-canvas transition hover:bg-accentSoft"
+                            className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
                           >
                             {busyTagId === tag.id ? "Saving..." : "Save"}
                           </button>
