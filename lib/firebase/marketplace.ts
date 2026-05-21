@@ -95,6 +95,10 @@ export async function saveMarketplaceListing(
   listingId: string | null,
   values: MarketplaceListingFormValues
 ): Promise<string> {
+  if (!businessSolidarity) {
+    throw new Error("Marketplace listings are only available to Solidarity Circle businesses.");
+  }
+
   const { db, firestoreModule } = await getFirestoreHelpers();
   const collRef = firestoreModule.collection(db, "marketplace_listings");
   const ref = listingId

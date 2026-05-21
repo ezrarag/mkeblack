@@ -26,6 +26,11 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid;
     }
 
+    function isSolidarityBusiness(businessId) {
+      return exists(/databases/$(database)/documents/businesses/$(businessId))
+        && get(/databases/$(database)/documents/businesses/$(businessId)).data.solidarityMember == true;
+    }
+
     function isSelf(uid) {
       return signedIn() && request.auth.uid == uid;
     }
@@ -56,6 +61,18 @@ service cloud.firestore {
     match /member_discounts/{discountId} {
       allow read: if resource.data.active == true || isAdmin();
       allow write: if isAdmin();
+    }
+
+    // ── Newsletter subscribers ───────────────────────────────────────────────
+    match /newsletter_subscribers/{subscriberId} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    // ── Contact submissions ─────────────────────────────────────────────────
+    match /contactSubmissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
     }
 
     // ── Articles ─────────────────────────────────────────────────────────────
@@ -132,9 +149,18 @@ service cloud.firestore {
                   || ownsBusinessById(resource.data.businessId);
       // Only the owning business (Solidarity members) or admin can create/update
       allow create: if isAdmin()
-                    || ownsBusinessById(request.resource.data.businessId);
+                    || (
+                      ownsBusinessById(request.resource.data.businessId)
+                      && isSolidarityBusiness(request.resource.data.businessId)
+                      && request.resource.data.businessSolidarity == true
+                    );
       allow update: if isAdmin()
-                    || ownsBusinessById(resource.data.businessId);
+                    || (
+                      ownsBusinessById(resource.data.businessId)
+                      && isSolidarityBusiness(resource.data.businessId)
+                      && request.resource.data.businessId == resource.data.businessId
+                      && request.resource.data.businessSolidarity == true
+                    );
       allow delete: if isAdmin()
                     || ownsBusinessById(resource.data.businessId);
     }
@@ -147,6 +173,12 @@ service cloud.firestore {
 
     // ── Recent views (subcollection under users) ─────────────────────────────
     match /users/{uid}/recent_views/{businessId} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ── Saved marketplace listings (subcollection under users) ───────────────
+    match /users/{uid}/saved_marketplace/{listingId} {
       allow read: if isSelf(uid) || isAdmin();
       allow write: if signedIn() && request.auth.uid == uid;
     }

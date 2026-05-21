@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { FormEvent, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { submitNewsletterSignup } from "@/lib/firebase/contact";
 
 type FooterLink = {
   href: string;
@@ -41,6 +43,54 @@ const exploreLinks: FooterLink[] = [
   { href: "/membership", label: "Solidarity Circle" },
   { href: "/contact", label: "Contact" }
 ];
+
+function NewsletterSignup() {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (!email.trim()) return;
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      await submitNewsletterSignup(email);
+      setEmail("");
+      setFeedback("Thanks for subscribing.");
+    } catch (err) {
+      setFeedback(err instanceof Error ? err.message : "Unable to subscribe.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="rounded-2xl border border-line bg-panel/70 p-6">
+      <p className="text-xs uppercase tracking-[0.26em] text-muted">
+        Subscribe to our newsletter
+      </p>
+      <div className="mt-4 flex gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Email"
+          required
+          className="min-w-0 flex-1 rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink placeholder-stone-500 focus:border-accent/60 focus:outline-none"
+        />
+        <button
+          type="submit"
+          disabled={submitting}
+          className="rounded-full border border-accent bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+        >
+          {submitting ? "Joining…" : "Join"}
+        </button>
+      </div>
+      {feedback ? <p className="mt-3 text-xs text-stone-400">{feedback}</p> : null}
+    </form>
+  );
+}
 
 export function SiteFooter() {
   const { user, hasAdminAccess } = useAuth();
@@ -164,7 +214,7 @@ export function SiteFooter() {
                 programs that drive Black community wealth.
               </p>
               <a
-                href="https://www.mkeblack.org/donate"
+                href="https://givebutter.com/mkeblackinc"
                 target="_blank"
                 rel="noreferrer"
                 className="mt-5 inline-flex rounded-full border border-success/50 bg-success/10 px-5 py-2.5 text-sm font-semibold text-success transition hover:bg-success/20 hover:text-white"
@@ -172,6 +222,8 @@ export function SiteFooter() {
                 Donate
               </a>
             </div>
+
+            <NewsletterSignup />
           </div>
         </div>
 

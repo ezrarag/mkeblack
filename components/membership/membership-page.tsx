@@ -256,7 +256,7 @@ export function MembershipPage() {
           <p className="text-sm text-stone-400">
             Prefer a one-time donation instead?{" "}
             <a
-              href="https://www.mkeblack.org/donate"
+              href="https://givebutter.com/mkeblackinc"
               target="_blank"
               rel="noreferrer"
               className="font-semibold text-accent transition hover:text-accentSoft"

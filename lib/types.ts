@@ -150,6 +150,19 @@ export type MarketplaceListing = {
   updatedAt: Date | null;
 };
 
+export type SavedMarketplaceListing = {
+  listingId: string;
+  businessId: string;
+  businessName: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  photoUrl: string;
+  category: string;
+  orderUrl: string;
+  savedAt: Date | null;
+};
+
 export type MarketplaceListingFormValues = {
   name: string;
   description: string;
@@ -339,6 +352,7 @@ export type SolidarityMember = {
   joinedAt: Date | null;
   expiresAt: Date | null;
   notes: string;
+  benefitIds: string[];
   paymentSource: "givebutter" | "stripe" | "comp" | "manual";
   paymentReference: string;
 };

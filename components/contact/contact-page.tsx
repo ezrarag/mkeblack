@@ -32,6 +32,7 @@ export function ContactPage() {
     phone: "",
     address: "",
     website: "",
+    logoUrl: "",
     description: ""
   });
   const [submitting, setSubmitting] = useState(false);
@@ -102,6 +103,7 @@ export function ContactPage() {
                 phone: "",
                 address: "",
                 website: "",
+                logoUrl: "",
                 description: ""
               });
               setReason("general");
@@ -281,6 +283,23 @@ export function ContactPage() {
                       className={inputClass}
                     />
                   </label>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className={labelClass}>
+                    Logo or brand image URL
+                    <input
+                      type="url"
+                      value={form.logoUrl}
+                      onChange={(e) => update("logoUrl", e.target.value)}
+                      placeholder="https://yourbusiness.com/logo.png"
+                      className={inputClass}
+                    />
+                  </label>
+                  <p className="mt-2 text-xs leading-5 text-stone-500">
+                    If you do not have a public logo URL, send the request anyway and
+                    MKE Black can follow up for the file.
+                  </p>
                 </div>
 
                 <div className="sm:col-span-2">

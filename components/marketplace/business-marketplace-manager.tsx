@@ -215,7 +215,7 @@ export function BusinessMarketplaceManager({
       await saveMarketplaceListing(
         businessId,
         businessName,
-        true, // isSolidarityMember guaranteed by the guard above
+        isSolidarityMember,
         editing,
         form
       );

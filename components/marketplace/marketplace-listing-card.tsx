@@ -1,5 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useAuth } from "@/components/providers/auth-provider";
+import { useIsSavedMarketplaceListing } from "@/hooks/use-saved-marketplace";
+import {
+  removeSavedMarketplaceListing,
+  saveMarketplaceListingForUser
+} from "@/lib/firebase/saved-marketplace";
 import { MarketplaceListing } from "@/lib/types";
 
 function formatPrice(priceCents: number): string {
@@ -17,12 +26,29 @@ type MarketplaceListingCardProps = {
 };
 
 export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps) {
+  const { user } = useAuth();
+  const { isSaved, loading } = useIsSavedMarketplaceListing(user?.uid ?? null, listing.id);
+  const [saving, setSaving] = useState(false);
   const orderHref =
     listing.orderUrl ||
     `/business/${listing.businessId}`;
   const orderIsExternal = listing.orderUrl
     ? !listing.orderUrl.startsWith("/")
     : false;
+
+  async function toggleSaved() {
+    if (!user || saving || loading) return;
+    setSaving(true);
+    try {
+      if (isSaved) {
+        await removeSavedMarketplaceListing(user.uid, listing.id);
+      } else {
+        await saveMarketplaceListingForUser(user.uid, listing);
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-panel/80 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-glow">
@@ -83,7 +109,7 @@ export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps)
           <div className="flex-1" />
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
           <span
             className={`font-display text-lg font-bold ${
               listing.priceCents === 0
@@ -94,23 +120,44 @@ export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps)
             {formatPrice(listing.priceCents)}
           </span>
 
-          {orderIsExternal ? (
-            <a
-              href={orderHref}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-accent bg-accent px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-accentSoft"
-            >
-              Order →
-            </a>
-          ) : (
+          <div className="flex items-center gap-2">
+            {user ? (
+              <button
+                type="button"
+                onClick={() => void toggleSaved()}
+                disabled={saving || loading}
+                className="rounded-full border border-line bg-panelAlt px-3 py-1.5 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-ink disabled:opacity-50"
+                aria-label={isSaved ? "Remove saved listing" : "Save listing"}
+              >
+                {isSaved ? "Saved" : "Save"}
+              </button>
+            ) : (
+              <Link
+                href={`/join?next=/marketplace`}
+                className="rounded-full border border-line bg-panelAlt px-3 py-1.5 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-ink"
+              >
+                Save
+              </Link>
+            )}
+
+            {orderIsExternal ? (
+              <a
+                href={orderHref}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-accent bg-accent px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-accentSoft"
+              >
+                Order →
+              </a>
+            ) : (
             <Link
               href={orderHref}
               className="rounded-full border border-accent bg-accent px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-accentSoft"
             >
               Order →
             </Link>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </article>

@@ -6,11 +6,24 @@ import { useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useRecentViews } from "@/hooks/use-recent-views";
+import { useSavedMarketplace } from "@/hooks/use-saved-marketplace";
 import { getFirebaseAuth, loadFirebaseAuthModule } from "@/lib/firebase/client";
 import { FavoriteRecord } from "@/lib/firebase/favorites";
+import { removeSavedMarketplaceListing } from "@/lib/firebase/saved-marketplace";
 import { RecentViewRecord } from "@/lib/recent-views";
+import { SavedMarketplaceListing } from "@/lib/types";
 
-type Tab = "favorites" | "recent" | "account";
+type Tab = "favorites" | "marketplace" | "recent" | "account";
+
+function formatPrice(priceCents: number): string {
+  if (priceCents === 0) return "Contact for price";
+  const dollars = priceCents / 100;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: dollars % 1 === 0 ? 0 : 2
+  }).format(dollars);
+}
 
 function BusinessMiniCard({
   id,
@@ -160,6 +173,140 @@ function RecentTab({ uid }: { uid: string }) {
   );
 }
 
+function SavedMarketplaceCard({
+  uid,
+  listing
+}: {
+  uid: string;
+  listing: SavedMarketplaceListing;
+}) {
+  const [removing, setRemoving] = useState(false);
+  const orderHref = listing.orderUrl || `/business/${listing.businessId}`;
+  const external = listing.orderUrl ? !listing.orderUrl.startsWith("/") : false;
+
+  async function remove() {
+    setRemoving(true);
+    try {
+      await removeSavedMarketplaceListing(uid, listing.listingId);
+    } finally {
+      setRemoving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-line bg-panelAlt/60 p-3">
+      <div className="flex gap-3">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-line bg-panel">
+          {listing.photoUrl ? (
+            <Image
+              src={listing.photoUrl}
+              alt={listing.name}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center font-display text-xl font-black text-stone-500">
+              {listing.name.slice(0, 2).toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <Link
+            href={`/business/${listing.businessId}`}
+            className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent transition hover:text-accentSoft"
+          >
+            {listing.businessName}
+          </Link>
+          <p className="truncate text-sm font-semibold text-ink">{listing.name}</p>
+          <p className="text-[11px] text-stone-400">{listing.category}</p>
+          <p className="mt-1 text-xs font-semibold text-stone-200">
+            {formatPrice(listing.priceCents)}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {external ? (
+          <a
+            href={orderHref}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full border border-accent bg-accent px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-accentSoft"
+          >
+            Order
+          </a>
+        ) : (
+          <Link
+            href={orderHref}
+            className="rounded-full border border-accent bg-accent px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-accentSoft"
+          >
+            Order
+          </Link>
+        )}
+        <button
+          type="button"
+          onClick={() => void remove()}
+          disabled={removing}
+          className="rounded-full border border-line px-4 py-1.5 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-ink disabled:opacity-50"
+        >
+          {removing ? "Removing…" : "Remove"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SavedMarketplaceTab({ uid }: { uid: string }) {
+  const { savedListings, loading } = useSavedMarketplace(uid);
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-24 animate-pulse rounded-xl border border-line bg-panel/60"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (!savedListings.length) {
+    return (
+      <div className="rounded-2xl border border-line bg-panel/60 px-6 py-10 text-center">
+        <p className="text-3xl">$</p>
+        <p className="mt-3 font-display text-lg font-bold text-ink">
+          No saved marketplace listings
+        </p>
+        <p className="mt-1 text-sm text-stone-400">
+          Save products and services from member businesses to revisit them here.
+        </p>
+        <Link
+          href="/marketplace"
+          className="mt-4 inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
+        >
+          Browse marketplace
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {savedListings.map((listing) => (
+        <SavedMarketplaceCard
+          key={listing.listingId}
+          uid={uid}
+          listing={listing}
+        />
+      ))}
+    </div>
+  );
+}
+
 function AccountTab() {
   const { user } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
@@ -223,6 +370,7 @@ function AccountTab() {
 
 const tabs: { key: Tab; label: string }[] = [
   { key: "favorites", label: "Favorites" },
+  { key: "marketplace", label: "Marketplace" },
   { key: "recent", label: "Recently viewed" },
   { key: "account", label: "Account" }
 ];
@@ -261,6 +409,7 @@ export function VisitorDashboard() {
 
       <div className="mt-6">
         {activeTab === "favorites" && <FavoritesTab uid={user.uid} />}
+        {activeTab === "marketplace" && <SavedMarketplaceTab uid={user.uid} />}
         {activeTab === "recent" && <RecentTab uid={user.uid} />}
         {activeTab === "account" && <AccountTab />}
       </div>

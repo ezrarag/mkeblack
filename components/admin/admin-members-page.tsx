@@ -4,16 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { StatePanel } from "@/components/ui/state-panel";
+import { useBenefitTypes } from "@/hooks/use-benefit-types";
 import { useMembers } from "@/hooks/use-members";
 import {
-  updateMemberStatus,
-  updateMemberNotes,
-  linkMemberToUser,
-  linkMemberToBusiness,
-  updateMemberExpiry
+  deleteBenefitType,
+  saveBenefitType,
+  saveMemberAdminState
 } from "@/lib/firebase/members";
 import { formatFirebaseError } from "@/lib/firebase-errors";
-import { SolidarityMember, SolidarityMemberStatus } from "@/lib/types";
+import { BenefitType, SolidarityMember, SolidarityMemberStatus } from "@/lib/types";
 
 const statusColors: Record<SolidarityMemberStatus, string> = {
   active: "border-success/40 bg-success/10 text-success",
@@ -31,11 +30,18 @@ function fmt(date: Date | null) {
   });
 }
 
-function MemberRow({ member }: { member: SolidarityMember }) {
+function MemberRow({
+  member,
+  benefitTypes
+}: {
+  member: SolidarityMember;
+  benefitTypes: BenefitType[];
+}) {
   const [status, setStatus] = useState<SolidarityMemberStatus>(member.status);
   const [notes, setNotes] = useState(member.notes);
   const [uid, setUid] = useState(member.uid ?? "");
   const [businessId, setBusinessId] = useState(member.businessId ?? "");
+  const [benefitIds, setBenefitIds] = useState(member.benefitIds);
   const [expiry, setExpiry] = useState(
     member.expiresAt ? member.expiresAt.toISOString().slice(0, 10) : ""
   );
@@ -46,22 +52,28 @@ function MemberRow({ member }: { member: SolidarityMember }) {
     setSaving(true);
     setFeedback(null);
     try {
-      await Promise.all([
-        updateMemberStatus(member.id, status),
-        updateMemberNotes(member.id, notes),
-        linkMemberToUser(member.id, uid.trim() || null),
-        linkMemberToBusiness(member.id, businessId.trim() || null),
-        updateMemberExpiry(
-          member.id,
-          expiry ? new Date(expiry) : null
-        )
-      ]);
+      await saveMemberAdminState(member.id, {
+        status,
+        notes,
+        uid: uid.trim() || null,
+        businessId: businessId.trim() || null,
+        expiresAt: expiry ? new Date(expiry) : null,
+        benefitIds
+      });
       setFeedback("Saved.");
     } catch (err) {
       setFeedback(formatFirebaseError(err));
     } finally {
       setSaving(false);
     }
+  }
+
+  function toggleBenefit(benefitId: string) {
+    setBenefitIds((current) =>
+      current.includes(benefitId)
+        ? current.filter((id) => id !== benefitId)
+        : [...current, benefitId]
+    );
   }
 
   return (
@@ -140,6 +152,41 @@ function MemberRow({ member }: { member: SolidarityMember }) {
         </div>
       </div>
 
+      {benefitTypes.length ? (
+        <div className="mt-4 rounded-xl border border-line/60 bg-panelAlt/40 p-4">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted">
+            Assigned benefits
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {benefitTypes.map((benefit) => (
+              <label
+                key={benefit.id}
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2 text-sm transition ${
+                  benefitIds.includes(benefit.id)
+                    ? "border-success/35 bg-success/10 text-stone-100"
+                    : "border-line bg-panel/50 text-stone-300 hover:border-accent/35"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={benefitIds.includes(benefit.id)}
+                  onChange={() => toggleBenefit(benefit.id)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block font-semibold">{benefit.label}</span>
+                  {benefit.description ? (
+                    <span className="block text-xs leading-5 text-stone-400">
+                      {benefit.description}
+                    </span>
+                  ) : null}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="mt-4 flex items-center gap-3">
         <button
           type="button"
@@ -173,8 +220,208 @@ const statusFilters: Array<{ value: SolidarityMemberStatus | "all"; label: strin
   { value: "expired", label: "Expired" }
 ];
 
+function BenefitTypesPanel({
+  benefitTypes,
+  loading,
+  error
+}: {
+  benefitTypes: BenefitType[];
+  loading: boolean;
+  error: string | null;
+}) {
+  const [draft, setDraft] = useState<Omit<BenefitType, "id">>({
+    label: "",
+    description: "",
+    active: true,
+    order: 0
+  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  function edit(benefit: BenefitType) {
+    setEditingId(benefit.id);
+    setDraft({
+      label: benefit.label,
+      description: benefit.description,
+      active: benefit.active,
+      order: benefit.order
+    });
+    setFeedback(null);
+  }
+
+  function reset() {
+    setEditingId(null);
+    setDraft({ label: "", description: "", active: true, order: benefitTypes.length });
+  }
+
+  async function save() {
+    if (!draft.label.trim()) return;
+    setSaving(true);
+    setFeedback(null);
+    try {
+      await saveBenefitType(editingId, draft);
+      setFeedback(editingId ? "Benefit updated." : "Benefit created.");
+      reset();
+    } catch (err) {
+      setFeedback(formatFirebaseError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function remove(benefit: BenefitType) {
+    if (!window.confirm(`Delete ${benefit.label}? Existing member assignments will remain as stored IDs until removed.`)) {
+      return;
+    }
+    setSaving(true);
+    setFeedback(null);
+    try {
+      await deleteBenefitType(benefit.id);
+      setFeedback("Benefit deleted.");
+      if (editingId === benefit.id) reset();
+    } catch (err) {
+      setFeedback(formatFirebaseError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6 shadow-glow">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+            Benefit types
+          </p>
+          <p className="mt-2 max-w-2xl text-sm leading-7 text-stone-400">
+            Define the benefits admins can assign to Solidarity Circle members, such
+            as T-shirts, member discounts, and exclusive events.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={reset}
+          className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-ink"
+        >
+          New benefit
+        </button>
+      </div>
+
+      <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_1fr_120px_auto]">
+        <input
+          type="text"
+          value={draft.label}
+          onChange={(event) =>
+            setDraft((current) => ({ ...current, label: event.target.value }))
+          }
+          placeholder="Benefit label"
+          className="rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink placeholder-stone-600 focus:border-accent/60 focus:outline-none"
+        />
+        <input
+          type="text"
+          value={draft.description}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              description: event.target.value
+            }))
+          }
+          placeholder="Short admin description"
+          className="rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink placeholder-stone-600 focus:border-accent/60 focus:outline-none"
+        />
+        <input
+          type="number"
+          value={draft.order}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              order: Number(event.target.value) || 0
+            }))
+          }
+          className="rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => void save()}
+          disabled={saving || !draft.label.trim()}
+          className="rounded-full border border-accent bg-accent px-5 py-2 text-xs font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+        >
+          {saving ? "Saving…" : editingId ? "Update" : "Create"}
+        </button>
+      </div>
+
+      <label className="mt-3 flex items-center gap-2 text-xs text-stone-400">
+        <input
+          type="checkbox"
+          checked={draft.active}
+          onChange={() =>
+            setDraft((current) => ({ ...current, active: !current.active }))
+          }
+        />
+        Active benefit
+      </label>
+
+      {feedback ? <p className="mt-3 text-xs text-stone-400">{feedback}</p> : null}
+      {error ? <p className="mt-3 text-xs text-rose-300">{error}</p> : null}
+
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        {loading ? (
+          <div className="h-24 animate-pulse rounded-xl border border-line bg-panelAlt/60" />
+        ) : benefitTypes.length ? (
+          benefitTypes.map((benefit) => (
+            <div
+              key={benefit.id}
+              className="rounded-xl border border-line bg-panelAlt/50 p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-ink">{benefit.label}</p>
+                  {benefit.description ? (
+                    <p className="mt-1 text-xs leading-5 text-stone-400">
+                      {benefit.description}
+                    </p>
+                  ) : null}
+                  <p className="mt-2 text-[10px] uppercase tracking-[0.16em] text-muted">
+                    {benefit.active ? "Active" : "Inactive"} · Order {benefit.order}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => edit(benefit)}
+                    className="rounded-full border border-line px-3 py-1 text-xs text-stone-300 transition hover:border-accent/40 hover:text-ink"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void remove(benefit)}
+                    className="rounded-full border border-danger/40 px-3 py-1 text-xs text-rose-300 transition hover:bg-danger/10"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="rounded-xl border border-dashed border-line bg-panelAlt/40 p-4 text-sm text-stone-400">
+            No benefit types yet.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function AdminMembersPage() {
   const { members, loading, error } = useMembers();
+  const {
+    benefitTypes,
+    loading: benefitsLoading,
+    error: benefitsError
+  } = useBenefitTypes();
   const [filter, setFilter] = useState<SolidarityMemberStatus | "all">("all");
   const [search, setSearch] = useState("");
 
@@ -224,6 +471,12 @@ export function AdminMembersPage() {
           </div>
         </div>
 
+        <BenefitTypesPanel
+          benefitTypes={benefitTypes}
+          loading={benefitsLoading}
+          error={benefitsError}
+        />
+
         <div className="mt-6 flex flex-wrap gap-3">
           <input
             type="search"
@@ -272,7 +525,11 @@ export function AdminMembersPage() {
           ) : (
             <div className="space-y-3">
               {visible.map((member) => (
-                <MemberRow key={member.id} member={member} />
+                <MemberRow
+                  key={member.id}
+                  member={member}
+                  benefitTypes={benefitTypes.filter((benefit) => benefit.active)}
+                />
               ))}
             </div>
           )}

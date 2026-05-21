@@ -117,7 +117,7 @@ export function SiteHeader() {
           ))}
 
           <a
-            href="https://www.mkeblack.org/donate"
+            href="https://givebutter.com/mkeblackinc"
             target="_blank"
             rel="noreferrer"
             className="rounded-full border border-success/50 bg-success/10 px-4 py-2 text-sm font-medium text-success transition hover:bg-success/20 hover:text-white"

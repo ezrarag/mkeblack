@@ -17,6 +17,75 @@ import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { ArticleSummary, HomepageModule, MarketplaceListing, MemberDiscount } from "@/lib/types";
 import { isExternalHref } from "@/lib/utils";
 
+type LiveSiteFeature = {
+  title: string;
+  description: string;
+  href: string;
+  cta: string;
+};
+
+const liveStoryLinks: LiveSiteFeature[] = [
+  {
+    title: "Gift Cards from Milwaukee Black Owned Businesses",
+    description:
+      "A quick path to local gifts for birthdays, holidays, thank-yous, and other moments when a Milwaukee business should be part of the celebration.",
+    href: "/news-articles",
+    cta: "Read gift guide"
+  },
+  {
+    title: "10 Black Owned Vegan Eats in Milwaukee",
+    description:
+      "A food guide for plant-based meals, snacks, and desserts from Black-owned restaurants and makers across the Milwaukee area.",
+    href: "/directory?tag=vegan-options",
+    cta: "Find vegan options"
+  },
+  {
+    title: "Discover the Near West Side",
+    description:
+      "A neighborhood spotlight connecting visitors to businesses, food, culture, and community stops west of downtown Milwaukee.",
+    href: "/directory?neighborhood=Near%20West%20Side",
+    cta: "Explore the area"
+  }
+];
+
+const liveGuideSections: LiveSiteFeature[] = [
+  {
+    title: "In the Mood for Food?",
+    description:
+      "Milwaukee has a deep Black-owned food and drink scene, from vegan burgers and soul food to desserts, popcorn, coffee, catering, and ice cream.",
+    href: "/directory?category=Food%20%26%20Drink",
+    cta: "Browse food and drink"
+  },
+  {
+    title: "Shop 'Til You Drop",
+    description:
+      "Find local retail, handcrafted goods, apparel, beauty products, makers markets, and multi-vendor spaces supporting Black businesses.",
+    href: "/directory?category=Retail%20%26%20Shopping",
+    cta: "Browse shopping"
+  },
+  {
+    title: "Hitting The Bar",
+    description:
+      "Plan a night out with Black-owned bars, lounges, sports bars, live music, Caribbean food, jazz, and social spaces around the city.",
+    href: "/directory?category=Food%20%26%20Drink",
+    cta: "Find nightlife"
+  },
+  {
+    title: "Dive Into Local History",
+    description:
+      "Connect with museums and historical institutions preserving African American history, culture, and community memory in Milwaukee.",
+    href: "/directory?category=Education%2C%20Youth%20%26%20Family%20Services",
+    cta: "Explore history"
+  },
+  {
+    title: "Discover the Arts",
+    description:
+      "Explore galleries, paint-and-sip studios, creative venues, print lounges, festivals, and arts businesses rooted in Black Milwaukee.",
+    href: "/directory?category=Arts%2C%20Media%20%26%20Creative%20Services",
+    cta: "Browse arts"
+  }
+];
+
 function SmartLink({
   href,
   className,
@@ -43,6 +112,90 @@ function SmartLink({
     <Link href={href} className={className}>
       {children}
     </Link>
+  );
+}
+
+function LiveSiteContentParitySection() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+              From the current MKE Black site
+            </p>
+            <h2 className="mt-4 font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
+              Business, events, culture, and advancement in Milwaukee.
+            </h2>
+            <p className="mt-5 text-sm leading-7 text-stone-300">
+              These legacy homepage pathways keep the current MKE Black content
+              model available while the new directory, marketplace, memberships,
+              and owner tools continue to grow.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/directory"
+                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
+              >
+                Search business directory
+              </Link>
+              <Link
+                href="/contact"
+                className="rounded-full border border-line bg-white/5 px-5 py-3 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
+              >
+                Submit your business
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            {liveStoryLinks.map((story) => (
+              <Link
+                key={story.title}
+                href={story.href}
+                className="group rounded-2xl border border-line bg-panelAlt/70 p-5 transition hover:border-accent/40 hover:bg-panelAlt"
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-success">
+                  Featured guide
+                </p>
+                <h3 className="mt-3 font-display text-lg font-bold leading-snug text-ink">
+                  {story.title}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-stone-400">
+                  {story.description}
+                </p>
+                <p className="mt-4 text-sm font-semibold text-accent transition group-hover:text-accentSoft">
+                  {story.cta} →
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {liveGuideSections.map((section) => (
+            <Link
+              key={section.title}
+              href={section.href}
+              className="group flex min-h-64 flex-col rounded-2xl border border-line bg-canvas/35 p-5 transition hover:border-success/40 hover:bg-success/5"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
+                Explore
+              </p>
+              <h3 className="mt-3 font-display text-xl font-bold leading-snug text-ink">
+                {section.title}
+              </h3>
+              <p className="mt-3 flex-1 text-sm leading-6 text-stone-400">
+                {section.description}
+              </p>
+              <p className="mt-4 text-sm font-semibold text-success transition group-hover:text-ink">
+                {section.cta} →
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -561,11 +714,8 @@ export function HomepagePage() {
 
   if (!modules.length) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <StatePanel
-          title="No homepage modules are live"
-          description="Publish at least one visible document in the homepage_modules collection to populate the homepage."
-        />
+      <div className="pb-16">
+        <LiveSiteContentParitySection />
       </div>
     );
   }
@@ -593,6 +743,7 @@ export function HomepagePage() {
           )}
         </motion.div>
       ))}
+      <LiveSiteContentParitySection />
     </div>
   );
 }

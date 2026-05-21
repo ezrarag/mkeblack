@@ -22,6 +22,7 @@ export type ContactFormData = {
   phone?: string;
   address?: string;
   website?: string;
+  logoUrl?: string;
   description?: string;
 };
 
@@ -45,5 +46,35 @@ export async function submitContactForm(data: ContactFormData): Promise<void> {
       ...data,
       submittedAt: firestoreModule.serverTimestamp()
     }
+  );
+}
+
+export async function submitNewsletterSignup(email: string): Promise<void> {
+  if (!isFirebaseConfigured) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error("Email is required.");
+  }
+
+  const [firestoreModule, db] = await Promise.all([
+    loadFirebaseFirestoreModule(),
+    getFirebaseDb()
+  ]);
+
+  if (!db) {
+    throw new Error("Firebase could not initialize.");
+  }
+
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "newsletter_subscribers", normalizedEmail),
+    {
+      email: normalizedEmail,
+      source: "site_footer",
+      subscribedAt: firestoreModule.serverTimestamp()
+    },
+    { merge: true }
   );
 }
