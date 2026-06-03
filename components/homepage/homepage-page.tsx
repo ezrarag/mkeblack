@@ -271,7 +271,7 @@ function renderHomepageModule(
   switch (module.type) {
     case "hero":
       return (
-        <section className="relative overflow-hidden border-b border-line bg-[radial-gradient(circle_at_top_left,rgba(236,32,36,0.14),transparent_28%),radial-gradient(circle_at_88%_35%,rgba(11,143,58,0.09),transparent_26%),linear-gradient(180deg,rgba(36,35,35,0.98),rgba(10,10,10,1))]">
+        <section className="relative overflow-hidden border-b border-line bg-mesh-dark">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
             <div className="max-w-4xl">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">

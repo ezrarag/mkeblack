@@ -16,13 +16,28 @@ type NavLink = {
   external?: boolean;
 };
 
-const publicLinks: NavLink[] = [
+const primaryLinks: NavLink[] = [
   { href: "/directory", label: "Directory" },
-  { href: "/marketplace", label: "Marketplace" },
+  { href: "/marketplace", label: "Marketplace" }
+];
+
+const exploreLinks: NavLink[] = [
   { href: "/about", label: "About" },
+  { href: "/what-we-do", label: "What we do" },
+  { href: "/who-we-are", label: "Who we are" },
   { href: "/news-articles", label: "News" },
   { href: "/events", label: "Events" },
+  { href: "/experiences", label: "Experiences" },
   { href: "/contact", label: "Contact" }
+];
+
+const supportLinks: NavLink[] = [
+  { href: "/membership", label: "Solidarity Circle" },
+  {
+    href: "https://givebutter.com/mkeblackinc",
+    label: "Donate",
+    external: true
+  }
 ];
 
 function HeaderLink({ href, label, external }: NavLink) {
@@ -30,6 +45,91 @@ function HeaderLink({ href, label, external }: NavLink) {
     "rounded-full border border-line px-4 py-2 text-sm font-medium text-ink/80 transition hover:border-accent/50 hover:bg-accent/10 hover:text-ink";
   if (external) return <a href={href} className={className}>{label}</a>;
   return <Link href={href} className={className}>{label}</Link>;
+}
+
+function DropdownLink({
+  href,
+  label,
+  external,
+  onSelect
+}: NavLink & { onSelect: () => void }) {
+  const className =
+    "rounded-xl border border-line bg-panelAlt/60 px-4 py-2.5 text-sm text-stone-200 transition hover:border-accent/40 hover:bg-accent/10 hover:text-ink";
+
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        onClick={onSelect}
+        className={className}
+      >
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} onClick={onSelect} className={className}>
+      {label}
+    </Link>
+  );
+}
+
+function HeaderDropdown({
+  label,
+  open,
+  onToggle,
+  links,
+  align = "right",
+  className = ""
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  links: NavLink[];
+  align?: "left" | "right";
+  className?: string;
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={onToggle}
+        className={cn(
+          "rounded-full border px-4 py-2 text-sm font-medium transition",
+          open
+            ? "border-accent/60 bg-accent/10 text-ink"
+            : "border-line text-ink/80 hover:border-accent/50 hover:bg-accent/10 hover:text-ink"
+        )}
+      >
+        {label}
+        <span className="ml-1 text-xs text-muted">▾</span>
+      </button>
+
+      {open ? (
+        <div
+          className={cn(
+            "absolute top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-panel/98 p-3 shadow-glow backdrop-blur-xl",
+            align === "left" ? "left-0" : "right-0"
+          )}
+        >
+          <div className="flex flex-col gap-1.5">
+            {links.map((link) => (
+              <DropdownLink
+                key={`${label}-${link.href}-${link.label}`}
+                {...link}
+                onSelect={onToggle}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function getAvatarInitials(
@@ -49,6 +149,10 @@ function getAvatarInitials(
 export function SiteHeader() {
   const { user, profile, isAdmin, isVisitor, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [guestAccountOpen, setGuestAccountOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const hasAdminAccess = isAdmin || profile?.role === "admin";
   const avatarInitials = getAvatarInitials(user?.displayName, user?.email);
@@ -72,12 +176,30 @@ export function SiteHeader() {
       : [{ href: "/dashboard", label: "My listing" }];
 
   useEffect(() => {
-    if (!menuOpen) return;
+    if (
+      !menuOpen &&
+      !exploreOpen &&
+      !supportOpen &&
+      !mobileMenuOpen &&
+      !guestAccountOpen
+    ) return;
     function handlePointerDown(event: MouseEvent) {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+        setExploreOpen(false);
+        setSupportOpen(false);
+        setMobileMenuOpen(false);
+        setGuestAccountOpen(false);
+      }
     }
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        setExploreOpen(false);
+        setSupportOpen(false);
+        setMobileMenuOpen(false);
+        setGuestAccountOpen(false);
+      }
     }
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
@@ -85,12 +207,12 @@ export function SiteHeader() {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [menuOpen]);
+  }, [menuOpen, exploreOpen, supportOpen, mobileMenuOpen, guestAccountOpen]);
 
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-charcoal/95 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex items-center gap-3">
+      <div ref={menuRef} className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="group flex min-w-0 items-center gap-3">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-accent/30 ring-offset-1 ring-offset-charcoal">
             <Image
               src="/header-mark.avif"
@@ -101,40 +223,79 @@ export function SiteHeader() {
               className="object-cover"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="font-display text-xl font-black tracking-tight text-ink transition group-hover:text-accent">
               MKE Black
             </p>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted">
+            <p className="hidden text-[10px] uppercase tracking-[0.22em] text-muted lg:block">
               Milwaukee Black Business Directory
             </p>
           </div>
         </Link>
 
-        <nav className="flex flex-1 flex-wrap items-center justify-end gap-2 sm:gap-3">
-          {publicLinks.map((link) => (
-            <HeaderLink key={link.href} {...link} />
-          ))}
+        <nav className="flex flex-1 items-center justify-end gap-2">
+          <HeaderDropdown
+            label="Menu"
+            open={mobileMenuOpen}
+            onToggle={() => {
+              setMobileMenuOpen((current) => !current);
+              setExploreOpen(false);
+              setSupportOpen(false);
+              setGuestAccountOpen(false);
+              setMenuOpen(false);
+            }}
+            links={[...primaryLinks, ...exploreLinks, ...supportLinks]}
+            className="md:hidden"
+          />
 
-          <a
-            href="https://givebutter.com/mkeblackinc"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-full border border-success/50 bg-success/10 px-4 py-2 text-sm font-medium text-success transition hover:bg-success/20 hover:text-white"
-          >
-            Donate
-          </a>
+          <div className="hidden items-center gap-2 md:flex">
+            {primaryLinks.map((link) => (
+              <HeaderLink key={link.href} {...link} />
+            ))}
+
+            <HeaderDropdown
+              label="Explore"
+              open={exploreOpen}
+              onToggle={() => {
+                setExploreOpen((current) => !current);
+                setSupportOpen(false);
+                setMobileMenuOpen(false);
+                setGuestAccountOpen(false);
+                setMenuOpen(false);
+              }}
+              links={exploreLinks}
+            />
+
+            <HeaderDropdown
+              label="Support"
+              open={supportOpen}
+              onToggle={() => {
+                setSupportOpen((current) => !current);
+                setExploreOpen(false);
+                setMobileMenuOpen(false);
+                setGuestAccountOpen(false);
+                setMenuOpen(false);
+              }}
+              links={supportLinks}
+            />
+          </div>
 
           {loading ? (
             <span className="rounded-full border border-line px-4 py-2 text-sm text-muted">…</span>
           ) : user ? (
-            <div ref={menuRef} className="relative">
+            <div className="relative">
               <button
                 type="button"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 aria-label="Open account menu"
-                onClick={() => setMenuOpen((c) => !c)}
+                onClick={() => {
+                  setMenuOpen((current) => !current);
+                  setExploreOpen(false);
+                  setSupportOpen(false);
+                  setMobileMenuOpen(false);
+                  setGuestAccountOpen(false);
+                }}
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold uppercase tracking-[0.15em] transition",
                   menuOpen
@@ -160,9 +321,9 @@ export function SiteHeader() {
                   </div>
 
                   <div className="mt-3 flex flex-col gap-1.5">
-                    {accountLinks.map((link) => (
+                    {accountLinks.map((link, index) => (
                       <Link
-                        key={link.href}
+                        key={`${link.href}-${index}`}
                         href={link.href}
                         onClick={() => setMenuOpen(false)}
                         className="rounded-xl border border-line bg-panelAlt/60 px-4 py-2.5 text-sm text-stone-200 transition hover:border-accent/40 hover:bg-accent/10 hover:text-ink"
@@ -190,19 +351,42 @@ export function SiteHeader() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/join"
-                className="rounded-full border border-success/50 bg-success/10 px-4 py-2 text-sm font-medium text-success transition hover:bg-success/20 hover:text-white"
-              >
-                Join
-              </Link>
-              <Link
-                href="/login"
+            <div className="relative">
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={guestAccountOpen}
+                onClick={() => {
+                  setGuestAccountOpen((current) => !current);
+                  setExploreOpen(false);
+                  setSupportOpen(false);
+                  setMobileMenuOpen(false);
+                }}
                 className="rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
               >
-                Business Login
-              </Link>
+                Account
+              </button>
+              {guestAccountOpen ? (
+                <div className="absolute right-0 top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-panel/98 p-3 shadow-glow backdrop-blur-xl">
+                  <div className="flex flex-col gap-1.5">
+                    <DropdownLink
+                      href="/join"
+                      label="Join as visitor"
+                      onSelect={() => setGuestAccountOpen(false)}
+                    />
+                    <DropdownLink
+                      href="/login"
+                      label="Business owner login"
+                      onSelect={() => setGuestAccountOpen(false)}
+                    />
+                    <DropdownLink
+                      href="/login?next=/admin"
+                      label="Admin login"
+                      onSelect={() => setGuestAccountOpen(false)}
+                    />
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
         </nav>

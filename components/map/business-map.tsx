@@ -163,10 +163,10 @@ function popupHtml(
   );
 
   return `
-    <div style="min-width:190px;background:#111111;color:#f7f7f3;font-family:system-ui,sans-serif;border-radius:8px;padding:2px">
+    <div style="min-width:190px;background:#ffffff;color:#161616;font-family:system-ui,sans-serif;border-radius:8px;padding:2px">
       <div style="font-weight:700;font-size:14px;line-height:1.35">${escapeHtml(business.name)}</div>
-      <div style="margin-top:3px;color:#9ca3af;font-size:12px">${escapeHtml(business.category)}</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;color:#d1d5db">
+      <div style="margin-top:3px;color:#5B6559;font-size:12px">${escapeHtml(business.category)}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;color:#3E463D">
         <span style="width:8px;height:8px;border-radius:999px;${statusClass}"></span>
         ${isOpen ? "Open now" : "Closed"}
       </div>

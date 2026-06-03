@@ -233,7 +233,7 @@ export function SiteFooter() {
           <p>
             Powered by the{" "}
             <a
-              href="https://readyaimgo.io"
+              href="https://readyaimgo.biz"
               target="_blank"
               rel="noreferrer"
               className="font-medium text-stone-400 transition hover:text-ink"

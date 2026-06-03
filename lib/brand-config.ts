@@ -16,10 +16,11 @@ export const readyAimGoGold = "#FFC107";
 export const readyAimGoGoldSoft = "#FFD54F";
 
 export const brandBlack = "#000000";
-export const brandCharcoal = "#242323";
-export const brandCanvas = "#0A0A0A";
+export const brandCharcoal = "#EEF1EA";
+export const brandCanvas = "#F6F7F2";
 export const brandWhite = "#FFFFFF";
-export const brandOffWhite = "#F7F7F3";
+export const brandOffWhite = "#FAFAF6";
+export const brandInk = "#161616";
 
 // ─── Semantic Tokens (mapped to Tailwind color names) ────────────────────────
 
@@ -27,19 +28,19 @@ export const semanticTokens = {
   // Backgrounds
   canvas: brandCanvas,
   charcoal: brandCharcoal,
-  panel: "#111111",
-  panelAlt: "#161616",
+  panel: brandWhite,
+  panelAlt: "#F0F3EC",
 
   // Typography
-  ink: brandOffWhite,
-  muted: "#6B7280",
+  ink: brandInk,
+  muted: "#687166",
 
   // Primary interactive — MKE Red
   accent: mkeRed,
   accentSoft: mkeRedBright,
 
   // Borders (fixed opacity baked in)
-  line: "rgba(255, 255, 255, 0.10)",
+  line: "rgba(22, 22, 22, 0.14)",
 
   // Status
   success: mkeGreen,
@@ -50,17 +51,17 @@ export const semanticTokens = {
 // ─── Shadow Tokens ────────────────────────────────────────────────────────────
 
 export const shadows = {
-  glow: "0 24px 80px rgba(236, 32, 36, 0.13)",
+  glow: "0 22px 70px rgba(22, 22, 22, 0.10)",
 } as const;
 
 // ─── Background Image Tokens ──────────────────────────────────────────────────
 
 export const backgroundImages = {
-  /** Subtle red/green dual-radial dark gradient for section backgrounds */
+  /** Soft red/green dual-radial light gradient for section backgrounds */
   meshDark:
-    "radial-gradient(circle at top left, rgba(236, 32, 36, 0.10), transparent 28%), " +
-    "radial-gradient(circle at 85% 30%, rgba(11, 143, 58, 0.06), transparent 25%), " +
-    "linear-gradient(180deg, rgba(36, 35, 35, 0.96), rgba(10, 10, 10, 1))",
+    "radial-gradient(circle at top left, rgba(236, 32, 36, 0.10), transparent 30%), " +
+    "radial-gradient(circle at 85% 30%, rgba(11, 143, 58, 0.10), transparent 28%), " +
+    "linear-gradient(180deg, rgba(250, 250, 246, 0.98), rgba(246, 247, 242, 1))",
 } as const;
 
 // ─── Typography Tokens ────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ const brandConfig = {
   brandCanvas,
   brandWhite,
   brandOffWhite,
+  brandInk,
 
   // Semantic
   ...semanticTokens,

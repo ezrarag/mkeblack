@@ -8,16 +8,16 @@ export const MKE_BLACK_BRAND_STYLE_PROMPT = `
 You are creating visual assets for MKE Black, Milwaukee's Black business community directory.
 
 PALETTE — use these colors only:
-- Primary background: near-black #0A0A0A and dark charcoal #242323
-- Primary text: off-white #F7F7F3
+- Primary background: soft paper #F6F7F2, white #FFFFFF, and pale green-gray #EEF1EA
+- Primary text: near-black #161616
 - Brand red (MKE Red): #EC2024 — use for CTAs, highlights, diagonal accent blocks
 - Brand green (MKE Green): #0B8F3A — use sparingly as a counterpoint to red, logo reference
-- White #FFFFFF — clean contrast, cards, text on dark fields
-- Black #000000 — solid fills, text on light fields
-- Neutral gray #6B7280 — secondary text, metadata, subdued labels
+- White #FFFFFF — clean cards and elevated surfaces
+- Black #000000 — logo reference and high-contrast details only
+- Neutral green-gray #687166 — secondary text, metadata, subdued labels
 - Platform accent gold #FFC107 — only for ReadyAimGo / platform-level UI, never as primary MKE Black color
 
-AVOID: warm taupe, tan, cream, beige, any luxury editorial gold as a primary color, pastels, gradients that read as sunset or warm glow.
+AVOID: blinding pure-white fields, warm taupe, tan, cream, beige, any luxury editorial gold as a primary color, pastels, gradients that read as sunset or warm glow.
 
 TYPOGRAPHY:
 - Display headings: Montserrat, weight 800–900, tight letter-spacing, uppercase or sentence case
@@ -28,8 +28,8 @@ TYPOGRAPHY:
 VISUAL MOOD:
 - Direct, grounded, community-rooted — not luxury editorial or fashion-forward
 - Bold, confident, modern — not aggressive or corporate
-- Black-and-white Milwaukee cityscape photography with diagonal red/green brand color blocks
-- Strong contrast between dark backgrounds and off-white text
+- Real Milwaukee business photography on light editorial surfaces with diagonal red/green brand color blocks
+- Strong contrast between soft light backgrounds and near-black text
 - Geometric, structured layouts over fluid or organic shapes
 - Photography: real Milwaukee businesses, storefronts, community members in authentic settings
 
@@ -52,16 +52,16 @@ The card represents a Black-owned Milwaukee business and should feel:
 
 CARD STRUCTURE:
 1. Business photo (4:3 aspect ratio) or charcoal initials fallback with white text
-2. Category chip — small, pill-shaped, dark background with white text
-3. Business name — Montserrat 700, large, off-white
-4. Address and neighborhood — Open Sans regular, muted gray
+2. Category chip — small, pill-shaped, brand red or green tint
+3. Business name — Montserrat 700, large, near-black
+4. Address and neighborhood — Open Sans regular, muted green-gray
 5. Open/Closed status badge — green (#0B8F3A) or red (#EC2024) with low-opacity background tint
 6. Hours for selected day — compact, Open Sans
 7. Directions link and "View profile" link — understated, red on hover
 
 RADII: 12–16px on card container, full-round (pill) on small chips and status badges.
-BORDER: rgba(255,255,255,0.10) — subtle, not distracting.
-BACKGROUND: #111111 with slight transparency over the dark canvas.
+BORDER: rgba(22,22,22,0.14) — subtle, not distracting.
+BACKGROUND: #FFFFFF with slight transparency over the soft paper canvas.
 
 PALETTE: Same as MKE Black brand style prompt above.
 `.trim();
@@ -72,16 +72,16 @@ You are creating a social media graphic for MKE Black (Milwaukee Black business 
 FORMATS: 1:1 square (Instagram), 16:9 landscape (Facebook cover / Twitter header), 9:16 vertical (Story).
 
 LAYOUT PATTERN — inspired by the MKE Black Facebook cover:
-- Dark base: near-black (#0A0A0A) or charcoal (#242323) full bleed
-- Black-and-white Milwaukee imagery (skyline, storefronts, community) as a mid-layer at 60–80% opacity
+- Light base: soft paper (#F6F7F2), white, or pale green-gray (#EEF1EA)
+- Milwaukee imagery (skyline, storefronts, community) in natural color or restrained black-and-white
 - Diagonal accent blocks: MKE Red (#EC2024) and/or MKE Green (#0B8F3A) on corners or edges
 - Circular MKE Black logo mark (red M, black K and "BLACK", green E) centered or top-left
-- Bold Montserrat headline — white or off-white
+- Bold Montserrat headline — near-black or white only when placed on a brand-color block
 - Tagline or directory URL in Open Sans
 
 WHAT MAKES IT MKE BLACK:
 - The diagonal red/green block motif references the brand identity
-- Black-and-white photography feels timeless and community-rooted
+- Photography feels real, local, and community-rooted
 - Red and green as accents, not backgrounds
 - The circular logo with three-color letterforms (R/G/B of M-K-E) is the anchor
 
@@ -89,5 +89,5 @@ AVOID:
 - Warm gold backgrounds or gold as primary feature
 - Busy, cluttered layouts
 - Clip-art or generic icons
-- Light backgrounds
+- Dark website-style backgrounds as the default
 `.trim();

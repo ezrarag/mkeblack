@@ -7,7 +7,7 @@
 /* Mapbox popups, and any context where Tailwind classes cannot be used.     */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /* Core palette */
   --mke-red: #EC2024;
@@ -16,20 +16,21 @@
   --ready-aim-go-gold: #FFC107;
 
   --brand-black: #000000;
-  --brand-charcoal: #242323;
-  --brand-canvas: #0A0A0A;
+  --brand-charcoal: #EEF1EA;
+  --brand-canvas: #F6F7F2;
   --brand-white: #FFFFFF;
-  --brand-off-white: #F7F7F3;
+  --brand-off-white: #FAFAF6;
+  --brand-ink: #161616;
 
   /* Semantic */
-  --color-canvas: #0A0A0A;
-  --color-panel: #111111;
-  --color-panel-alt: #161616;
-  --color-ink: #F7F7F3;
-  --color-muted: #6B7280;
+  --color-canvas: #F6F7F2;
+  --color-panel: #FFFFFF;
+  --color-panel-alt: #F0F3EC;
+  --color-ink: #161616;
+  --color-muted: #687166;
   --color-accent: #EC2024;
   --color-accent-soft: #FF4040;
-  --color-line: rgba(255, 255, 255, 0.10);
+  --color-line: rgba(22, 22, 22, 0.14);
   --color-success: #0B8F3A;
   --color-danger: #ef4444;
 
@@ -54,7 +55,7 @@ a {
 }
 
 * {
-  border-color: rgba(255, 255, 255, 0.10);
+  border-color: rgba(22, 22, 22, 0.14);
 }
 
 /* ─── Form Controls ──────────────────────────────────────────────────────── */
@@ -62,7 +63,7 @@ a {
 input:not([type="checkbox"]):not([type="file"]),
 textarea,
 select {
-  @apply w-full rounded-xl border border-line bg-panelAlt/90 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-500 focus:border-accent/50 focus:ring-2 focus:ring-accent/15;
+  @apply w-full rounded-xl border border-line bg-panelAlt/90 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/50 focus:ring-2 focus:ring-accent/15;
 }
 
 textarea {
@@ -77,4 +78,47 @@ input[type="checkbox"] {
 button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+/* ─── Light Theme Compatibility ───────────────────────────────────────────── */
+/* Many components were originally authored against dark-mode Tailwind stone
+   utilities. These overrides preserve the component structure while making the
+   existing surfaces readable on the new light brand canvas. */
+
+.text-stone-100,
+.text-stone-200 {
+  color: #252825;
+}
+
+.text-stone-300 {
+  color: #3E463D;
+}
+
+.text-stone-400 {
+  color: #5B6559;
+}
+
+.text-stone-500,
+.text-stone-600 {
+  color: #747D72;
+}
+
+.placeholder\:text-stone-500::placeholder,
+.placeholder\:text-stone-600::placeholder {
+  color: #7C8579;
+}
+
+.bg-white\/5 {
+  background-color: rgba(22, 22, 22, 0.04);
+}
+
+.bg-canvas\/30 {
+  background-color: rgba(246, 247, 242, 0.72);
+}
+
+.bg-canvas\/40,
+.bg-canvas\/50,
+.bg-canvas\/60,
+.bg-canvas\/70 {
+  background-color: rgba(246, 247, 242, 0.86);
 }

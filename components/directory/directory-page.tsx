@@ -5,7 +5,7 @@ import { BusinessCard } from "@/components/directory/business-card";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { BUSINESS_CATEGORIES } from "@/lib/constants";
-import { getDayKeyFromDate, isBusinessOpenOnDay } from "@/lib/business-hours";
+import { isBusinessOpenOnDay } from "@/lib/business-hours";
 import { getGoogleMapsDirectionsUrl } from "@/lib/directions";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { useBusinesses } from "@/hooks/use-businesses";
@@ -37,9 +37,8 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   );
   const [tagMatchMode, setTagMatchMode] = useState<"any" | "all">("any");
   const [tagsExpanded, setTagsExpanded] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<DayKey | "all">(
-    getDayKeyFromDate()
-  );
+  const [openOnExpanded, setOpenOnExpanded] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<DayKey | "all">("all");
   const [layout, setLayout] = useState<"grid" | "list">("grid");
   const [mobileMapEnabled, setMobileMapEnabled] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -57,7 +56,6 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
 
     if (tagParams.length) {
       setSelectedTags(Array.from(new Set(tagParams)));
-      setTagsExpanded(true);
     }
   }, [initialTags]);
 
@@ -421,7 +419,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   setSelectedNeighborhood("all");
                   setSelectedTags([]);
                   setTagMatchMode("any");
-                  setSelectedDay(getDayKeyFromDate());
+                  setSelectedDay("all");
                   setSortByDistance(false);
                   setUserLocation(null);
                   setLocationMessage(null);
@@ -444,15 +442,12 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
               <button
                 type="button"
                 onClick={() => setTagsExpanded((current) => !current)}
-                className="rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm text-stone-200 transition hover:border-accent/35 md:hidden"
+                className="rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm text-stone-200 transition hover:border-accent/35"
               >
                 {tagsExpanded ? "Hide tags" : "Show tags"}
                 {selectedTags.length ? ` (${selectedTags.length})` : ""}
               </button>
-              <p className="hidden text-xs font-semibold uppercase tracking-[0.24em] text-accent md:block">
-                Tags
-              </p>
-              <div className="flex rounded-full border border-line bg-panelAlt/70 p-1">
+              <div className={`${tagsExpanded ? "flex" : "hidden"} rounded-full border border-line bg-panelAlt/70 p-1`}>
                 {(["any", "all"] as const).map((mode) => (
                   <button
                     key={mode}
@@ -469,7 +464,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 ))}
               </div>
             </div>
-            <div className={`${tagsExpanded ? "block" : "hidden"} md:block`}>
+            <div className={tagsExpanded ? "block" : "hidden"}>
               {activeTags.length ? (
                 <div className="max-h-[6.5rem] overflow-y-auto pr-1">
                   <div className="flex flex-wrap gap-2">
@@ -502,10 +497,15 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           </div>
 
           <div className="mt-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-              Open on
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={() => setOpenOnExpanded((current) => !current)}
+              className="mb-3 rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm text-stone-200 transition hover:border-accent/35"
+            >
+              {openOnExpanded ? "Hide open on" : "Show open on"}
+              {selectedDay !== "all" ? ` (${titleCase(selectedDay)})` : " (All days)"}
+            </button>
+            <div className={`${openOnExpanded ? "flex" : "hidden"} gap-2 overflow-x-auto pb-1`}>
               <button
                 type="button"
                 onClick={() => setSelectedDay("all")}
