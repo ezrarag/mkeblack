@@ -30,8 +30,7 @@ function MemberCard({ member }: { member: TeamMember }) {
       onClick={() => setOpen((v) => !v)}
       aria-expanded={open}
       aria-label={`${open ? "Close" : "Open"} profile for ${member.name}`}
-      className="group relative w-full overflow-hidden rounded-2xl border border-line text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
-      style={{ aspectRatio: open ? "auto" : "3 / 4" }}
+      className="group relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
     >
       {/* ── Photo or initials fallback ── */}
       <div
@@ -62,7 +61,7 @@ function MemberCard({ member }: { member: TeamMember }) {
           open ? "top-0" : "top-1/2"
         }`}
       >
-        <div className="px-4 pb-4 pt-6">
+        <div className="max-h-full overflow-y-auto px-4 pb-4 pt-6">
           {/* Name */}
           <p className="font-display text-base font-bold leading-snug text-white sm:text-lg">
             {member.name}
@@ -79,13 +78,13 @@ function MemberCard({ member }: { member: TeamMember }) {
             }`}
           >
             <div className="overflow-hidden">
-              <p className="text-sm leading-relaxed text-stone-200">{member.bio}</p>
+              <p className="text-sm leading-relaxed text-white/90">{member.bio}</p>
             </div>
           </div>
 
           {/* Tap hint */}
           <p
-            className={`mt-2 text-[10px] uppercase tracking-[0.2em] text-stone-400 transition-opacity duration-300 ${
+            className={`mt-2 text-[10px] uppercase tracking-[0.2em] text-white/60 transition-opacity duration-300 ${
               open ? "opacity-0" : "opacity-100 group-hover:opacity-60"
             }`}
           >

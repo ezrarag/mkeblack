@@ -145,7 +145,7 @@ export function SiteFooter() {
                 Facebook
               </a>
               <a
-                href="https://www.instagram.com/mkeblack"
+                href="https://www.instagram.com/mkeblackinc/?hl=en"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
@@ -153,12 +153,20 @@ export function SiteFooter() {
                 Instagram
               </a>
               <a
-                href="https://twitter.com/mkeblack"
+                href="https://x.com/MKEBlackInc"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
               >
                 Twitter / X
+              </a>
+              <a
+                href="https://www.linkedin.com/company/mkeblackinc"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
+              >
+                LinkedIn
               </a>
             </div>
           </div>
