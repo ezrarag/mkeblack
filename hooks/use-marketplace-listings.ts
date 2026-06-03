@@ -6,6 +6,7 @@ import {
   loadFirebaseFirestoreModule,
   isFirebaseConfigured
 } from "@/lib/firebase/client";
+import { formatFirebaseError } from "@/lib/firebase-errors";
 import { normalizeMarketplaceListing } from "@/lib/firebase/marketplace";
 import { MarketplaceListing } from "@/lib/types";
 
@@ -16,6 +17,8 @@ type UseMarketplaceListingsOptions = {
   businessId?: string;
   /** Admin mode — no filters */
   adminAll?: boolean;
+  /** Defer opening the Firestore listener until auth/access state is ready */
+  enabled?: boolean;
 };
 
 export function useMarketplaceListings(
@@ -24,7 +27,8 @@ export function useMarketplaceListings(
   const {
     availableOnly = true,
     businessId,
-    adminAll = false
+    adminAll = false,
+    enabled = true
   } = options ?? {};
 
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -33,6 +37,13 @@ export function useMarketplaceListings(
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
+    if (!enabled) {
+      setListings([]);
+      setError(null);
       setLoading(false);
       return;
     }
@@ -87,16 +98,14 @@ export function useMarketplaceListings(
           },
           (err) => {
             if (!cancelled) {
-              setError(err.message);
+              setError(formatFirebaseError(err));
               setLoading(false);
             }
           }
         );
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load listings"
-          );
+          setError(formatFirebaseError(err));
           setLoading(false);
         }
       }
@@ -107,7 +116,7 @@ export function useMarketplaceListings(
       cancelled = true;
       unsubscribe();
     };
-  }, [availableOnly, businessId, adminAll]);
+  }, [availableOnly, businessId, adminAll, enabled]);
 
   return { listings, loading, error };
 }

@@ -1,0 +1,18 @@
+  const accountLinks: NavLink[] = hasAdminAccess
+    ? [
+        { href: "/admin", label: "Admin workspace" },
+        { href: "/admin/homepage", label: "Homepage editor" },
+        { href: "/admin/articles", label: "Articles" },
+        { href: "/admin/businesses", label: "Business manager" },
+        { href: "/admin/marketplace", label: "Marketplace" },
+        { href: "/admin/members", label: "Solidarity Circle" },
+        { href: "/admin/claims", label: "Pending claims" },
+        { href: "/admin/import", label: "Import spreadsheet" },
+        { href: "/admin/team", label: "Team access" },
+      ]
+    : isVisitor
+      ? [
+          { href: "/visitor", label: "My favorites" },
+          { href: "/visitor", label: "My account" },
+        ]
+      : [{ href: "/dashboard", label: "My listing" }];

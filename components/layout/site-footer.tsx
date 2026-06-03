@@ -137,7 +137,7 @@ export function SiteFooter() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href="https://www.facebook.com/MKEBlack"
+                href="https://www.facebook.com/MKEBlackInc"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
@@ -213,14 +213,12 @@ export function SiteFooter() {
                 Your donation directly funds the directory, events, and community
                 programs that drive Black community wealth.
               </p>
-              <a
-                href="https://givebutter.com/mkeblackinc"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/membership"
                 className="mt-5 inline-flex rounded-full border border-success/50 bg-success/10 px-5 py-2.5 text-sm font-semibold text-success transition hover:bg-success/20 hover:text-white"
               >
                 Donate
-              </a>
+              </Link>
             </div>
 
             <NewsletterSignup />

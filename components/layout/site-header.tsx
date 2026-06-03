@@ -33,11 +33,7 @@ const exploreLinks: NavLink[] = [
 
 const supportLinks: NavLink[] = [
   { href: "/membership", label: "Solidarity Circle" },
-  {
-    href: "https://givebutter.com/mkeblackinc",
-    label: "Donate",
-    external: true
-  }
+  { href: "/membership", label: "Donate" }
 ];
 
 function HeaderLink({ href, label, external }: NavLink) {
@@ -161,6 +157,7 @@ export function SiteHeader() {
     ? [
         { href: "/admin", label: "Admin workspace" },
         { href: "/admin/homepage", label: "Homepage editor" },
+        { href: "/admin/articles", label: "Articles" },
         { href: "/admin/businesses", label: "Business manager" },
         { href: "/admin/marketplace", label: "Marketplace" },
         { href: "/admin/members", label: "Solidarity Circle" },

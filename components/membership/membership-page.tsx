@@ -1,11 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { submitMembershipInterest } from "@/lib/firebase/members";
-import { isFirebaseConfigured } from "@/lib/firebase/client";
-
-const GIVEBUTTER_URL = "https://givebutter.com/PRbf2u";
 
 const benefits = [
   {
@@ -34,30 +29,46 @@ const benefits = [
   }
 ];
 
-type FormStep = "idle" | "form" | "submitting" | "done";
+type CheckoutKind = "membership" | "donation";
 
 export function MembershipPage() {
-  const [formStep, setFormStep] = useState<FormStep>("idle");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [reference, setReference] = useState("");
+  const [checkoutKind, setCheckoutKind] = useState<CheckoutKind | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!name.trim() || !email.trim()) return;
-    setFormStep("submitting");
+  async function startCheckout(kind: CheckoutKind) {
+    if (kind === "membership" && (!name.trim() || !email.trim())) {
+      setError("Enter your name and email before continuing to checkout.");
+      return;
+    }
+
+    setCheckoutKind(kind);
     setError(null);
+
     try {
-      await submitMembershipInterest({
-        name: name.trim(),
-        email: email.trim(),
-        paymentReference: reference.trim() || undefined
+      const response = await fetch("/api/membership/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind,
+          name: name.trim(),
+          email: email.trim()
+        })
       });
-      setFormStep("done");
+      const payload = (await response.json()) as {
+        url?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.url) {
+        throw new Error(payload.error ?? "Unable to start checkout.");
+      }
+
+      window.location.href = payload.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-      setFormStep("form");
+      setError(err instanceof Error ? err.message : "Unable to start checkout.");
+      setCheckoutKind(null);
     }
   }
 
@@ -75,30 +86,52 @@ export function MembershipPage() {
             Support Milwaukee&apos;s Black business community. Your membership funds the
             directory, events, and connections that build real community wealth.
           </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <a
-              href={GIVEBUTTER_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-accent bg-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-accentSoft"
-            >
-              Become a member on Givebutter
-            </a>
-            <a
-              href="#already-joined"
-              onClick={(e) => {
-                e.preventDefault();
-                setFormStep("form");
-                setTimeout(() => {
-                  document
-                    .getElementById("already-joined")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }, 50);
-              }}
-              className="rounded-full border border-line px-7 py-3.5 text-sm font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
-            >
-              I already joined
-            </a>
+          <div className="mt-8 grid max-w-xl gap-4 rounded-2xl border border-line bg-panel/80 p-5 sm:grid-cols-2">
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              Full name
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Your name"
+                className="mt-2 w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm normal-case tracking-normal text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
+              />
+            </label>
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              Email address
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                className="mt-2 w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm normal-case tracking-normal text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
+              />
+            </label>
+            <div className="flex flex-wrap gap-3 sm:col-span-2">
+              <button
+                type="button"
+                onClick={() => void startCheckout("membership")}
+                disabled={checkoutKind !== null}
+                className="rounded-full border border-accent bg-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+              >
+                {checkoutKind === "membership"
+                  ? "Opening checkout..."
+                  : "Continue to checkout"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void startCheckout("donation")}
+                disabled={checkoutKind !== null}
+                className="rounded-full border border-line px-7 py-3.5 text-sm font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink disabled:opacity-50"
+              >
+                {checkoutKind === "donation" ? "Opening checkout..." : "Donate"}
+              </button>
+            </div>
+            {error ? (
+              <p className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-rose-300 sm:col-span-2">
+                {error}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -133,137 +166,17 @@ export function MembershipPage() {
             Ready to join?
           </p>
           <p className="mt-3 text-sm leading-7 text-stone-300">
-            Membership is processed securely through Givebutter. Once you join, come back here
-            to link your account.
+            Membership is processed securely through Stripe Checkout. After payment,
+            your member record is activated automatically.
           </p>
-          <a
-            href={GIVEBUTTER_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex rounded-full border border-accent bg-accent px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-accentSoft"
+          <button
+            type="button"
+            onClick={() => void startCheckout("membership")}
+            disabled={checkoutKind !== null}
+            className="mt-6 inline-flex rounded-full border border-accent bg-accent px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
           >
-            Join on Givebutter →
-          </a>
-        </div>
-
-        <div id="already-joined" className="mt-12 scroll-mt-24">
-          <div className="rounded-2xl border border-line bg-panel/80 p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-              Already a member?
-            </p>
-            <h2 className="mt-4 font-display text-2xl font-bold text-ink">
-              Link your membership to this account.
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-stone-400">
-              After joining on Givebutter, enter your details below so MKE Black can
-              connect your membership with your directory profile and send you member benefits.
-            </p>
-
-            {formStep === "idle" ? (
-              <button
-                type="button"
-                onClick={() => setFormStep("form")}
-                className="mt-6 rounded-full border border-line px-6 py-3 text-sm font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
-              >
-                I already joined — connect my account
-              </button>
-            ) : formStep === "done" ? (
-              <div className="mt-6 rounded-xl border border-success/35 bg-success/10 p-5">
-                <p className="font-semibold text-ink">You&apos;re registered!</p>
-                <p className="mt-2 text-sm leading-7 text-stone-300">
-                  We&apos;ve received your details. An MKE Black admin will verify your
-                  membership and activate your benefits shortly. Questions?{" "}
-                  <Link href="/contact" className="text-accent hover:text-accentSoft">
-                    Contact us.
-                  </Link>
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="mt-6 max-w-md space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Full name
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      placeholder="Your name"
-                      className="mt-2 w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Email address
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="you@example.com"
-                      className="mt-2 w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    Givebutter transaction ID{" "}
-                    <span className="normal-case tracking-normal text-stone-500">
-                      (optional — helps us verify faster)
-                    </span>
-                    <input
-                      type="text"
-                      value={reference}
-                      onChange={(e) => setReference(e.target.value)}
-                      placeholder="e.g. GB-12345"
-                      className="mt-2 w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
-                    />
-                  </label>
-                </div>
-                {!isFirebaseConfigured ? (
-                  <p className="text-xs text-stone-500">
-                    Account linking is unavailable in this environment.
-                  </p>
-                ) : null}
-                {error ? (
-                  <p className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-rose-300">
-                    {error}
-                  </p>
-                ) : null}
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={formStep === "submitting" || !isFirebaseConfigured}
-                    className="rounded-full border border-accent bg-accent px-6 py-3 text-sm font-medium text-white transition hover:bg-accentSoft disabled:opacity-50"
-                  >
-                    {formStep === "submitting" ? "Submitting…" : "Submit"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormStep("idle")}
-                    className="rounded-full border border-line px-5 py-3 text-sm text-stone-400 transition hover:text-ink"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-2xl border border-accent/20 bg-panelAlt/50 p-6 text-center">
-          <p className="text-sm text-stone-400">
-            Prefer a one-time donation instead?{" "}
-            <a
-              href="https://givebutter.com/mkeblackinc"
-              target="_blank"
-              rel="noreferrer"
-              className="font-semibold text-accent transition hover:text-accentSoft"
-            >
-              Donate here →
-            </a>
-          </p>
+            {checkoutKind === "membership" ? "Opening checkout..." : "Join now"}
+          </button>
         </div>
       </section>
     </main>

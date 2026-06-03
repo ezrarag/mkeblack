@@ -8,6 +8,7 @@ type EditState = {
   orderUrl: string;
 };
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { useAuth } from "@/components/providers/auth-provider";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
 import { adminUpdateListing } from "@/lib/firebase/marketplace";
 import { formatFirebaseError } from "@/lib/firebase-errors";
@@ -150,10 +151,12 @@ function ListingAdminRow({
   );
 }
 
-export function AdminMarketplacePage() {
+function AdminMarketplaceContent() {
+  const { hasAdminAccess } = useAuth();
   const { listings, loading, error } = useMarketplaceListings({
     adminAll: true,
-    availableOnly: false
+    availableOnly: false,
+    enabled: hasAdminAccess
   });
 
   const [feedback, setFeedback] = useState<{
@@ -219,8 +222,7 @@ export function AdminMarketplacePage() {
   const featuredCount = listings.filter((l) => l.featured).length;
 
   return (
-    <ProtectedRoute requireAdmin>
-      <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow">
           <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
@@ -330,8 +332,14 @@ export function AdminMarketplacePage() {
             ))
           )}
         </div>
-      </section>
-    </ProtectedRoute>
+    </section>
   );
 }
 
+export function AdminMarketplacePage() {
+  return (
+    <ProtectedRoute requireAdmin>
+      <AdminMarketplaceContent />
+    </ProtectedRoute>
+  );
+}

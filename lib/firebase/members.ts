@@ -53,9 +53,9 @@ function normalizeStatus(v: unknown): SolidarityMemberStatus {
 function normalizePaymentSource(
   v: unknown
 ): SolidarityMember["paymentSource"] {
-  if (v === "givebutter" || v === "stripe" || v === "comp" || v === "manual")
+  if (v === "stripe" || v === "comp" || v === "manual")
     return v;
-  return "givebutter";
+  return "manual";
 }
 
 export function normalizeSolidarityMember(
@@ -111,7 +111,7 @@ export async function submitMembershipInterest(data: {
     name: data.name.trim(),
     email: data.email.trim().toLowerCase(),
     paymentReference: data.paymentReference?.trim() ?? "",
-    paymentSource: "givebutter",
+    paymentSource: "manual",
     status: "pending",
     uid: null,
     businessId: null,

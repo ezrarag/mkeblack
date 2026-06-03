@@ -31,7 +31,7 @@ export function formatFirebaseError(error: unknown) {
       case "auth/too-many-requests":
         return "Too many attempts were made. Wait a few minutes and try again.";
       case "permission-denied":
-        return "Firestore denied this write. Verify that this account is an admin in the active Firebase project and that the latest Firestore rules are deployed.";
+        return "Firestore denied this request. Verify that this account has the required access in the active Firebase project and that the latest Firestore rules are deployed.";
       case "storage/unauthorized":
         return "You do not have permission to upload files for this listing.";
       default:

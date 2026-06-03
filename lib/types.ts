@@ -353,7 +353,7 @@ export type SolidarityMember = {
   expiresAt: Date | null;
   notes: string;
   benefitIds: string[];
-  paymentSource: "givebutter" | "stripe" | "comp" | "manual";
+  paymentSource: "stripe" | "comp" | "manual";
   paymentReference: string;
 };
 
