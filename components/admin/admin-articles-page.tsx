@@ -336,7 +336,7 @@ export function AdminArticlesPage() {
                 <code className="rounded bg-panelAlt px-2 py-0.5 text-stone-300">
                   node scripts/seed-articles.js
                 </code>{" "}
-                to import from mkeblack.org, or click "+ Add article" above.
+                to import from mkeblack.org, or click &quot;+ Add article&quot; above.
               </p>
             </div>
           ) : (
@@ -598,7 +598,7 @@ export function AdminArticlesPage() {
 
               <div>
                 <label className="block text-xs uppercase tracking-[0.2em] text-muted mb-2">
-                  Link URL (where "Read more" goes)
+                  Link URL (where &quot;Read more&quot; goes)
                 </label>
                 <input
                   value={form.href}
