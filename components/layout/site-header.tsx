@@ -32,8 +32,9 @@ const exploreLinks: NavLink[] = [
 ];
 
 const supportLinks: NavLink[] = [
-  { href: "/membership", label: "Solidarity Circle" },
-  { href: "/membership", label: "Donate" }
+  { href: "/membership#join", label: "Join Solidarity Circle" },
+  { href: "/membership#donate", label: "Make a donation" },
+  { href: "/membership#benefits", label: "Member benefits" }
 ];
 
 function HeaderLink({ href, label, external }: NavLink) {
