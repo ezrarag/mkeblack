@@ -315,6 +315,84 @@ function ModuleEditor({
                   }
                 />
               </div>
+              <div>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-muted">
+                    Hero images
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onChange({
+                        ...module,
+                        content: {
+                          ...module.content,
+                          heroImages: [...module.content.heroImages, ""]
+                        }
+                      })
+                    }
+                    className="rounded-full border border-accent/35 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Add image URL
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {module.content.heroImages.length ? (
+                    module.content.heroImages.map((imageUrl, index) => (
+                      <div key={index} className="rounded-2xl border border-line bg-panelAlt/70 p-3">
+                        <div className="flex gap-2">
+                          <input
+                            value={imageUrl}
+                            placeholder="https://..."
+                            onChange={(event) =>
+                              onChange({
+                                ...module,
+                                content: {
+                                  ...module.content,
+                                  heroImages: module.content.heroImages.map((currentUrl, currentIndex) =>
+                                    currentIndex === index ? event.target.value : currentUrl
+                                  )
+                                }
+                              })
+                            }
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onChange({
+                                ...module,
+                                content: {
+                                  ...module.content,
+                                  heroImages: module.content.heroImages.filter((_, currentIndex) =>
+                                    currentIndex !== index
+                                  )
+                                }
+                              })
+                            }
+                            className="shrink-0 rounded-xl border border-line px-3 py-2 text-xs text-stone-300 transition hover:border-danger/40 hover:text-danger"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        {imageUrl ? (
+                          <div className="mt-3 aspect-[16/9] overflow-hidden rounded-xl border border-line bg-canvas/70">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={imageUrl}
+                              alt="Hero preview"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-line bg-canvas/30 p-4 text-sm text-stone-400">
+                      No hero images. Add a URL to show an image behind the hero copy.
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">

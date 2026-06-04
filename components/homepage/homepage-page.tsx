@@ -3,7 +3,8 @@
 
 import Link from "next/link";
 import DOMPurify from "dompurify";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MarketplaceListingCard } from "@/components/marketplace/marketplace-listing-card";
@@ -14,7 +15,12 @@ import { useMemberDiscounts } from "@/hooks/use-member-discounts";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
 import { HOMEPAGE_MODULE_LABELS } from "@/lib/homepage";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
-import { ArticleSummary, HomepageModule, MarketplaceListing, MemberDiscount } from "@/lib/types";
+import {
+  ArticleSummary,
+  HomepageModule,
+  MarketplaceListing,
+  MemberDiscount
+} from "@/lib/types";
 import { isExternalHref } from "@/lib/utils";
 
 type LiveSiteFeature = {
@@ -22,6 +28,13 @@ type LiveSiteFeature = {
   description: string;
   href: string;
   cta: string;
+};
+
+type LiveGuideFeature = LiveSiteFeature & {
+  imageUrl: string;
+  imageAlt: string;
+  caption: string;
+  body: string[];
 };
 
 const liveStoryLinks: LiveSiteFeature[] = [
@@ -48,42 +61,94 @@ const liveStoryLinks: LiveSiteFeature[] = [
   }
 ];
 
-const liveGuideSections: LiveSiteFeature[] = [
+const liveGuideSections: LiveGuideFeature[] = [
   {
     title: "In the Mood for Food?",
     description:
       "Milwaukee has a deep Black-owned food and drink scene, from vegan burgers and soul food to desserts, popcorn, coffee, catering, and ice cream.",
     href: "/directory?category=Food%20%26%20Drink",
-    cta: "Browse food and drink"
+    cta: "Browse food and drink",
+    imageUrl:
+      "https://static.wixstatic.com/media/82231f_c01b9066909449e0acb26d5bd8ab27f1~mv2.png/v1/fill/w_1000,h_627,al_c,q_90,enc_avif,quality_auto/82231f_c01b9066909449e0acb26d5bd8ab27f1~mv2.png",
+    imageAlt: "Burgers and fries from a Black-owned Milwaukee restaurant",
+    caption: "Twisted Plants offers delicious vegan food.",
+    body: [
+      "With nearly 80 Black-owned food and drink establishments, the Milwaukee area is no stranger to southern inspired cuisine. Morning favorites of scrambled eggs, bacon, and hash browns are a must try at Rise and Grind Cafe.",
+      "In the mood for soul? Head over to Daddy's Soul Food & Grille, one of the city's best southern style restaurants. For vegan diners, Twisted Plants is the area's go-to place for plant-based burgers.",
+      "Still have room for dessert? Confectionately Yours, Bougie Berries, Goody Gourmets, and Tastee Twist keep the sweet options close by."
+    ]
   },
   {
     title: "Shop 'Til You Drop",
     description:
       "Find local retail, handcrafted goods, apparel, beauty products, makers markets, and multi-vendor spaces supporting Black businesses.",
     href: "/directory?category=Retail%20%26%20Shopping",
-    cta: "Browse shopping"
+    cta: "Browse shopping",
+    imageUrl:
+      "https://static.wixstatic.com/media/82231f_aeb53ddaa7ae47dbba543a9c3380f423~mv2.png/v1/fill/w_1000,h_628,al_c,q_90,enc_avif,quality_auto/82231f_aeb53ddaa7ae47dbba543a9c3380f423~mv2.png",
+    imageAlt: "Sherman Phoenix building mural",
+    caption: "Sherman Phoenix is home to several Black-owned restaurants, shops, and services.",
+    body: [
+      "With over 25 local brands in one space, The Bronzeville Collective offers something for everyone. Discover handcrafted jewelry, one-of-a-kind apparel, bath products, and more.",
+      "Born out of the ashes of unrest, Sherman Phoenix offers a variety of restaurants, shops, and services. Visit The Underground Makers Market, Queens' Closet, and None Above for the latest fashion and handcrafted items."
+    ]
   },
   {
     title: "Hitting The Bar",
     description:
       "Plan a night out with Black-owned bars, lounges, sports bars, live music, Caribbean food, jazz, and social spaces around the city.",
     href: "/directory?category=Food%20%26%20Drink",
-    cta: "Find nightlife"
+    cta: "Find nightlife",
+    imageUrl:
+      "https://static.wixstatic.com/media/82231f_c27dbfe0f8ac494b8e4fe5497b9564b8~mv2.png/v1/fill/w_1000,h_628,al_c,q_90,enc_avif,quality_auto/82231f_c27dbfe0f8ac494b8e4fe5497b9564b8~mv2.png",
+    imageAlt: "Two drinks on a dark bar",
+    caption: "Milwaukee is home to several Black-owned bars and clubs.",
+    body: [
+      "Milwaukee is known as Brew City for a reason, with ample places to drink, dance, and socialize. For an upscale experience, visit KISS Ultra Lounge for cocktails, food, partying, and entertainment.",
+      "If you are into reggae and hip-hop, Club Timbuktu is a can't-miss stop with live music, DJs, and Caribbean food. Jazz fans can find an eclectic menu, drinks, and company at Garfield's 502.",
+      "Catch Milwaukee Bucks, Brewers, and Green Bay Packers games at 4th Quarter Sports Bar and Grill and Skybox Sports Bar."
+    ]
   },
   {
     title: "Dive Into Local History",
     description:
       "Connect with museums and historical institutions preserving African American history, culture, and community memory in Milwaukee.",
     href: "/directory?category=Education%2C%20Youth%20%26%20Family%20Services",
-    cta: "Explore history"
+    cta: "Explore history",
+    imageUrl:
+      "https://static.wixstatic.com/media/82231f_0e932acb2d3944ca9fd983d3475c7f74~mv2.png/v1/fill/w_999,h_628,al_c,q_90,enc_avif,quality_auto/82231f_0e932acb2d3944ca9fd983d3475c7f74~mv2.png",
+    imageAlt: "America's Black Holocaust Museum",
+    caption: "America's Black Holocaust Museum",
+    body: [
+      "Milwaukee is home to museums that dive into African American history. America's Black Holocaust Museum offers vast knowledge of the harmful effects of slavery and the road to reconciliation.",
+      "The Wisconsin Black Historical Society documents and preserves African American history and culture in Wisconsin. Located in a former library and fire station, the museum provides a look into past times."
+    ]
   },
   {
     title: "Discover the Arts",
     description:
       "Explore galleries, paint-and-sip studios, creative venues, print lounges, festivals, and arts businesses rooted in Black Milwaukee.",
     href: "/directory?category=Arts%2C%20Media%20%26%20Creative%20Services",
-    cta: "Browse arts"
+    cta: "Browse arts",
+    imageUrl:
+      "https://static.wixstatic.com/media/82231f_71e4919c24ef45dbb9931c8f60055ebf~mv2.png/v1/fill/w_1000,h_628,al_c,q_90,enc_avif,quality_auto/82231f_71e4919c24ef45dbb9931c8f60055ebf~mv2.png",
+    imageAlt: "Painting at Vibez Creative Arts Space",
+    caption: "Painting at Vibez Creative Arts Space",
+    body: [
+      "Milwaukee has a thriving Black arts scene and is home to many galleries, events, and art-based businesses. Vibez Creative Arts Space is the city's premiere urban paint-and-sip space.",
+      "Cream City Print Lounge offers a similar concept with print, paint, and sip classes and parties. Art lovers can also explore 5 Points Art Gallery & Studios and Greenwood Park Gallery and Framing.",
+      "Founded by Oscar winner and Milwaukee native John Ridley, No Studios offers an environment for artists and art lovers to come together. Black Arts Fest MKE honors African American heritage through performances, activities, and local vendors."
+    ]
   }
+];
+
+const legacyMemberDiscountImages = [
+  "https://static.wixstatic.com/media/9f0f22_c512893b3b994d6cb5fb3c9e4db759e8~mv2.jpg/v1/crop/x_0,y_931,w_1170,h_743/fill/w_456,h_286,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(4).jpg",
+  "https://static.wixstatic.com/media/9f0f22_8157bc84ea1740d7a7210909ac5af8bd~mv2.png/v1/fill/w_576,h_250,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/PNG-02.png",
+  "https://static.wixstatic.com/media/9f0f22_d857e05640e6491a92efac81d3f5381d~mv2.jpg/v1/crop/x_0,y_1678,w_320,h_322/fill/w_428,h_286,al_c,lg_1,q_80,enc_avif,quality_auto/9f0f22_d857e05640e6491a92efac81d3f5381d~mv2.jpg",
+  "https://static.wixstatic.com/media/9f0f22_24565f8d914b4c4f99c455c56b2ad89a~mv2.jpg/v1/crop/x_311,y_0,w_729,h_608/fill/w_520,h_286,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/431473182_1115458509593685_4701702819671945082_n.jpg",
+  "https://static.wixstatic.com/media/9f0f22_19791aff28fc47e0b6b5f9450e221daa~mv2.jpg/v1/fill/w_520,h_250,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/9f0f22_19791aff28fc47e0b6b5f9450e221daa~mv2.jpg",
+  "https://static.wixstatic.com/media/9f0f22_e55c07e544534adc8024c7e521805887~mv2.png/v1/fill/w_442,h_368,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SP-LogoSP.png"
 ];
 
 function SmartLink({
@@ -93,7 +158,7 @@ function SmartLink({
 }: {
   href: string;
   className: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   if (isExternalHref(href)) {
     return (
@@ -115,7 +180,78 @@ function SmartLink({
   );
 }
 
+function GuideModal({
+  guide,
+  onClose
+}: {
+  guide: LiveGuideFeature;
+  onClose: () => void;
+}) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 py-8 backdrop-blur-sm sm:px-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label={guide.title}
+        className="relative grid max-h-[82vh] w-full max-w-7xl overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f1f] shadow-glow lg:grid-cols-[0.92fr_1.08fr]"
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 18, scale: 0.98 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close guide"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/45 text-lg leading-none text-white transition hover:border-accent/60 hover:bg-accent"
+        >
+          ×
+        </button>
+
+        <div className="max-h-[82vh] overflow-y-auto px-6 py-8 sm:px-8 lg:px-10 lg:py-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-white/45">
+            Explore Milwaukee
+          </p>
+          <h3 className="mt-5 font-display text-4xl font-black leading-tight text-accent sm:text-5xl">
+            {guide.title}
+          </h3>
+          <div className="mt-6 space-y-4 text-base leading-8 text-white/85">
+            {guide.body.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+          <p className="mt-8 text-sm leading-7 text-white/55">{guide.caption}</p>
+          <SmartLink
+            href={guide.href}
+            className="mt-8 inline-flex rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
+          >
+            {guide.cta}
+          </SmartLink>
+        </div>
+
+        <div className="relative min-h-[280px] overflow-hidden lg:min-h-[520px]">
+          <img
+            src={guide.imageUrl}
+            alt={guide.imageAlt}
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1f1f1f]/25 via-transparent to-transparent" />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function LiveSiteContentParitySection() {
+  const [activeGuide, setActiveGuide] = useState<LiveGuideFeature | null>(null);
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
@@ -174,10 +310,11 @@ function LiveSiteContentParitySection() {
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {liveGuideSections.map((section) => (
-            <Link
+            <button
+              type="button"
               key={section.title}
-              href={section.href}
-              className="group flex min-h-64 flex-col rounded-2xl border border-line bg-canvas/35 p-5 transition hover:border-success/40 hover:bg-success/5"
+              onClick={() => setActiveGuide(section)}
+              className="group flex min-h-64 flex-col rounded-2xl border border-line bg-canvas/35 p-5 text-left transition hover:border-success/40 hover:bg-success/5"
             >
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
                 Explore
@@ -191,10 +328,16 @@ function LiveSiteContentParitySection() {
               <p className="mt-4 text-sm font-semibold text-success transition group-hover:text-ink">
                 {section.cta} →
               </p>
-            </Link>
+            </button>
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {activeGuide ? (
+          <GuideModal guide={activeGuide} onClose={() => setActiveGuide(null)} />
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }
@@ -257,6 +400,72 @@ function ArticleCard({ article }: { article: ArticleSummary }) {
   );
 }
 
+function MemberDiscountCard({
+  discount,
+  fallbackImageUrl
+}: {
+  discount: MemberDiscount;
+  fallbackImageUrl?: string;
+}) {
+  const imageUrl = discount.logoUrl || fallbackImageUrl;
+  const content = (
+    <>
+      <div className="flex h-28 items-center justify-center overflow-hidden border-b border-line bg-white">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={discount.businessName || "Member discount"}
+            onError={(event) => {
+              if (fallbackImageUrl && event.currentTarget.src !== fallbackImageUrl) {
+                event.currentTarget.src = fallbackImageUrl;
+              }
+            }}
+            className="h-full w-full object-contain p-4 transition duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <span className="font-display text-4xl font-black uppercase tracking-[0.12em] text-accent/35">
+            Deal
+          </span>
+        )}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col p-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+          Member discount
+        </p>
+        <h3 className="mt-2 truncate font-display text-lg font-bold leading-snug text-ink">
+          {discount.businessName || "MKE Black partner"}
+        </h3>
+        <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-stone-300">
+          {discount.discountText || "Member offer details coming soon."}
+        </p>
+        {discount.businessUrl ? (
+          <p className="mt-auto pt-4 text-sm font-semibold text-accent transition group-hover:text-ink">
+            Visit business →
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
+
+  const className =
+    "group flex h-60 flex-col overflow-hidden rounded-2xl border border-line bg-panelAlt/75 text-left transition hover:border-accent/50 hover:bg-panelAlt/90";
+
+  if (discount.businessUrl) {
+    return (
+      <a
+        href={discount.businessUrl}
+        target="_blank"
+        rel="noreferrer"
+        className={className}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
+}
+
 function renderHomepageModule(
   module: HomepageModule,
   articles: ArticleSummary[],
@@ -269,11 +478,32 @@ function renderHomepageModule(
   listingsLoading: boolean
 ) {
   switch (module.type) {
-    case "hero":
+    case "hero": {
+      const heroImageUrl = module.content.heroImages[0]?.trim();
+
       return (
         <section className="relative overflow-hidden border-b border-line bg-mesh-dark">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-            <div className="max-w-4xl">
+          {heroImageUrl ? (
+            <>
+              <img
+                src={heroImageUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(90deg, rgba(246,247,242,0.98) 0%, rgba(246,247,242,0.94) 38%, rgba(246,247,242,0.62) 58%, rgba(246,247,242,0.18) 78%, rgba(246,247,242,0) 100%)"
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-canvas/35 via-transparent to-canvas/80" />
+            </>
+          ) : null}
+
+          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
+            <div className="max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">
                 {module.title || HOMEPAGE_MODULE_LABELS.hero}
               </p>
@@ -297,7 +527,7 @@ function renderHomepageModule(
                   {module.content.ctaSecondary.href ? (
                     <SmartLink
                       href={module.content.ctaSecondary.href}
-                      className="rounded-full border border-line bg-white/5 px-6 py-3 text-sm font-medium text-ink transition hover:border-accent/40 hover:bg-accent/10"
+                      className="rounded-full border border-line bg-canvas/70 px-6 py-3 text-sm font-medium text-ink transition hover:border-accent/40 hover:bg-accent/10"
                     >
                       {module.content.ctaSecondary.label || "Explore"}
                     </SmartLink>
@@ -308,6 +538,7 @@ function renderHomepageModule(
           </div>
         </section>
       );
+    }
 
     case "featured_articles":
       return (
@@ -444,45 +675,12 @@ function renderHomepageModule(
               </div>
             ) : discounts.length ? (
               <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {discounts.map((discount) => (
-                  <a
+                {discounts.map((discount, index) => (
+                  <MemberDiscountCard
                     key={discount.id}
-                    href={discount.businessUrl || undefined}
-                    target={discount.businessUrl ? "_blank" : undefined}
-                    rel={discount.businessUrl ? "noreferrer" : undefined}
-                    className="group rounded-2xl border border-line bg-panelAlt/75 p-6 transition hover:border-accent/40 hover:bg-panelAlt/85"
-                  >
-                    <div className="flex items-start gap-4">
-                      {discount.logoUrl ? (
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line bg-canvas/70">
-                          <img
-                            src={discount.logoUrl}
-                            alt={discount.businessName}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-canvas/70 text-xs uppercase tracking-[0.24em] text-muted">
-                          Deal
-                        </div>
-                      )}
-
-                      <div className="min-w-0">
-                        <h3 className="font-display text-lg font-bold leading-snug text-ink">
-                          {discount.businessName}
-                        </h3>
-                        <p className="mt-3 text-sm leading-7 text-stone-300">
-                          {discount.discountText}
-                        </p>
-                      </div>
-                    </div>
-
-                    {discount.businessUrl ? (
-                      <p className="mt-6 text-sm font-semibold text-accent transition group-hover:text-ink">
-                        Visit business
-                      </p>
-                    ) : null}
-                  </a>
+                    discount={discount}
+                    fallbackImageUrl={legacyMemberDiscountImages[index]}
+                  />
                 ))}
               </div>
             ) : (

@@ -20,6 +20,9 @@ const DEFAULT_MEMBERSHIP_BENEFITS = [
   "Stay close to campaigns, events, and partner offers."
 ];
 
+export const DEFAULT_HOMEPAGE_HERO_IMAGE_URL =
+  "https://firebasestorage.googleapis.com/v0/b/mkeblack-c6dfe.firebasestorage.app/o/assets%2FScreenshot%202026-06-04%20at%2010.59.48%E2%80%AFAM.png?alt=media&token=ce47f8a7-439a-4fb9-8fa8-5f837f410337";
+
 type FirestoreRecord = Record<string, unknown>;
 
 export const HOMEPAGE_MODULE_TYPES: HomepageModuleType[] = [
@@ -80,10 +83,17 @@ function normalizeLink(value: unknown): HomepageLink {
 
 function normalizeHeroContent(value: unknown): HeroHomepageModule["content"] {
   const record = isRecord(value) ? value : {};
+  const heroImages =
+    "heroImages" in record
+      ? stringListValue(record.heroImages)
+      : stringListValue([record.heroImageUrl, record.imageUrl]).length
+        ? stringListValue([record.heroImageUrl, record.imageUrl])
+        : [DEFAULT_HOMEPAGE_HERO_IMAGE_URL];
 
   return {
     headline: stringValue(record.headline).trim(),
     subheadline: stringValue(record.subheadline).trim(),
+    heroImages,
     ctaPrimary: normalizeLink(record.ctaPrimary),
     ctaSecondary: normalizeLink(record.ctaSecondary)
   };
@@ -201,6 +211,7 @@ export function createHomepageModuleDraft(type: HomepageModuleType): HomepageMod
           headline: "Celebrate Milwaukee's Black business community.",
           subheadline:
             "Publish a flexible homepage that highlights stories, perks, and the people building the city forward.",
+          heroImages: [DEFAULT_HOMEPAGE_HERO_IMAGE_URL],
           ctaPrimary: {
             label: "Browse the directory",
             href: "/directory"
@@ -302,6 +313,7 @@ export function cloneHomepageModule(module: HomepageModule): HomepageModule {
         ...module,
         content: {
           ...module.content,
+          heroImages: [...module.content.heroImages],
           ctaPrimary: { ...module.content.ctaPrimary },
           ctaSecondary: { ...module.content.ctaSecondary }
         }
@@ -436,6 +448,9 @@ export function serializeHomepageModule(module: HomepageModule) {
         content: {
           headline: module.content.headline.trim(),
           subheadline: module.content.subheadline.trim(),
+          heroImages: module.content.heroImages
+            .map((imageUrl) => imageUrl.trim())
+            .filter(Boolean),
           ctaPrimary: normalizeLink(module.content.ctaPrimary),
           ctaSecondary: normalizeLink(module.content.ctaSecondary)
         }

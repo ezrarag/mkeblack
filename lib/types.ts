@@ -200,6 +200,7 @@ export type HeroHomepageModule = HomepageModuleBase<
   {
     headline: string;
     subheadline: string;
+    heroImages: string[];
     ctaPrimary: HomepageLink;
     ctaSecondary: HomepageLink;
   }
