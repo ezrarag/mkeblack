@@ -410,32 +410,43 @@ function MemberDiscountCard({
   const imageUrl = discount.logoUrl || fallbackImageUrl;
   const content = (
     <>
-      <div className="flex h-28 items-center justify-center overflow-hidden border-b border-line bg-white">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={discount.businessName || "Member discount"}
-            onError={(event) => {
-              if (fallbackImageUrl && event.currentTarget.src !== fallbackImageUrl) {
-                event.currentTarget.src = fallbackImageUrl;
-              }
-            }}
-            className="h-full w-full object-contain p-4 transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <span className="font-display text-4xl font-black uppercase tracking-[0.12em] text-accent/35">
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={discount.businessName || "Member discount"}
+          onError={(event) => {
+            if (fallbackImageUrl && event.currentTarget.src !== fallbackImageUrl) {
+              event.currentTarget.src = fallbackImageUrl;
+              return;
+            }
+
+            event.currentTarget.style.display = "none";
+          }}
+          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+      ) : null}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(246,247,242,0.97) 0%, rgba(246,247,242,0.91) 48%, rgba(246,247,242,0.58) 73%, rgba(246,247,242,0.24) 100%)"
+        }}
+      />
+      {!imageUrl ? (
+        <div className="absolute inset-0 flex items-center justify-end pr-8">
+          <span className="font-display text-5xl font-black uppercase tracking-[0.12em] text-accent/20">
             Deal
           </span>
-        )}
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col p-5">
+        </div>
+      ) : null}
+      <div className="relative flex h-full max-w-[72%] flex-col p-6">
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
           Member discount
         </p>
-        <h3 className="mt-2 truncate font-display text-lg font-bold leading-snug text-ink">
+        <h3 className="mt-3 font-display text-2xl font-black leading-tight text-ink">
           {discount.businessName || "MKE Black partner"}
         </h3>
-        <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-stone-300">
+        <p className="mt-4 line-clamp-3 text-base font-medium leading-7 text-stone-300">
           {discount.discountText || "Member offer details coming soon."}
         </p>
         {discount.businessUrl ? (
@@ -448,7 +459,7 @@ function MemberDiscountCard({
   );
 
   const className =
-    "group flex h-60 flex-col overflow-hidden rounded-2xl border border-line bg-panelAlt/75 text-left transition hover:border-accent/50 hover:bg-panelAlt/90";
+    "group relative block h-60 overflow-hidden rounded-2xl border border-line bg-panelAlt/75 text-left transition hover:border-accent/50";
 
   if (discount.businessUrl) {
     return (

@@ -50,7 +50,7 @@ function DropdownLink({
   onSelect
 }: NavLink & { onSelect: () => void }) {
   const className =
-    "rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white transition hover:border-accent/60 hover:bg-accent/20";
+    "rounded-xl border border-line bg-canvas/70 px-4 py-2.5 text-sm font-medium text-ink transition hover:border-accent/45 hover:bg-panelAlt/90 hover:text-accent";
 
   if (external) {
     return (
@@ -109,7 +109,7 @@ function HeaderDropdown({
       {open ? (
         <div
           className={cn(
-            "absolute top-full z-40 mt-3 w-64 rounded-2xl border border-white/10 bg-black/95 p-3 shadow-glow backdrop-blur-xl",
+            "absolute top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl",
             align === "left" ? "left-0" : "right-0"
           )}
         >
@@ -304,16 +304,16 @@ export function SiteHeader() {
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-40 mt-3 w-72 rounded-2xl border border-white/10 bg-black/95 p-3 shadow-glow backdrop-blur-xl">
-                  <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/50">
+                <div className="absolute right-0 top-full z-40 mt-3 w-72 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
+                  <div className="rounded-xl border border-line bg-panelAlt/70 px-4 py-4">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-muted">
                       {hasAdminAccess ? "Admin account" : isVisitor ? "MKE Black member" : "Business owner"}
                     </p>
-                    <p className="mt-2 text-sm font-semibold text-white">
+                    <p className="mt-2 text-sm font-semibold text-ink">
                       {user.displayName || user.email || "MKE Black account"}
                     </p>
                     {user.email && (
-                      <p className="mt-0.5 text-xs text-white/60">{user.email}</p>
+                      <p className="mt-0.5 text-xs text-stone-400">{user.email}</p>
                     )}
                   </div>
 
@@ -323,7 +323,7 @@ export function SiteHeader() {
                         key={`${link.href}-${index}`}
                         href={link.href}
                         onClick={() => setMenuOpen(false)}
-                        className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white transition hover:border-accent/60 hover:bg-accent/20"
+                        className="rounded-xl border border-line bg-canvas/70 px-4 py-2.5 text-sm font-medium text-ink transition hover:border-accent/45 hover:bg-panelAlt/90 hover:text-accent"
                       >
                         {link.label}
                       </Link>
@@ -364,7 +364,7 @@ export function SiteHeader() {
                 Account
               </button>
               {guestAccountOpen ? (
-                <div className="absolute right-0 top-full z-40 mt-3 w-64 rounded-2xl border border-white/10 bg-black/95 p-3 shadow-glow backdrop-blur-xl">
+                <div className="absolute right-0 top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
                   <div className="flex flex-col gap-1.5">
                     <DropdownLink
                       href="/join"

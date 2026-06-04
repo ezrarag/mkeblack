@@ -29,7 +29,7 @@ export function EventsPage() {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <a
-              href="https://www.facebook.com/MKEBlack"
+              href="https://www.facebook.com/MKEBlackInc"
               target="_blank"
               rel="noreferrer"
               className="rounded-full border border-line px-5 py-3 text-sm font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
@@ -37,7 +37,7 @@ export function EventsPage() {
               Follow on Facebook
             </a>
             <a
-              href="https://www.instagram.com/mkeblack"
+              href="https://www.instagram.com/mkeblackinc/?hl=en"
               target="_blank"
               rel="noreferrer"
               className="rounded-full border border-line px-5 py-3 text-sm font-medium text-stone-300 transition hover:border-accent/50 hover:text-ink"
