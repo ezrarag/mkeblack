@@ -647,7 +647,9 @@ export function BusinessEditorForm({
                   location: values.location,
                   solidarityMember: false,
                   solidarityMemberSince: null,
-                  solidarityMemberExpiry: null
+                  solidarityMemberExpiry: null,
+                  solidarityMembershipSource: "manual",
+                  solidarityMembershipNotes: ""
                 }
               ]}
               heightClassName="h-[340px]"

@@ -7,6 +7,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { BusinessMarketplaceManager } from "@/components/marketplace/business-marketplace-manager";
+import { BusinessEventsManager } from "@/components/events/business-events-manager";
 import { BusinessClaimSearch } from "@/components/dashboard/business-claim-search";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
@@ -24,7 +25,7 @@ export function DashboardPageContent() {
   const { business, loading, error } = useBusiness(profile?.businessId ?? "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"listing" | "team" | "marketplace">("listing");
+  const [activeTab, setActiveTab] = useState<"listing" | "team" | "marketplace" | "events">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -195,7 +196,7 @@ export function DashboardPageContent() {
         ) : (
           <div className="mt-6">
             <div className="mb-6 flex flex-wrap gap-2 rounded-xl border border-line bg-panel/80 p-2">
-              {(["listing", "team", "marketplace"] as const).map((tab) => (
+              {(["listing", "team", "marketplace", "events"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -210,7 +211,9 @@ export function DashboardPageContent() {
                     ? "Listing"
                     : tab === "team"
                     ? "Team"
-                    : "Marketplace"}
+                    : tab === "marketplace"
+                    ? "Marketplace"
+                    : "Events"}
                 </button>
               ))}
             </div>
@@ -231,8 +234,14 @@ export function DashboardPageContent() {
               />
             ) : activeTab === "team" ? (
               <BusinessTeamManager businessId={business.id} />
-            ) : (
+            ) : activeTab === "marketplace" ? (
               <BusinessMarketplaceManager
+                businessId={business.id}
+                businessName={business.name}
+                isSolidarityMember={business.solidarityMember}
+              />
+            ) : (
+              <BusinessEventsManager
                 businessId={business.id}
                 businessName={business.name}
                 isSolidarityMember={business.solidarityMember}

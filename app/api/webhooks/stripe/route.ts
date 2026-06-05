@@ -9,6 +9,29 @@ function getId(value: string | { id: string } | null) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  if (session.metadata?.kind === "event_ticket") {
+    const orderId = session.metadata.orderId || session.client_reference_id;
+
+    if (!orderId) {
+      throw new Error("Stripe checkout session is missing orderId metadata.");
+    }
+
+    const db = getFirebaseAdminDb();
+    await db.collection("event_ticket_orders").doc(orderId).set(
+      {
+        status: "paid",
+        paymentSource: "stripe",
+        paymentReference: session.id,
+        stripeCheckoutSessionId: session.id,
+        stripeCustomerId: getId(session.customer),
+        stripePaymentStatus: session.payment_status,
+        paidAt: FieldValue.serverTimestamp()
+      },
+      { merge: true }
+    );
+    return;
+  }
+
   if (session.metadata?.kind !== "membership") {
     return;
   }

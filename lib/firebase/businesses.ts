@@ -533,12 +533,17 @@ export async function setBusinessSolidarityMembership(
     solidarityMember: boolean;
     solidarityMemberSince: Date | null;
     solidarityMemberExpiry: Date | null;
+    solidarityMembershipSource: "stripe" | "manual" | "comp";
+    solidarityMembershipNotes: string;
   }
 ) {
   const { db, firestoreModule } = await getFirestoreHelpers();
   await firestoreModule.updateDoc(firestoreModule.doc(db, "businesses", businessId), {
     solidarityMember: data.solidarityMember,
     solidarityMemberSince: data.solidarityMemberSince ?? null,
-    solidarityMemberExpiry: data.solidarityMemberExpiry ?? null
+    solidarityMemberExpiry: data.solidarityMemberExpiry ?? null,
+    solidarityMembershipSource: data.solidarityMembershipSource,
+    solidarityMembershipNotes: data.solidarityMembershipNotes.trim(),
+    solidarityMembershipUpdatedAt: firestoreModule.serverTimestamp()
   });
 }

@@ -184,6 +184,68 @@ export type MarketplaceOrder = {
   createdAt: Date | null;
 };
 
+// ── Events ───────────────────────────────────────────────────────────────────
+
+export type BusinessEventStatus = "draft" | "published" | "cancelled";
+
+export type EventTicketType = {
+  id: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  quantityTotal: number;
+  quantitySold: number;
+  active: boolean;
+};
+
+export type BusinessEvent = {
+  id: string;
+  businessId: string;
+  businessName: string;
+  businessSolidarity: boolean;
+  title: string;
+  description: string;
+  imageUrl: string;
+  venueName: string;
+  address: string;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  status: BusinessEventStatus;
+  ticketTypes: EventTicketType[];
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type BusinessEventFormValues = {
+  title: string;
+  description: string;
+  imageUrl: string;
+  venueName: string;
+  address: string;
+  startsAt: string;
+  endsAt: string;
+  status: BusinessEventStatus;
+  ticketTypes: EventTicketType[];
+};
+
+export type EventTicketOrderStatus = "pending" | "paid" | "free" | "cancelled";
+
+export type EventTicketOrder = {
+  id: string;
+  eventId: string;
+  businessId: string;
+  ticketTypeId: string;
+  ticketName: string;
+  quantity: number;
+  customerName: string;
+  customerEmail: string;
+  amountCents: number;
+  status: EventTicketOrderStatus;
+  stripeCheckoutSessionId: string;
+  createdAt: Date | null;
+  paidAt: Date | null;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 type HomepageModuleBase<T extends HomepageModuleType, C> = {
@@ -352,6 +414,8 @@ export type Business = {
   solidarityMember: boolean;
   solidarityMemberSince: Date | null;
   solidarityMemberExpiry: Date | null;
+  solidarityMembershipSource: "stripe" | "manual" | "comp";
+  solidarityMembershipNotes: string;
 };
 
 export type SolidarityMemberStatus = "active" | "expired" | "comp" | "pending";

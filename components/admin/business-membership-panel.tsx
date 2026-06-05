@@ -21,6 +21,10 @@ export function BusinessMembershipPanel({ business }: Props) {
       ? business.solidarityMemberExpiry.toISOString().slice(0, 10)
       : ""
   );
+  const [source, setSource] = useState<"stripe" | "manual" | "comp">(
+    business.solidarityMembershipSource
+  );
+  const [notes, setNotes] = useState(business.solidarityMembershipNotes);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
@@ -32,7 +36,9 @@ export function BusinessMembershipPanel({ business }: Props) {
       await setBusinessSolidarityMembership(business.id, {
         solidarityMember: member,
         solidarityMemberSince: since ? new Date(since) : null,
-        solidarityMemberExpiry: expiry ? new Date(expiry) : null
+        solidarityMemberExpiry: expiry ? new Date(expiry) : null,
+        solidarityMembershipSource: source,
+        solidarityMembershipNotes: notes
       });
       setFeedbackTone("success");
       setFeedback("Membership updated.");
@@ -87,6 +93,23 @@ export function BusinessMembershipPanel({ business }: Props) {
 
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+            Membership source
+          </p>
+          <select
+            value={source}
+            onChange={(e) =>
+              setSource(e.target.value as "stripe" | "manual" | "comp")
+            }
+            className="mt-1.5 w-full rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
+          >
+            <option value="stripe">Stripe payment</option>
+            <option value="manual">Paid externally</option>
+            <option value="comp">Comped by MKE Black</option>
+          </select>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
             Member since
           </p>
           <input
@@ -108,6 +131,19 @@ export function BusinessMembershipPanel({ business }: Props) {
             className="mt-1.5 w-full rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
           />
         </div>
+      </div>
+
+      <div className="mt-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+          Internal notes
+        </p>
+        <textarea
+          rows={3}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="e.g. Board comp through 2026, invoice paid offline, sponsor grant..."
+          className="mt-1.5 w-full rounded-xl border border-line bg-panelAlt/70 px-3 py-2 text-sm text-ink placeholder:text-stone-500 focus:border-accent/60 focus:outline-none"
+        />
       </div>
 
       {feedback ? (
@@ -135,7 +171,8 @@ export function BusinessMembershipPanel({ business }: Props) {
 
       <p className="mt-4 text-xs leading-6 text-stone-500">
         Mark as member to show the Solidarity Circle badge on the directory card and
-        business profile. Use the expiry date to auto-flag when renewal is due.
+        business profile. Use comped source when MKE Black furnishes membership
+        without Stripe payment.
       </p>
     </div>
   );

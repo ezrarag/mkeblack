@@ -247,7 +247,13 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
     },
     solidarityMember: booleanValue(record.solidarityMember, false),
     solidarityMemberSince: parseDateValue(record.solidarityMemberSince),
-    solidarityMemberExpiry: parseDateValue(record.solidarityMemberExpiry)
+    solidarityMemberExpiry: parseDateValue(record.solidarityMemberExpiry),
+    solidarityMembershipSource:
+      record.solidarityMembershipSource === "manual" ||
+      record.solidarityMembershipSource === "comp"
+        ? record.solidarityMembershipSource
+        : "stripe",
+    solidarityMembershipNotes: stringValue(record.solidarityMembershipNotes).trim()
   };
 }
 
