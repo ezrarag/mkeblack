@@ -23,7 +23,7 @@ import {
   BusinessClaimInvite,
   BusinessFormValues
 } from "@/lib/types";
-import { addCapability } from "@/lib/user-capabilities";
+import { addCapability, removeCapability } from "@/lib/user-capabilities";
 import { normalizeUrl } from "@/lib/utils";
 import { normalizeTagSlugs } from "@/lib/tags";
 
@@ -160,6 +160,40 @@ async function syncOwnerBusinessLink(ownerUid: string | null, businessId: string
   );
 }
 
+async function unlinkOwnerBusinessLink(ownerUid: string | null, businessId: string) {
+  if (!ownerUid) {
+    return;
+  }
+
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  const userReference = firestoreModule.doc(db, "users", ownerUid);
+  const userSnapshot = await firestoreModule.getDoc(userReference);
+
+  if (!userSnapshot.exists()) {
+    return;
+  }
+
+  const userData = userSnapshot.data();
+
+  if (userData.businessId && userData.businessId !== businessId) {
+    return;
+  }
+
+  const nextCapabilities = removeCapability(userData.capabilities, "business");
+  const hasAdminAccess =
+    userData.role === "admin" || nextCapabilities.includes("admin");
+
+  await firestoreModule.setDoc(
+    userReference,
+    {
+      businessId: null,
+      capabilities: nextCapabilities,
+      role: hasAdminAccess ? "admin" : "visitor"
+    },
+    { merge: true }
+  );
+}
+
 export async function saveBusiness(
   businessId: string,
   values: BusinessFormValues,
@@ -168,6 +202,9 @@ export async function saveBusiness(
   const { db, firestoreModule } = await getFirestoreHelpers();
   const businessReference = firestoreModule.doc(db, "businesses", businessId);
   const previousSnapshot = await firestoreModule.getDoc(businessReference);
+  const previousOwnerUid = previousSnapshot.exists()
+    ? String(previousSnapshot.data().ownerUid ?? "").trim() || null
+    : null;
   const previousTags = previousSnapshot.exists()
     ? normalizeTagSlugs(previousSnapshot.data().tags)
     : [];
@@ -213,7 +250,28 @@ export async function saveBusiness(
 
   await updateBusinessTagUsageCounts(previousTags, payload.tags);
   await updateBusinessCategoryUsageCounts(previousCategory, payload.category);
+
+  if (previousOwnerUid && previousOwnerUid !== (payload.ownerUid || null)) {
+    await unlinkOwnerBusinessLink(previousOwnerUid, businessId);
+  }
+
   await syncOwnerBusinessLink(payload.ownerUid || null, businessId);
+}
+
+export async function unlinkBusinessOwner(businessId: string, ownerUid: string) {
+  const { db, firestoreModule } = await getFirestoreHelpers();
+
+  await Promise.all([
+    firestoreModule.setDoc(
+      firestoreModule.doc(db, "businesses", businessId),
+      {
+        ownerUid: null,
+        claimInviteStatus: "not_invited"
+      },
+      { merge: true }
+    ),
+    unlinkOwnerBusinessLink(ownerUid, businessId)
+  ]);
 }
 
 export async function createBusiness(values: BusinessFormValues) {

@@ -13,6 +13,7 @@ import {
   removeBusinessPhoto,
   saveBusiness,
   sendBusinessClaimInvite,
+  unlinkBusinessOwner,
   uploadBusinessPhotos
 } from "@/lib/firebase/businesses";
 import { formatFirebaseError } from "@/lib/firebase-errors";
@@ -27,6 +28,7 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [unlinkingOwner, setUnlinkingOwner] = useState(false);
   const [activeTab, setActiveTab] = useState<"listing" | "team" | "membership">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
@@ -110,6 +112,34 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
     }
   }
 
+  async function handleUnlinkOwner() {
+    if (!business?.ownerUid) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Unlink this owner from ${business.name}? This removes their business dashboard access but keeps any admin access.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setUnlinkingOwner(true);
+    setFeedback(null);
+
+    try {
+      await unlinkBusinessOwner(business.id, business.ownerUid);
+      setFeedbackTone("success");
+      setFeedback("Owner unlinked from this business.");
+    } catch (unlinkError) {
+      setFeedbackTone("error");
+      setFeedback(formatFirebaseError(unlinkError));
+    } finally {
+      setUnlinkingOwner(false);
+    }
+  }
+
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -139,6 +169,16 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
               >
                 {inviting ? "Sending invite..." : "Claim this listing"}
               </button>
+              {business?.ownerUid ? (
+                <button
+                  type="button"
+                  onClick={() => void handleUnlinkOwner()}
+                  disabled={unlinkingOwner}
+                  className="rounded-full border border-danger/35 bg-danger/10 px-5 py-3 text-sm font-medium text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
+                >
+                  {unlinkingOwner ? "Unlinking..." : "Unlink owner"}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
