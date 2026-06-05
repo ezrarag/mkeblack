@@ -5,11 +5,11 @@ import Link from "next/link";
 import { BusinessCard } from "@/components/directory/business-card";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
-import { BUSINESS_CATEGORIES } from "@/lib/constants";
 import { isBusinessOpenOnDay } from "@/lib/business-hours";
 import { getGoogleMapsDirectionsUrl } from "@/lib/directions";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { useBusinesses } from "@/hooks/use-businesses";
+import { useBusinessCategories } from "@/hooks/use-business-categories";
 import { useNeighborhoods } from "@/hooks/use-neighborhoods";
 import { useBusinessTags } from "@/hooks/use-business-tags";
 import { Business, DAY_KEYS, DayKey } from "@/lib/types";
@@ -21,6 +21,7 @@ type DirectoryPageProps = {
 
 export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const { businesses, loading, error } = useBusinesses();
+  const { categories: businessCategories, error: categoriesError } = useBusinessCategories();
   const { neighborhoods, error: neighborhoodsError } = useNeighborhoods();
   const { tags: businessTags, error: tagsError } = useBusinessTags();
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,9 +64,14 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const categories = useMemo(
     () =>
       Array.from(
-        new Set([...BUSINESS_CATEGORIES, ...businesses.map((business) => business.category)])
-      ),
-    [businesses]
+        new Set([
+          ...businessCategories
+            .filter((category) => category.active)
+            .map((category) => category.label),
+          ...businesses.map((business) => business.category)
+        ])
+      ).sort((left, right) => left.localeCompare(right)),
+    [businessCategories, businesses]
   );
 
   const neighborhoodOptions = useMemo(
@@ -432,9 +438,9 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
             </div>
           </div>
 
-          {locationMessage || neighborhoodsError || tagsError ? (
+          {locationMessage || neighborhoodsError || tagsError || categoriesError ? (
             <div className="mt-4 rounded-xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-stone-100">
-              {locationMessage ?? neighborhoodsError ?? tagsError}
+              {locationMessage ?? neighborhoodsError ?? tagsError ?? categoriesError}
             </div>
           ) : null}
 

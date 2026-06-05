@@ -307,6 +307,15 @@ export type BusinessCategory =
   | "Resources"
   | "Other";
 
+export type BusinessCategoryOption = {
+  id: string;
+  label: string;
+  slug: string;
+  active: boolean;
+  createdAt: Date | null;
+  usageCount: number;
+};
+
 export type Business = {
   id: string;
   name: string;

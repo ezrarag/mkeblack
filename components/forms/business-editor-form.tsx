@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { BUSINESS_CATEGORIES } from "@/lib/constants";
 import { BusinessFormValues, DayKey } from "@/lib/types";
 import { formatPhone } from "@/lib/utils";
 import { BusinessMap } from "@/components/map/business-map";
 import { HoursEditor } from "@/components/forms/hours-editor";
 import { geocodeAddress } from "@/lib/geocode";
 import { redetectBusinessNeighborhood } from "@/lib/firebase/neighborhoods";
+import { getBusinessCategoryLabels } from "@/lib/categories";
+import { useBusinessCategories } from "@/hooks/use-business-categories";
 import { useBusinessTags } from "@/hooks/use-business-tags";
 import { BUSINESS_TAG_CATEGORIES } from "@/lib/tags";
 
@@ -70,9 +71,14 @@ export function BusinessEditorForm({
   const [geocoding, setGeocoding] = useState(false);
   const [detectingNeighborhood, setDetectingNeighborhood] = useState(false);
   const [geocodeFeedback, setGeocodeFeedback] = useState<GeocodeFeedback>(null);
+  const {
+    categories: businessCategories,
+    error: categoriesError
+  } = useBusinessCategories();
   const { tags: businessTags, loading: tagsLoading, error: tagsError } = useBusinessTags();
-  const categoryOptions = Array.from(
-    new Set([...BUSINESS_CATEGORIES, values.category].filter(Boolean))
+  const categoryOptions = getBusinessCategoryLabels(
+    businessCategories,
+    values.category
   );
   const visibleTags = businessTags.filter(
     (tag) => tag.active && (showAdminFields || !tag.adminOnly)
@@ -231,6 +237,9 @@ export function BusinessEditorForm({
                 </option>
               ))}
             </select>
+            {categoriesError ? (
+              <p className="mt-2 text-xs text-rose-300">{categoriesError}</p>
+            ) : null}
           </div>
           <div className="lg:col-span-2">
             <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">

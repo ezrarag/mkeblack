@@ -27,7 +27,6 @@ const exploreLinks: NavLink[] = [
   { href: "/who-we-are", label: "Who we are" },
   { href: "/news-articles", label: "News" },
   { href: "/events", label: "Events" },
-  { href: "/experiences", label: "Experiences" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -160,6 +159,7 @@ export function SiteHeader() {
         { href: "/admin/homepage", label: "Homepage editor" },
         { href: "/admin/articles", label: "Articles" },
         { href: "/admin/businesses", label: "Business manager" },
+        { href: "/admin/categories", label: "Categories" },
         { href: "/admin/marketplace", label: "Marketplace" },
         { href: "/admin/members", label: "Solidarity Circle" },
         { href: "/admin/claims", label: "Pending claims" },

@@ -6,6 +6,7 @@ import {
   getFirebaseDb,
   loadFirebaseFirestoreModule
 } from "@/lib/firebase/client";
+import { TeamMemberRoleType } from "@/lib/types";
 
 type SearchResult = {
   id: string;
@@ -20,12 +21,14 @@ type ClaimSearchProps = {
   onClaimed: () => void;
 };
 
-export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
+export function BusinessClaimSearch({ onClaimed: _onClaimed }: ClaimSearchProps) {
+  void _onClaimed;
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [claiming, setClaimingId] = useState<string | null>(null);
+  const [requestedRoles, setRequestedRoles] = useState<Record<string, TeamMemberRoleType>>({});
   const [feedback, setFeedback] = useState<{ tone: "success" | "error"; text: string } | null>(null);
 
   async function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -107,10 +110,19 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
     }
   }
 
+  function getRequestedRole(business: SearchResult): TeamMemberRoleType {
+    if (!business.ownerUid) {
+      return "owner";
+    }
+
+    return requestedRoles[business.id] ?? "co_owner";
+  }
+
   async function handleClaim(business: SearchResult) {
     if (!user) return;
     setClaimingId(business.id);
     setFeedback(null);
+    const requestedRoleType = getRequestedRole(business);
 
     try {
       const [firestoreModule, db] = await Promise.all([
@@ -119,25 +131,6 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
       ]);
 
       if (!db) throw new Error("Firestore not available");
-
-      // Link the user to the business
-      await firestoreModule.setDoc(
-        firestoreModule.doc(db, "users", user.uid),
-        { businessId: business.id },
-        { merge: true }
-      );
-
-      // Mark the business as claimed by this user
-      await firestoreModule.setDoc(
-        firestoreModule.doc(db, "businesses", business.id),
-        {
-          ownerUid: user.uid,
-          claimInviteStatus: "self_claimed",
-          selfClaimedAt: firestoreModule.serverTimestamp(),
-          selfClaimedByEmail: user.email ?? ""
-        },
-        { merge: true }
-      );
 
       // Write to a pending_claims collection so admin can verify
       await firestoreModule.setDoc(
@@ -149,6 +142,8 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
           businessName: business.name,
           claimedByUid: user.uid,
           claimedByEmail: user.email ?? "",
+          claimedByName: user.displayName ?? "",
+          requestedRoleType,
           status: "pending_verification",
           claimedAt: firestoreModule.serverTimestamp()
         }
@@ -156,11 +151,10 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
 
       setFeedback({
         tone: "success",
-        text: `You've been linked to ${business.name}. The MKE Black team will verify your ownership — you can edit your listing in the meantime.`
+        text: requestedRoleType === "owner"
+          ? `Your ownership claim for ${business.name} was sent to the MKE Black team for review.`
+          : `Your ${requestedRoleType === "co_owner" ? "co-owner" : "team"} access request for ${business.name} was sent to the MKE Black team for review.`
       });
-
-      // Small delay then reload the dashboard
-      setTimeout(() => onClaimed(), 2000);
     } catch (err) {
       setFeedback({
         tone: "error",
@@ -172,9 +166,6 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
   }
 
   function claimable(b: SearchResult): { can: boolean; reason: string } {
-    if (b.ownerUid && b.ownerUid !== user?.uid) {
-      return { can: false, reason: "Already claimed by another account" };
-    }
     if (b.ownerUid === user?.uid) {
       return { can: false, reason: "You already own this listing" };
     }
@@ -257,20 +248,46 @@ export function BusinessClaimSearch({ onClaimed }: ClaimSearchProps) {
                     <p className="mt-0.5 truncate text-xs text-stone-500">
                       {b.category}{b.address ? ` · ${b.address}` : ""}
                     </p>
+                    {b.ownerUid && b.ownerUid !== user?.uid ? (
+                      <p className="mt-1 text-xs text-amber-400">
+                        Already has an owner. Request co-owner or team access.
+                      </p>
+                    ) : null}
                     {!can && (
                       <p className="mt-1 text-xs text-amber-400">{reason}</p>
                     )}
                   </div>
 
                   {can ? (
-                    <button
-                      type="button"
-                      onClick={() => handleClaim(b)}
-                      disabled={claiming === b.id}
-                      className="shrink-0 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
-                    >
-                      {claiming === b.id ? "Claiming…" : "Claim this listing"}
-                    </button>
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                      {b.ownerUid && b.ownerUid !== user?.uid ? (
+                        <select
+                          value={getRequestedRole(b)}
+                          onChange={(event) =>
+                            setRequestedRoles((current) => ({
+                              ...current,
+                              [b.id]: event.target.value as TeamMemberRoleType
+                            }))
+                          }
+                          className="w-auto rounded-full border border-line bg-panelAlt/70 px-3 py-2 text-xs text-stone-100"
+                        >
+                          <option value="co_owner">Co-owner</option>
+                          <option value="team">Team member</option>
+                        </select>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => handleClaim(b)}
+                        disabled={claiming === b.id}
+                        className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+                      >
+                        {claiming === b.id
+                          ? "Claiming…"
+                          : b.ownerUid
+                          ? "Request access"
+                          : "Claim this listing"}
+                      </button>
+                    </div>
                   ) : (
                     <span className="shrink-0 rounded-full border border-line px-4 py-2 text-xs text-stone-500">
                       Unavailable

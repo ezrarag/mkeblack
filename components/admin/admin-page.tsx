@@ -181,6 +181,12 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
                     Manage tags
                   </Link>
                   <Link
+                    href="/admin/categories"
+                    className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Manage categories
+                  </Link>
+                  <Link
                     href="/admin/hours-sync"
                     className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
                   >

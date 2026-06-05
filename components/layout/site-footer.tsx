@@ -39,7 +39,6 @@ const exploreLinks: FooterLink[] = [
   { href: "/who-we-are", label: "Who we are" },
   { href: "/news-articles", label: "News & articles" },
   { href: "/events", label: "Events" },
-  { href: "/experiences", label: "Experiences" },
   { href: "/membership", label: "Solidarity Circle" },
   { href: "/contact", label: "Contact" }
 ];

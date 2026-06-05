@@ -10,18 +10,23 @@ import {
   getBusinessSourceLabel,
   businessToFormValues
 } from "@/lib/businesses";
-import { BUSINESS_CATEGORIES } from "@/lib/constants";
+import { getBusinessCategoryLabels } from "@/lib/categories";
 import {
   deleteBusinesses,
   saveBusiness,
   setBusinessesActive
 } from "@/lib/firebase/businesses";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import { useBusinessCategories } from "@/hooks/use-business-categories";
 
 type DraftMap = Record<string, ReturnType<typeof businessToFormValues>>;
 
 export function BusinessManagementPage() {
   const { businesses, loading, error } = useAllBusinesses();
+  const {
+    categories: businessCategories,
+    error: categoriesError
+  } = useBusinessCategories();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSource, setSelectedSource] = useState("all");
@@ -62,8 +67,11 @@ export function BusinessManagementPage() {
   }, [businesses, searchTerm, selectedCategory, selectedSource, selectedStatus]);
 
   const categoryOptions = Array.from(
-    new Set([...BUSINESS_CATEGORIES, ...businesses.map((business) => business.category)])
-  );
+    new Set([
+      ...getBusinessCategoryLabels(businessCategories),
+      ...businesses.map((business) => business.category)
+    ])
+  ).sort((left, right) => left.localeCompare(right));
 
   const allVisibleIds = filteredBusinesses.map((business) => business.id);
   const allVisibleSelected =
@@ -226,6 +234,12 @@ export function BusinessManagementPage() {
           </div>
         ) : null}
 
+        {categoriesError ? (
+          <div className="mt-6 rounded-3xl border border-danger/35 bg-danger/10 px-5 py-4 text-sm text-stone-100">
+            {categoriesError}
+          </div>
+        ) : null}
+
         <div className="mt-6 rounded-2xl border border-line bg-panel/85 p-5">
           <div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr]">
             <div>
@@ -366,8 +380,10 @@ export function BusinessManagementPage() {
                     }
 
                     const categoryChoices = Array.from(
-                      new Set([...BUSINESS_CATEGORIES, draft.category].filter(Boolean))
-                    );
+                      new Set([
+                        ...getBusinessCategoryLabels(businessCategories, draft.category)
+                      ])
+                    ).sort((left, right) => left.localeCompare(right));
 
                     return (
                       <tr key={business.id}>

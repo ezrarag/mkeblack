@@ -37,6 +37,22 @@ type LiveGuideFeature = LiveSiteFeature & {
   body: string[];
 };
 
+const submitBusinessHref = "/contact?reason=submit_business";
+
+function normalizeSubmitBusinessHref(link: { label: string; href: string }) {
+  const label = link.label.trim().toLowerCase();
+  const href = link.href.trim();
+
+  if (
+    href === "/contact" &&
+    (label.includes("submit") || label.includes("business"))
+  ) {
+    return submitBusinessHref;
+  }
+
+  return href;
+}
+
 const liveStoryLinks: LiveSiteFeature[] = [
   {
     title: "Gift Cards from Milwaukee Black Owned Businesses",
@@ -276,7 +292,7 @@ function LiveSiteContentParitySection() {
                 Search business directory
               </Link>
               <Link
-                href="/contact?reason=submit_business"
+                href={submitBusinessHref}
                 className="rounded-full border border-line bg-white/5 px-5 py-3 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
               >
                 Submit your business
@@ -529,7 +545,7 @@ function renderHomepageModule(
                 <div className="mt-8 flex flex-wrap gap-3">
                   {module.content.ctaPrimary.href ? (
                     <SmartLink
-                      href={module.content.ctaPrimary.href}
+                      href={normalizeSubmitBusinessHref(module.content.ctaPrimary)}
                       className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
                     >
                       {module.content.ctaPrimary.label || "Learn more"}
@@ -537,7 +553,7 @@ function renderHomepageModule(
                   ) : null}
                   {module.content.ctaSecondary.href ? (
                     <SmartLink
-                      href={module.content.ctaSecondary.href}
+                      href={normalizeSubmitBusinessHref(module.content.ctaSecondary)}
                       className="rounded-full border border-line bg-canvas/70 px-6 py-3 text-sm font-medium text-ink transition hover:border-accent/40 hover:bg-accent/10"
                     >
                       {module.content.ctaSecondary.label || "Explore"}

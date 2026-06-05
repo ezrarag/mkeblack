@@ -17,6 +17,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { getMilwaukeeNeighborhoods } from "@/lib/firebase/neighborhoods";
 import { getNeighborhoodForPoint } from "@/lib/neighborhood";
 import { updateBusinessTagUsageCounts } from "@/lib/firebase/tags";
+import { updateBusinessCategoryUsageCounts } from "@/lib/firebase/categories";
 import {
   Business,
   BusinessClaimInvite,
@@ -167,6 +168,9 @@ export async function saveBusiness(
   const previousTags = previousSnapshot.exists()
     ? normalizeTagSlugs(previousSnapshot.data().tags)
     : [];
+  const previousCategory = previousSnapshot.exists()
+    ? previousSnapshot.data().category
+    : null;
   const payload = normalizeBusinessPayload(values);
 
   if (!payload.address) {
@@ -205,6 +209,7 @@ export async function saveBusiness(
   );
 
   await updateBusinessTagUsageCounts(previousTags, payload.tags);
+  await updateBusinessCategoryUsageCounts(previousCategory, payload.category);
   await syncOwnerBusinessLink(payload.ownerUid || null, businessId);
 }
 
