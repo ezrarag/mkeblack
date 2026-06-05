@@ -260,6 +260,31 @@ export function HoursSyncPage() {
     }
   }
 
+  async function handleApproveProfile(result: AdminHoursSyncResult) {
+    if (!session) {
+      return;
+    }
+
+    setActingId(result.businessId);
+    setFeedback(null);
+
+    try {
+      await apiPost({
+        action: "approve_profile",
+        sessionId: session.id,
+        businessId: result.businessId
+      });
+      setFeedbackTone("success");
+      setFeedback(`Approved Google profile updates for ${result.businessName}.`);
+      setEditingId(null);
+    } catch (error) {
+      setFeedbackTone("error");
+      setFeedback(error instanceof Error ? error.message : "Profile approval failed.");
+    } finally {
+      setActingId(null);
+    }
+  }
+
   async function handleSkip(result: AdminHoursSyncResult) {
     if (!session) {
       return;
@@ -323,15 +348,15 @@ export function HoursSyncPage() {
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">
-                Hours sync
+                Google profile sync
               </p>
               <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
-                Recover missing weekly hours.
+                Recover missing Google profile data.
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
-                Scan imported businesses with every day marked closed, pull proposed
-                hours from Google Places in batches of ten per minute, then review
-                each result before saving.
+                Scan imported businesses with missing hours, pull proposed hours
+                and profile details from Google Places in batches of ten per
+                minute, then review each result before saving.
               </p>
             </div>
             <Link
@@ -456,11 +481,63 @@ export function HoursSyncPage() {
                             ? formatReadableHours(result.proposedHours)
                             : result.message}
                         </p>
+                        {isFound && result.proposedProfile ? (
+                          <div className="mt-4 rounded-xl border border-line bg-panel/60 p-4 text-sm leading-7 text-stone-300">
+                            <p className="text-xs uppercase tracking-[0.2em] text-muted">
+                              Google profile proposal
+                            </p>
+                            {result.matchedName ? (
+                              <p className="mt-2">Matched name: {result.matchedName}</p>
+                            ) : null}
+                            {result.proposedProfile.address ? (
+                              <p>Address: {result.proposedProfile.address}</p>
+                            ) : null}
+                            {result.proposedProfile.phone ? (
+                              <p>Phone: {result.proposedProfile.phone}</p>
+                            ) : null}
+                            {result.proposedProfile.website ? (
+                              <p>
+                                Website:{" "}
+                                <a
+                                  href={result.proposedProfile.website}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-accentSoft underline-offset-4 hover:underline"
+                                >
+                                  {result.proposedProfile.website}
+                                </a>
+                              </p>
+                            ) : null}
+                            {result.proposedProfile.googleMapsUrl ? (
+                              <p>
+                                Google Maps:{" "}
+                                <a
+                                  href={result.proposedProfile.googleMapsUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-accentSoft underline-offset-4 hover:underline"
+                                >
+                                  Open listing
+                                </a>
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className="flex flex-wrap gap-2">
                         {isFound && !isDone ? (
                           <>
+                            {result.proposedProfile ? (
+                              <button
+                                type="button"
+                                onClick={() => void handleApproveProfile(result)}
+                                disabled={actingId === result.businessId}
+                                className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+                              >
+                                Approve profile
+                              </button>
+                            ) : null}
                             <button
                               type="button"
                               onClick={() => void handleApprove(result, draftHours)}

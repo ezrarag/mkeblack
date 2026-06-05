@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/providers/auth-provider";
 import {
+  attachGoogleAccountToBusinessSubmission,
   submitContactForm,
   type ContactFormData,
   type ContactReason
@@ -53,6 +55,8 @@ export function ContactPage() {
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [businessStep, setBusinessStep] = useState(0);
   const [success, setSuccess] = useState(false);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const [postSubmitAttached, setPostSubmitAttached] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isBizSubmission = reason === "submit_business";
@@ -87,7 +91,7 @@ export function ContactPage() {
     setBusinessStep((current) => Math.min(current + 1, businessSteps.length - 1));
   }
 
-  async function handleGoogleSignIn() {
+  async function connectGoogleAccount() {
     setGoogleSubmitting(true);
     setError(null);
 
@@ -104,16 +108,51 @@ export function ContactPage() {
       const provider = new authModule.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       const credential = await authModule.signInWithPopup(auth, provider);
-
-      setForm((prev) => ({
-        ...prev,
-        ownerName: prev.ownerName || credential.user.displayName || "",
-        ownerEmail: prev.ownerEmail || credential.user.email || ""
-      }));
+      return credential.user;
     } catch (submitError) {
       setError(formatFirebaseError(submitError));
+      return null;
     } finally {
       setGoogleSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    const nextUser = await connectGoogleAccount();
+
+    if (!nextUser) {
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      ownerName: prev.ownerName || nextUser.displayName || "",
+      ownerEmail: prev.ownerEmail || nextUser.email || ""
+    }));
+  }
+
+  async function handleAttachGoogleAfterSubmit() {
+    if (!submittedId) {
+      return;
+    }
+
+    const nextUser = await connectGoogleAccount();
+
+    if (!nextUser) {
+      return;
+    }
+
+    try {
+      await attachGoogleAccountToBusinessSubmission(submittedId, {
+        submitterUid: nextUser.uid,
+        submitterDisplayName: nextUser.displayName ?? null,
+        submitterPhotoUrl: nextUser.photoURL ?? null,
+        ownerName: form.ownerName || nextUser.displayName || "",
+        ownerEmail: form.ownerEmail || nextUser.email || ""
+      });
+      setPostSubmitAttached(true);
+    } catch (attachError) {
+      setError(formatFirebaseError(attachError));
     }
   }
 
@@ -123,13 +162,15 @@ export function ContactPage() {
     setError(null);
 
     try {
-      await submitContactForm({
+      const nextSubmissionId = await submitContactForm({
         reason,
         ...form,
         submitterUid: isBizSubmission ? user?.uid ?? null : null,
         submitterDisplayName: isBizSubmission ? user?.displayName ?? null : null,
         submitterPhotoUrl: isBizSubmission ? user?.photoURL ?? null : null
       });
+      setSubmittedId(nextSubmissionId);
+      setPostSubmitAttached(Boolean(isBizSubmission && user?.uid));
       setSuccess(true);
     } catch (err) {
       setError(
@@ -188,11 +229,63 @@ export function ContactPage() {
               });
               setReason(forcedReason ? "submit_business" : "general");
               setBusinessStep(0);
+              setSubmittedId(null);
+              setPostSubmitAttached(false);
+              setError(null);
             }}
             className="mt-6 rounded-full border border-line px-5 py-3 text-sm text-stone-300 transition hover:border-accent/50 hover:text-ink"
           >
             {forcedReason ? "Submit another business" : "Send another message"}
           </button>
+          {forcedReason && submittedId ? (
+            <div className="mt-6 rounded-2xl border border-line bg-panelAlt/50 p-5 text-left">
+              <p className="text-sm font-semibold text-ink">
+                Save your status link
+              </p>
+              <p className="mt-2 text-sm leading-6 text-stone-300">
+                Use this page to check review status or attach Google before approval.
+              </p>
+              <Link
+                href={`/submission/${submittedId}`}
+                className="mt-4 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                Open status page
+              </Link>
+              <Link
+                href="/submission"
+                className="ml-3 mt-4 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold text-stone-400 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                Look up by email
+              </Link>
+            </div>
+          ) : null}
+          {forcedReason && !postSubmitAttached ? (
+            <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/5 p-5">
+              <p className="text-sm font-semibold text-ink">
+                Want owner access after approval?
+              </p>
+              <p className="mt-2 text-sm leading-6 text-stone-300">
+                Connect Google to this request now. After admin approval, this
+                same account can manage the listing.
+              </p>
+              <button
+                type="button"
+                onClick={() => void handleAttachGoogleAfterSubmit()}
+                disabled={googleSubmitting || !submittedId}
+                className="mt-4 rounded-full border border-accent bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+              >
+                {googleSubmitting ? "Opening Google..." : "Connect Google to request"}
+              </button>
+              {error ? (
+                <p className="mt-3 text-sm text-rose-300">{error}</p>
+              ) : null}
+            </div>
+          ) : null}
+          {forcedReason && postSubmitAttached ? (
+            <div className="mt-6 rounded-2xl border border-success/35 bg-success/10 p-5 text-sm leading-6 text-stone-100">
+              Google is attached. Once approved, use that Google account to manage the listing.
+            </div>
+          ) : null}
         </div>
       </section>
     );

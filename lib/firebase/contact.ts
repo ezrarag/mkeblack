@@ -137,7 +137,7 @@ function businessSubmissionToFormValues(
   };
 }
 
-export async function submitContactForm(data: ContactFormData): Promise<void> {
+export async function submitContactForm(data: ContactFormData): Promise<string> {
   if (!isFirebaseConfigured) {
     throw new Error("Firebase is not configured.");
   }
@@ -151,13 +151,45 @@ export async function submitContactForm(data: ContactFormData): Promise<void> {
     throw new Error("Firebase could not initialize.");
   }
 
-  await firestoreModule.addDoc(
+  const submissionReference = await firestoreModule.addDoc(
     firestoreModule.collection(db, "contactSubmissions"),
     {
       ...data,
       status: data.reason === "submit_business" ? "pending" : null,
       submittedAt: firestoreModule.serverTimestamp()
     }
+  );
+
+  return submissionReference.id;
+}
+
+export async function attachGoogleAccountToBusinessSubmission(
+  submissionId: string,
+  data: {
+    submitterUid: string;
+    submitterDisplayName: string | null;
+    submitterPhotoUrl: string | null;
+    ownerName: string;
+    ownerEmail: string;
+  }
+): Promise<void> {
+  if (!isFirebaseConfigured) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  const [firestoreModule, db] = await Promise.all([
+    loadFirebaseFirestoreModule(),
+    getFirebaseDb()
+  ]);
+
+  if (!db) {
+    throw new Error("Firebase could not initialize.");
+  }
+
+  await firestoreModule.setDoc(
+    firestoreModule.doc(db, "contactSubmissions", submissionId),
+    data,
+    { merge: true }
   );
 }
 
@@ -180,8 +212,7 @@ export async function getPendingBusinessListingSubmissions(): Promise<
   const snapshot = await firestoreModule.getDocs(
     firestoreModule.query(
       firestoreModule.collection(db, "contactSubmissions"),
-      firestoreModule.where("reason", "==", "submit_business"),
-      firestoreModule.orderBy("submittedAt", "desc")
+      firestoreModule.where("reason", "==", "submit_business")
     )
   );
 
@@ -189,7 +220,12 @@ export async function getPendingBusinessListingSubmissions(): Promise<
     .map((docSnapshot) =>
       normalizeBusinessSubmission(docSnapshot.id, docSnapshot.data())
     )
-    .filter((submission) => submission.status === "pending");
+    .filter((submission) => submission.status === "pending")
+    .sort(
+      (left, right) =>
+        (right.submittedAt?.getTime() ?? 0) -
+        (left.submittedAt?.getTime() ?? 0)
+    );
 }
 
 export async function approveBusinessListingSubmission(

@@ -341,6 +341,10 @@ export type Business = {
   importedAt: Date | null;
   claimInviteStatus: ClaimInviteStatus;
   claimInvitedAt: Date | null;
+  googlePlaceId: string;
+  googleMatchedName: string;
+  googleMapsUrl: string;
+  googleProfileLastSynced: Date | null;
   location: {
     lat: number;
     lng: number;
@@ -454,6 +458,16 @@ export type AdminHoursSyncResult = {
   placeId: string | null;
   matchedName: string;
   proposedHours: BusinessHours | null;
+  proposedProfile: {
+    address: string;
+    phone: string;
+    website: string;
+    googleMapsUrl: string;
+    location: {
+      lat: number;
+      lng: number;
+    } | null;
+  } | null;
   status: AdminHoursSyncResultStatus;
   message: string;
   reviewedAt: Date | null;

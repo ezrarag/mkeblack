@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { BusinessSubmissionsPanel } from "@/components/admin/business-submissions-panel";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import {
   getFirebaseDb,
@@ -18,6 +19,7 @@ type PendingClaim = {
   requestedRoleType: TeamMemberRoleType;
   status: string;
   claimedAt: string;
+  claimedAtDate: Date | null;
 };
 
 const roleLabels: Record<TeamMemberRoleType, string> = {
@@ -38,6 +40,7 @@ export function AdminClaimsPage() {
 
   const loadClaims = useCallback(async () => {
     setLoading(true);
+    setFeedback(null);
     try {
       const [firestoreModule, db] = await Promise.all([
         loadFirebaseFirestoreModule(),
@@ -49,26 +52,37 @@ export function AdminClaimsPage() {
         firestoreModule.query(
           firestoreModule.collection(db, "pending_claims"),
           firestoreModule.where("status", "==", "pending_verification"),
-          firestoreModule.orderBy("claimedAt", "desc"),
           firestoreModule.limit(50)
         )
       );
 
       setClaims(
-        snap.docs.map((doc) => {
-          const d = doc.data();
-          return {
-            id: doc.id,
-            businessId: d.businessId ?? "",
-            businessName: d.businessName ?? "",
-            claimedByUid: d.claimedByUid ?? "",
-            claimedByEmail: d.claimedByEmail ?? "",
-            claimedByName: d.claimedByName ?? "",
-            requestedRoleType: normalizeRequestedRole(d.requestedRoleType),
-            status: d.status ?? "",
-            claimedAt: d.claimedAt?.toDate?.()?.toLocaleDateString() ?? "—"
-          };
-        })
+        snap.docs
+          .map((doc) => {
+            const d = doc.data();
+            const claimedAtDate = d.claimedAt?.toDate?.() ?? null;
+            return {
+              id: doc.id,
+              businessId: d.businessId ?? "",
+              businessName: d.businessName ?? "",
+              claimedByUid: d.claimedByUid ?? "",
+              claimedByEmail: d.claimedByEmail ?? "",
+              claimedByName: d.claimedByName ?? "",
+              requestedRoleType: normalizeRequestedRole(d.requestedRoleType),
+              status: d.status ?? "",
+              claimedAt: claimedAtDate?.toLocaleDateString() ?? "—",
+              claimedAtDate
+            };
+          })
+          .sort(
+            (left, right) =>
+              (right.claimedAtDate?.getTime() ?? 0) -
+              (left.claimedAtDate?.getTime() ?? 0)
+          )
+      );
+    } catch (loadError) {
+      setFeedback(
+        loadError instanceof Error ? loadError.message : "Unable to load claims."
       );
     } finally {
       setLoading(false);
@@ -280,15 +294,15 @@ export function AdminClaimsPage() {
         <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">Admin</p>
           <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink">
-            Pending claims.
+            Pending claims and submissions.
           </h1>
           <p className="mt-4 text-sm leading-8 text-stone-300">
-            Business owners who searched and self-claimed their listing.
-            Review each one and approve or reject. Approved claims confirm
-            the user as the official listing owner. Rejected claims unlink
-            the user immediately.
+            Review new business listing submissions and business owners who
+            searched and claimed an existing listing.
           </p>
         </div>
+
+        <BusinessSubmissionsPanel />
 
         {feedback && (
           <div className="rounded-2xl border border-line bg-panelAlt/60 px-4 py-3 text-sm text-stone-200">

@@ -89,6 +89,30 @@ function normalizeHours(value: unknown): BusinessHours {
   }, createClosedBusinessHours());
 }
 
+function normalizeProfile(value: unknown): AdminHoursSyncResult["proposedProfile"] {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const location = isRecord(value.location)
+    ? {
+        lat: numberValue(value.location.lat, Number.NaN),
+        lng: numberValue(value.location.lng, Number.NaN)
+      }
+    : null;
+
+  return {
+    address: stringValue(value.address).trim(),
+    phone: stringValue(value.phone).trim(),
+    website: stringValue(value.website).trim(),
+    googleMapsUrl: stringValue(value.googleMapsUrl).trim(),
+    location:
+      location && Number.isFinite(location.lat) && Number.isFinite(location.lng)
+        ? location
+        : null
+  };
+}
+
 export function hasNoStructuredHours(hours: BusinessHours) {
   return DAY_KEYS.every((day) => hours[day].closed);
 }
@@ -189,6 +213,7 @@ export function normalizeAdminHoursSyncResult(value: unknown): AdminHoursSyncRes
     placeId: stringValue(record.placeId).trim() || null,
     matchedName: stringValue(record.matchedName).trim(),
     proposedHours: record.proposedHours ? normalizeHours(record.proposedHours) : null,
+    proposedProfile: normalizeProfile(record.proposedProfile),
     status: normalizeResultStatus(record.status),
     message: stringValue(record.message).trim(),
     reviewedAt: parseDateValue(record.reviewedAt)

@@ -47,6 +47,21 @@ service cloud.firestore {
         || request.resource.data.status == "pending";
     }
 
+    function canAttachContactSubmitter() {
+      return signedIn()
+        && resource.data.reason == "submit_business"
+        && resource.data.status == "pending"
+        && (!("submitterUid" in resource.data) || resource.data.submitterUid == null)
+        && request.resource.data.submitterUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "submitterUid",
+          "submitterDisplayName",
+          "submitterPhotoUrl",
+          "ownerName",
+          "ownerEmail"
+        ]);
+    }
+
     // ── Businesses ──────────────────────────────────────────────────────────
     match /businesses/{businessId} {
       allow read: if resource.data.active == true || isAdmin() || ownsBusiness();
@@ -84,7 +99,8 @@ service cloud.firestore {
     // ── Contact submissions ─────────────────────────────────────────────────
     match /contactSubmissions/{submissionId} {
       allow create: if validContactSubmitterUid() && validContactSubmissionStatus();
-      allow read, update, delete: if isAdmin();
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin() || canAttachContactSubmitter();
     }
 
     // ── Articles ─────────────────────────────────────────────────────────────

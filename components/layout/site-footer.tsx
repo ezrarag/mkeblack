@@ -207,6 +207,12 @@ export function SiteFooter() {
               >
                 Open contact form
               </Link>
+              <Link
+                href="/submission"
+                className="ml-3 mt-6 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                Check submission
+              </Link>
               <p className="mt-4 text-xs uppercase tracking-[0.22em] text-muted">
                 Milwaukee, Wisconsin
               </p>

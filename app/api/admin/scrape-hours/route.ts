@@ -78,7 +78,18 @@ function buildPlacesDetailsUrl(placeId: string) {
     "https://maps.googleapis.com/maps/api/place/details/json"
   );
   url.searchParams.set("place_id", placeId);
-  url.searchParams.set("fields", "opening_hours");
+  url.searchParams.set(
+    "fields",
+    [
+      "formatted_address",
+      "formatted_phone_number",
+      "geometry",
+      "name",
+      "opening_hours",
+      "url",
+      "website"
+    ].join(",")
+  );
   url.searchParams.set("key", process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "");
   return url.toString();
 }
@@ -96,7 +107,11 @@ async function fetchJson<T>(url: string) {
   return (await response.json()) as T;
 }
 
-async function scrapeBusinessHours(businessId: string, name: string, address: string) {
+async function scrapeBusinessGoogleProfile(
+  businessId: string,
+  name: string,
+  address: string
+) {
   const searchInput = `${name} ${address} Milwaukee`;
   const searchResponse = await fetchJson<{
     candidates?: Array<{ place_id?: string; name?: string }>;
@@ -113,6 +128,7 @@ async function scrapeBusinessHours(businessId: string, name: string, address: st
       placeId: null,
       matchedName: "",
       proposedHours: null,
+      proposedProfile: null,
       status: "not_found" as const,
       message: "Not found on Google Places.",
       reviewedAt: null
@@ -121,9 +137,20 @@ async function scrapeBusinessHours(businessId: string, name: string, address: st
 
   const detailsResponse = await fetchJson<{
     result?: {
+      formatted_address?: string;
+      formatted_phone_number?: string;
+      geometry?: {
+        location?: {
+          lat?: number;
+          lng?: number;
+        };
+      };
+      name?: string;
       opening_hours?: {
         periods?: unknown;
       };
+      url?: string;
+      website?: string;
     };
     status?: string;
   }>(buildPlacesDetailsUrl(candidate.place_id));
@@ -131,17 +158,39 @@ async function scrapeBusinessHours(businessId: string, name: string, address: st
   const proposedHours = parseGooglePlacesPeriods(
     detailsResponse.result?.opening_hours?.periods
   );
+  const location = detailsResponse.result?.geometry?.location;
+  const proposedProfile = {
+    address: detailsResponse.result?.formatted_address ?? "",
+    phone: detailsResponse.result?.formatted_phone_number ?? "",
+    website: detailsResponse.result?.website ?? "",
+    googleMapsUrl: detailsResponse.result?.url ?? "",
+    location:
+      typeof location?.lat === "number" && typeof location?.lng === "number"
+        ? {
+            lat: location.lat,
+            lng: location.lng
+          }
+        : null
+  };
+  const hasProfileData = Boolean(
+    proposedProfile.address ||
+      proposedProfile.phone ||
+      proposedProfile.website ||
+      proposedProfile.googleMapsUrl ||
+      proposedProfile.location
+  );
 
-  if (!proposedHours) {
+  if (!proposedHours && !hasProfileData) {
     return {
       businessId,
       businessName: name,
       address,
       placeId: candidate.place_id,
-      matchedName: candidate.name ?? "",
+      matchedName: detailsResponse.result?.name ?? candidate.name ?? "",
       proposedHours: null,
+      proposedProfile: null,
       status: "not_found" as const,
-      message: "Google Places returned no structured opening hours.",
+      message: "Google Places returned no useful profile fields.",
       reviewedAt: null
     };
   }
@@ -151,10 +200,13 @@ async function scrapeBusinessHours(businessId: string, name: string, address: st
     businessName: name,
     address,
     placeId: candidate.place_id,
-    matchedName: candidate.name ?? "",
+    matchedName: detailsResponse.result?.name ?? candidate.name ?? "",
     proposedHours,
+    proposedProfile,
     status: "found" as const,
-    message: `Found on Google Places: ${formatReadableHours(proposedHours)}`,
+    message: proposedHours
+      ? `Found on Google Places: ${formatReadableHours(proposedHours)}`
+      : "Found Google profile fields, but no structured opening hours.",
     reviewedAt: null
   };
 }
@@ -302,6 +354,7 @@ export async function POST(req: NextRequest) {
           placeId: null,
           matchedName: "",
           proposedHours: null,
+          proposedProfile: null,
           status: "error",
           message: "Business no longer exists.",
           reviewedAt: null
@@ -316,7 +369,7 @@ export async function POST(req: NextRequest) {
 
       try {
         nextResults.push(
-          await scrapeBusinessHours(business.id, business.name, business.address)
+          await scrapeBusinessGoogleProfile(business.id, business.name, business.address)
         );
       } catch (error) {
         nextResults.push({
@@ -326,6 +379,7 @@ export async function POST(req: NextRequest) {
           placeId: null,
           matchedName: "",
           proposedHours: null,
+          proposedProfile: null,
           status: "error",
           message: error instanceof Error ? error.message : "Google Places lookup failed.",
           reviewedAt: null
@@ -391,6 +445,59 @@ export async function POST(req: NextRequest) {
                 reviewedAt: now
               }
             : result
+        ),
+        updatedAt: now
+      },
+      { merge: true }
+    );
+
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "approve_profile") {
+    const businessId = typeof body.businessId === "string" ? body.businessId : "";
+    const result = session.results.find((candidate) => candidate.businessId === businessId);
+
+    if (!businessId || !result?.proposedProfile) {
+      return NextResponse.json(
+        { error: "businessId and proposed profile are required." },
+        { status: 400 }
+      );
+    }
+
+    const now = nowTimestamp();
+    const profile = result.proposedProfile;
+    const update: Record<string, unknown> = {
+      googlePlaceId: result.placeId,
+      googleMatchedName: result.matchedName,
+      googleMapsUrl: profile.googleMapsUrl,
+      googleProfileLastSynced: now
+    };
+
+    if (profile.phone) update.phone = profile.phone;
+    if (profile.website) update.website = profile.website;
+    if (profile.address) update.address = profile.address;
+    if (profile.location) update.location = profile.location;
+    if (result.proposedHours) {
+      update.hours = result.proposedHours;
+      update.hoursSource = "google_places";
+      update.hoursSkipped = false;
+      update.hoursLastSynced = now;
+    }
+
+    await db.collection("businesses").doc(businessId).set(update, { merge: true });
+
+    await sessionRef.set(
+      {
+        results: session.results.map((candidate) =>
+          candidate.businessId === businessId
+            ? {
+                ...candidate,
+                status: "approved",
+                message: "Approved Google profile updates.",
+                reviewedAt: now
+              }
+            : candidate
         ),
         updatedAt: now
       },

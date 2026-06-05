@@ -231,6 +231,10 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
     importedAt: parseDateValue(record.importedAt),
     claimInviteStatus: normalizeClaimInviteStatus(record.claimInviteStatus),
     claimInvitedAt: parseDateValue(record.claimInvitedAt),
+    googlePlaceId: stringValue(record.googlePlaceId).trim(),
+    googleMatchedName: stringValue(record.googleMatchedName).trim(),
+    googleMapsUrl: normalizeUrl(stringValue(record.googleMapsUrl).trim()),
+    googleProfileLastSynced: parseDateValue(record.googleProfileLastSynced),
     location: {
       lat: numberValue(
         isRecord(record.location) ? record.location.lat : undefined,
