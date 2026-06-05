@@ -143,35 +143,60 @@ function getAvatarInitials(
 }
 
 export function SiteHeader() {
-  const { user, profile, isAdmin, isVisitor, loading } = useAuth();
+  const {
+    user,
+    hasAdminAccess,
+    hasBusinessAccess,
+    isVisitor,
+    loading
+  } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [guestAccountOpen, setGuestAccountOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const hasAdminAccess = isAdmin || profile?.role === "admin";
   const avatarInitials = getAvatarInitials(user?.displayName, user?.email);
 
-  const accountLinks: NavLink[] = hasAdminAccess
-    ? [
-        { href: "/admin", label: "Admin workspace" },
-        { href: "/admin/homepage", label: "Homepage editor" },
-        { href: "/admin/articles", label: "Articles" },
-        { href: "/admin/businesses", label: "Business manager" },
-        { href: "/admin/categories", label: "Categories" },
-        { href: "/admin/marketplace", label: "Marketplace" },
-        { href: "/admin/members", label: "Solidarity Circle" },
-        { href: "/admin/claims", label: "Pending claims" },
-        { href: "/admin/import", label: "Import spreadsheet" },
-        { href: "/admin/team", label: "Team access" },
-      ]
+  const accountLinks: NavLink[] = [];
+
+  if (hasAdminAccess) {
+    accountLinks.push(
+      { href: "/admin", label: "Admin workspace" },
+      { href: "/admin/homepage", label: "Homepage editor" },
+      { href: "/admin/articles", label: "Articles" },
+      { href: "/admin/businesses", label: "Business manager" },
+      { href: "/admin/categories", label: "Categories" },
+      { href: "/admin/marketplace", label: "Marketplace" },
+      { href: "/admin/members", label: "Solidarity Circle" },
+      { href: "/admin/claims", label: "Pending claims" },
+      { href: "/admin/import", label: "Import spreadsheet" },
+      { href: "/admin/team", label: "Team access" }
+    );
+  }
+
+  if (hasBusinessAccess) {
+    accountLinks.push({ href: "/dashboard", label: "My business dashboard" });
+  }
+
+  if (!accountLinks.length && isVisitor) {
+    accountLinks.push(
+      { href: "/visitor", label: "My favorites" },
+      { href: "/visitor", label: "My account" }
+    );
+  }
+
+  if (!accountLinks.length) {
+    accountLinks.push({ href: "/dashboard", label: "My listing" });
+  }
+
+  const accountLabel = hasAdminAccess
+    ? hasBusinessAccess
+      ? "Admin + business account"
+      : "Admin account"
     : isVisitor
-      ? [
-          { href: "/visitor", label: "My favorites" },
-          { href: "/visitor", label: "My account" },
-        ]
-      : [{ href: "/dashboard", label: "My listing" }];
+      ? "MKE Black member"
+      : "Business owner";
 
   useEffect(() => {
     if (
@@ -308,7 +333,7 @@ export function SiteHeader() {
                 <div className="absolute right-0 top-full z-40 mt-3 w-72 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
                   <div className="rounded-xl border border-line bg-panelAlt/70 px-4 py-4">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-muted">
-                      {hasAdminAccess ? "Admin account" : isVisitor ? "MKE Black member" : "Business owner"}
+                      {accountLabel}
                     </p>
                     <p className="mt-2 text-sm font-semibold text-ink">
                       {user.displayName || user.email || "MKE Black account"}

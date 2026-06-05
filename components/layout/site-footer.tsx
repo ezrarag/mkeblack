@@ -92,7 +92,7 @@ function NewsletterSignup() {
 }
 
 export function SiteFooter() {
-  const { user, hasAdminAccess } = useAuth();
+  const { user, hasAdminAccess, hasBusinessAccess } = useAuth();
 
   const businessLinks: FooterLink[] = [];
 
@@ -108,9 +108,12 @@ export function SiteFooter() {
       { href: "/admin/businesses", label: "Business manager" },
       { href: "/admin/marketplace", label: "Marketplace" },
       { href: "/admin/members", label: "Solidarity Circle" },
-      { href: "/admin/import", label: "Import spreadsheet" },
-      { href: "/dashboard", label: "Owner dashboard" }
+      { href: "/admin/import", label: "Import spreadsheet" }
     );
+
+    if (hasBusinessAccess) {
+      businessLinks.push({ href: "/dashboard", label: "My business dashboard" });
+    }
   } else {
     businessLinks.push(
       { href: "/dashboard", label: "My listing" },

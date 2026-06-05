@@ -23,6 +23,7 @@ import {
   BusinessClaimInvite,
   BusinessFormValues
 } from "@/lib/types";
+import { addCapability } from "@/lib/user-capabilities";
 import { normalizeUrl } from "@/lib/utils";
 import { normalizeTagSlugs } from "@/lib/tags";
 
@@ -151,7 +152,9 @@ async function syncOwnerBusinessLink(ownerUid: string | null, businessId: string
     userReference,
     {
       uid: ownerUid,
-      businessId
+      businessId,
+      role: userSnapshot.data().role === "admin" ? "admin" : "business",
+      capabilities: addCapability(userSnapshot.data().capabilities, "business")
     },
     { merge: true }
   );
@@ -484,13 +487,20 @@ export async function claimBusinessListing(
   uid: string
 ) {
   const { db, firestoreModule } = await getFirestoreHelpers();
+  const userReference = firestoreModule.doc(db, "users", uid);
+  const userSnapshot = await firestoreModule.getDoc(userReference);
+  const existingRole = userSnapshot.exists() ? userSnapshot.data().role : null;
+  const existingCapabilities = userSnapshot.exists()
+    ? userSnapshot.data().capabilities
+    : [];
 
   await firestoreModule.setDoc(
-    firestoreModule.doc(db, "users", uid),
+    userReference,
     {
       uid,
       email: invite.email.trim(),
-      role: "business",
+      role: existingRole === "admin" ? "admin" : "business",
+      capabilities: addCapability(existingCapabilities, "business"),
       businessId: invite.businessId
     },
     { merge: true }

@@ -380,12 +380,14 @@ export type BenefitType = {
 };
 
 export type UserRole = "business" | "admin" | "visitor";
+export type UserCapability = "admin" | "business";
 
 export type UserProfile = {
   uid: string;
   email: string;
   role: UserRole;
-  businessId: string;
+  capabilities?: UserCapability[];
+  businessId: string | null;
 };
 
 export type BusinessFormValues = {

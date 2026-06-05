@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeApp, cert, getApps, getApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import {
+  FieldValue,
+  getFirestore,
+  type QueryDocumentSnapshot
+} from "firebase-admin/firestore";
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
+import { normalizeCapabilities, removeCapability } from "@/lib/user-capabilities";
 
 function getAdminApp() {
   if (getApps().length) return getApp();
@@ -58,7 +63,8 @@ async function getVerifiedAdmin(req: NextRequest) {
 
   const hasAdminAccess =
     context.decodedToken.admin === true ||
-    userSnapshot.data()?.role === "admin";
+    userSnapshot.data()?.role === "admin" ||
+    normalizeCapabilities(userSnapshot.data()?.capabilities).includes("admin");
 
   return hasAdminAccess ? context : null;
 }
@@ -132,13 +138,17 @@ export async function POST(req: NextRequest) {
 
     try {
       const existingUser = await auth.getUserByEmail(email);
+      const userRef = db.collection("users").doc(existingUser.uid);
+      const userSnapshot = await userRef.get();
+      const existingRole = userSnapshot.data()?.role;
 
-      await db.collection("users").doc(existingUser.uid).set(
+      await userRef.set(
         {
           uid: existingUser.uid,
           email,
           name: name || existingUser.displayName || "",
-          role: "admin",
+          role: existingRole === "business" ? "business" : "admin",
+          capabilities: FieldValue.arrayUnion("admin"),
           adminGrantedAt: new Date().toISOString(),
           adminGrantedByUid: decodedToken.uid,
           adminGrantedByEmail: decodedToken.email ?? ""
@@ -192,12 +202,17 @@ export async function GET(req: NextRequest) {
   try {
     const { db } = context;
 
-    const [adminSnapshot, inviteSnapshot] = await Promise.all([
+    const [roleAdminSnapshot, capabilityAdminSnapshot, inviteSnapshot] = await Promise.all([
       db.collection("users").where("role", "==", "admin").get(),
+      db.collection("users").where("capabilities", "array-contains", "admin").get(),
       db.collection("admin_invites").where("status", "==", "pending").get()
     ]);
 
-    const admins = adminSnapshot.docs
+    const adminDocsById = new Map<string, QueryDocumentSnapshot>();
+    roleAdminSnapshot.docs.forEach((doc) => adminDocsById.set(doc.id, doc));
+    capabilityAdminSnapshot.docs.forEach((doc) => adminDocsById.set(doc.id, doc));
+
+    const admins = Array.from(adminDocsById.values())
       .map((doc) => {
         const data = doc.data();
         return {
@@ -258,7 +273,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ promoted: false });
     }
 
-    await db.collection("users").doc(decodedToken.uid).set(
+    const userRef = db.collection("users").doc(decodedToken.uid);
+    const userSnapshot = await userRef.get();
+    const existingRole = userSnapshot.data()?.role;
+
+    await userRef.set(
       {
         uid: decodedToken.uid,
         email,
@@ -266,7 +285,8 @@ export async function PATCH(req: NextRequest) {
           (typeof inviteData.name === "string" && inviteData.name.trim()) ||
           decodedToken.name ||
           "",
-        role: "admin",
+        role: existingRole === "business" ? "business" : "admin",
+        capabilities: FieldValue.arrayUnion("admin"),
         adminGrantedAt: new Date().toISOString(),
         adminGrantedByUid:
           typeof inviteData.invitedByUid === "string" ? inviteData.invitedByUid : "",
@@ -323,11 +343,21 @@ export async function DELETE(req: NextRequest) {
     let inviteEmail = email;
 
     if (uid) {
-      const userSnapshot = await db.collection("users").doc(uid).get();
-      const userEmail = userSnapshot.data()?.email;
+      const userRef = db.collection("users").doc(uid);
+      const userSnapshot = await userRef.get();
+      const userData = userSnapshot.data() ?? {};
+      const userEmail = userData.email;
+      const nextCapabilities = removeCapability(userData.capabilities, "admin");
+      const hasBusinessAccess =
+        nextCapabilities.includes("business") ||
+        userData.role === "business" ||
+        Boolean(userData.businessId);
 
-      await db.collection("users").doc(uid).set(
-        { role: "business" },
+      await userRef.set(
+        {
+          capabilities: nextCapabilities,
+          role: hasBusinessAccess ? "business" : "visitor"
+        },
         { merge: true }
       );
 

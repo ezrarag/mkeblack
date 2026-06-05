@@ -8,6 +8,7 @@ import {
   loadFirebaseFirestoreModule
 } from "@/lib/firebase/client";
 import { TeamMemberRoleType } from "@/lib/types";
+import { addCapability } from "@/lib/user-capabilities";
 
 type PendingClaim = {
   id: string;
@@ -103,6 +104,20 @@ export function AdminClaimsPage() {
       if (!db) return;
 
       if (approve) {
+        const userReference = firestoreModule.doc(db, "users", claim.claimedByUid);
+        const userSnapshot = await firestoreModule.getDoc(userReference);
+        const existingRole = userSnapshot.exists() ? userSnapshot.data().role : null;
+        const existingCapabilities = userSnapshot.exists()
+          ? userSnapshot.data().capabilities
+          : [];
+        const businessUserUpdate = {
+          uid: claim.claimedByUid,
+          email: claim.claimedByEmail,
+          role: existingRole === "admin" ? "admin" : "business",
+          capabilities: addCapability(existingCapabilities, "business"),
+          businessId: claim.businessId
+        };
+
         if (claim.requestedRoleType === "owner") {
           await Promise.all([
             firestoreModule.setDoc(
@@ -114,13 +129,8 @@ export function AdminClaimsPage() {
               { merge: true }
             ),
             firestoreModule.setDoc(
-              firestoreModule.doc(db, "users", claim.claimedByUid),
-              {
-                uid: claim.claimedByUid,
-                email: claim.claimedByEmail,
-                role: "business",
-                businessId: claim.businessId
-              },
+              userReference,
+              businessUserUpdate,
               { merge: true }
             )
           ]);
@@ -168,13 +178,8 @@ export function AdminClaimsPage() {
               { merge: true }
             ),
             firestoreModule.setDoc(
-              firestoreModule.doc(db, "users", claim.claimedByUid),
-              {
-                uid: claim.claimedByUid,
-                email: claim.claimedByEmail,
-                role: "business",
-                businessId: claim.businessId
-              },
+              userReference,
+              businessUserUpdate,
               { merge: true }
             )
           ]);

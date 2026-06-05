@@ -6,6 +6,7 @@ import {
 import { createBusiness } from "@/lib/firebase/businesses";
 import { BUSINESS_CATEGORIES, createEmptyBusinessForm } from "@/lib/constants";
 import { BusinessFormValues } from "@/lib/types";
+import { addCapability } from "@/lib/user-capabilities";
 import { normalizeUrl } from "@/lib/utils";
 
 export type ContactReason =
@@ -266,12 +267,20 @@ export async function approveBusinessListingSubmission(
   );
 
   if (submission.submitterUid) {
+    const userReference = firestoreModule.doc(db, "users", submission.submitterUid);
+    const userSnapshot = await firestoreModule.getDoc(userReference);
+    const existingRole = userSnapshot.exists() ? userSnapshot.data().role : null;
+    const existingCapabilities = userSnapshot.exists()
+      ? userSnapshot.data().capabilities
+      : [];
+
     await firestoreModule.setDoc(
-      firestoreModule.doc(db, "users", submission.submitterUid),
+      userReference,
       {
         uid: submission.submitterUid,
         email: submission.ownerEmail || submission.businessEmail || "",
-        role: "business",
+        role: existingRole === "admin" ? "admin" : "business",
+        capabilities: addCapability(existingCapabilities, "business"),
         businessId
       },
       { merge: true }

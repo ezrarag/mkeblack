@@ -11,6 +11,7 @@ import {
   parseGooglePlacesPeriods
 } from "@/lib/hours-sync";
 import { AdminHoursSyncResult, BusinessHours } from "@/lib/types";
+import { normalizeCapabilities } from "@/lib/user-capabilities";
 
 const BATCH_SIZE = 10;
 const BATCH_INTERVAL_MS = 60_000;
@@ -54,7 +55,9 @@ async function verifyAdmin(req: NextRequest) {
     const decodedToken = await auth.verifyIdToken(token);
     const userSnapshot = await db.collection("users").doc(decodedToken.uid).get();
     const hasAdminAccess =
-      decodedToken.admin === true || userSnapshot.data()?.role === "admin";
+      decodedToken.admin === true ||
+      userSnapshot.data()?.role === "admin" ||
+      normalizeCapabilities(userSnapshot.data()?.capabilities).includes("admin");
 
     return hasAdminAccess ? { db, decodedToken } : null;
   } catch {

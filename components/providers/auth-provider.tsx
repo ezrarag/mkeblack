@@ -16,6 +16,7 @@ import {
   isFirebaseConfigured
 } from "@/lib/firebase/client";
 import { UserProfile } from "@/lib/types";
+import { profileHasCapability } from "@/lib/user-capabilities";
 
 type AuthContextValue = {
   user: User | null;
@@ -23,6 +24,7 @@ type AuthContextValue = {
   loading: boolean;
   isAdmin: boolean;
   hasAdminAccess: boolean;
+  hasBusinessAccess: boolean;
   isVisitor: boolean;
 };
 
@@ -32,6 +34,7 @@ const AuthContext = createContext<AuthContextValue>({
   loading: true,
   isAdmin: false,
   hasAdminAccess: false,
+  hasBusinessAccess: false,
   isVisitor: false
 });
 
@@ -40,9 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const hasAdminAccess = isAdmin || profile?.role === "admin";
+  const hasAdminAccess = isAdmin || profileHasCapability(profile, "admin");
+  const hasBusinessAccess = profileHasCapability(profile, "business");
   const isVisitor =
-    !loading && !!user && !hasAdminAccess && profile?.role !== "business";
+    !loading && !!user && !hasAdminAccess && !hasBusinessAccess;
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -136,7 +140,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, isAdmin, hasAdminAccess, isVisitor }}
+      value={{
+        user,
+        profile,
+        loading,
+        isAdmin,
+        hasAdminAccess,
+        hasBusinessAccess,
+        isVisitor
+      }}
     >
       {children}
     </AuthContext.Provider>
