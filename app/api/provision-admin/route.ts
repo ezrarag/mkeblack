@@ -215,9 +215,14 @@ export async function GET(req: NextRequest) {
     const admins = Array.from(adminDocsById.values())
       .map((doc) => {
         const data = doc.data();
+        const email =
+          typeof data.email === "string" && data.email.trim()
+            ? data.email
+            : doc.id;
+
         return {
-          uid: data.uid,
-          email: data.email,
+          uid: typeof data.uid === "string" && data.uid.trim() ? data.uid : doc.id,
+          email,
           name: data.name ?? "",
           provisionedAt: data.adminGrantedAt ?? data.provisionedAt ?? null
         };
@@ -227,8 +232,13 @@ export async function GET(req: NextRequest) {
     const invites = inviteSnapshot.docs
       .map((doc) => {
         const data = doc.data();
+        const email =
+          typeof data.email === "string" && data.email.trim()
+            ? data.email
+            : doc.id;
+
         return {
-          email: data.email,
+          email,
           name: data.name ?? "",
           invitedAt: data.invitedAt ?? null
         };
