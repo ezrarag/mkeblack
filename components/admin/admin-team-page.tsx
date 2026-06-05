@@ -8,6 +8,7 @@ type AdminUser = {
   uid: string;
   email: string;
   name: string;
+  businessId: string | null;
   provisionedAt: string | null;
 };
 
@@ -44,6 +45,7 @@ export function AdminTeamPage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const [removingKey, setRemovingKey] = useState<string | null>(null);
+  const [clearingBusinessKey, setClearingBusinessKey] = useState<string | null>(null);
 
   const apiFetch = useCallback(
     async (method: "GET" | "POST" | "DELETE", body?: object) => {
@@ -159,6 +161,46 @@ export function AdminTeamPage() {
       setFetchError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setRemovingKey(null);
+    }
+  }
+
+  async function handleClearBusinessLink(admin: AdminUser) {
+    const confirmed = window.confirm(
+      `Clear business dashboard access for ${admin.email}? This keeps admin access but removes their linked business.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setClearingBusinessKey(admin.uid);
+    setFetchError(null);
+
+    try {
+      if (!user) {
+        throw new Error("You must be signed in as an admin.");
+      }
+
+      const token = await user.getIdToken();
+      const res = await fetch("/api/admin/user-business-link", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid: admin.uid })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to clear business link");
+      }
+
+      void loadTeamAccess();
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setClearingBusinessKey(null);
     }
   }
 
@@ -326,15 +368,40 @@ export function AdminTeamPage() {
                         Added {new Date(admin.provisionedAt).toLocaleDateString()}
                       </p>
                     ) : null}
+                    {admin.businessId ? (
+                      <p className="mt-1 text-xs text-amber-300">
+                        Linked business:{" "}
+                        <a
+                          href={`/admin/businesses/${admin.businessId}`}
+                          className="underline underline-offset-4 hover:text-amber-200"
+                        >
+                          {admin.businessId}
+                        </a>
+                      </p>
+                    ) : null}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveAdmin(admin.uid)}
-                    disabled={removingKey === admin.uid}
-                    className="rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-xs text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
-                  >
-                    {removingKey === admin.uid ? "Removing…" : "Remove"}
-                  </button>
+                  <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                    {admin.businessId ? (
+                      <button
+                        type="button"
+                        onClick={() => handleClearBusinessLink(admin)}
+                        disabled={clearingBusinessKey === admin.uid}
+                        className="rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-xs text-amber-200 transition hover:bg-amber-400/20 disabled:opacity-50"
+                      >
+                        {clearingBusinessKey === admin.uid
+                          ? "Clearing…"
+                          : "Clear business link"}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAdmin(admin.uid)}
+                      disabled={removingKey === admin.uid}
+                      className="rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-xs text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
+                    >
+                      {removingKey === admin.uid ? "Removing…" : "Remove"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

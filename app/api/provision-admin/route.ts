@@ -224,6 +224,10 @@ export async function GET(req: NextRequest) {
           uid: typeof data.uid === "string" && data.uid.trim() ? data.uid : doc.id,
           email,
           name: data.name ?? "",
+          businessId:
+            typeof data.businessId === "string" && data.businessId.trim()
+              ? data.businessId
+              : null,
           provisionedAt: data.adminGrantedAt ?? data.provisionedAt ?? null
         };
       })
