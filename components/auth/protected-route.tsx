@@ -50,23 +50,12 @@ export function ProtectedRoute({
         title="Admin access required"
         description="This workspace is reserved for admins. Use an account with the admin custom claim or an admin role document."
         action={
-          <div className="flex flex-col gap-4">
-            <Link
-              href="/dashboard"
-              className="inline-flex w-fit rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
-            >
-              Go to dashboard
-            </Link>
-
-            <div className="w-fit rounded-2xl border border-line/80 bg-canvas/45 px-4 py-4">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-muted">
-                Firebase UID
-              </p>
-              <code className="mt-2 block break-all text-sm text-stone-100">
-                {user.uid}
-              </code>
-            </div>
-          </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex w-fit rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
+          >
+            Go to dashboard
+          </Link>
         }
       />
     );

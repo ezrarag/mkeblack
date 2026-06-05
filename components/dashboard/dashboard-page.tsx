@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -9,6 +9,7 @@ import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { BusinessMarketplaceManager } from "@/components/marketplace/business-marketplace-manager";
 import { BusinessEventsManager } from "@/components/events/business-events-manager";
 import { BusinessClaimSearch } from "@/components/dashboard/business-claim-search";
+import { PendingBusinessSubmissions } from "@/components/dashboard/pending-business-submissions";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
 import { businessToFormValues } from "@/lib/businesses";
@@ -26,6 +27,7 @@ export function DashboardPageContent() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<"listing" | "team" | "marketplace" | "events">("listing");
+  const [hasPendingSubmissions, setHasPendingSubmissions] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
 
@@ -81,6 +83,10 @@ export function DashboardPageContent() {
     window.location.reload();
   }
 
+  const handlePendingSubmissionsChange = useCallback((hasPending: boolean) => {
+    setHasPendingSubmissions(hasPending);
+  }, []);
+
   return (
     <ProtectedRoute>
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -97,12 +103,16 @@ export function DashboardPageContent() {
                   ? "Loading your listing…"
                   : business
                   ? business.name
+                  : hasPendingSubmissions
+                  ? "Business request pending"
                   : "My Listing"}
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-stone-300">
-                Updates you make here publish directly to the public MKE Black
-                directory. Keep your hours accurate — that&apos;s what people
-                search by most.
+                {business
+                  ? "Updates you make here publish directly to the public MKE Black directory. Keep your hours accurate — that's what people search by most."
+                  : hasPendingSubmissions
+                  ? "Your business listing request is waiting for admin approval. You can track status, attach Google, and start Solidarity Circle membership while you wait."
+                  : "Find or claim your business listing to manage it from this dashboard."}
               </p>
             </div>
 
@@ -166,7 +176,13 @@ export function DashboardPageContent() {
         ) : !profile?.businessId ? (
           /* ── No business linked yet: show search + claim ── */
           <>
-            <BusinessClaimSearch onClaimed={handleClaimed} />
+            <PendingBusinessSubmissions
+              onHasPendingChange={handlePendingSubmissionsChange}
+            />
+
+            {!hasPendingSubmissions ? (
+              <BusinessClaimSearch onClaimed={handleClaimed} />
+            ) : null}
 
             {/* Admin UID debug block */}
             {hasAdminAccess && user ? (

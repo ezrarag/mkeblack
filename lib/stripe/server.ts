@@ -23,3 +23,14 @@ export function getBaseUrl() {
     "http://localhost:3000"
   ).replace(/\/$/, "");
 }
+
+/**
+ * Rick Banks / MKE Black Incorporated Stripe account ID.
+ * Payments are collected on RAG's platform account and transferred
+ * to MKE Black via Stripe Connect (destination charges).
+ * Once Rick's account review is complete, all membership payments
+ * settle directly into MKE Black's bank account.
+ */
+export function getMKEBlackStripeAccountId(): string | undefined {
+  return process.env.STRIPE_MKE_BLACK_ACCOUNT_ID || undefined;
+}

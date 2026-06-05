@@ -43,6 +43,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const db = getFirebaseAdminDb();
+  const pendingSubmissionId = session.metadata?.pendingSubmissionId ?? "";
   await db.collection("members").doc(memberId).set(
     {
       status: "active",
@@ -58,6 +59,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     },
     { merge: true }
   );
+
+  if (pendingSubmissionId) {
+    await db.collection("contactSubmissions").doc(pendingSubmissionId).set(
+      {
+        solidarityPaymentStatus: "active",
+        solidarityMemberId: memberId,
+        solidarityCheckoutSessionId: session.id,
+        solidarityActivatedAt: FieldValue.serverTimestamp()
+      },
+      { merge: true }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {

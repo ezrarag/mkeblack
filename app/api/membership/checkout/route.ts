@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getFirebaseAdminDb } from "@/lib/firebase/admin";
-import { getBaseUrl, getStripe } from "@/lib/stripe/server";
+import { getBaseUrl, getMKEBlackStripeAccountId, getStripe } from "@/lib/stripe/server";
 
 type CheckoutKind = "membership" | "donation";
 type MembershipPlan = "monthly" | "quarterly" | "yearly";
@@ -56,6 +56,9 @@ export async function POST(req: NextRequest) {
     email?: string;
     membershipPlan?: MembershipPlan;
     donationAmountCents?: number;
+    pendingSubmissionId?: string;
+    pendingBusinessName?: string;
+    uid?: string;
   };
 
   try {
@@ -69,6 +72,9 @@ export async function POST(req: NextRequest) {
   const email = getString(body.email).toLowerCase();
   const membershipPlan = getMembershipPlan(body.membershipPlan);
   const donationAmountCents = getDonationAmountCents(body.donationAmountCents);
+  const pendingSubmissionId = getString(body.pendingSubmissionId);
+  const pendingBusinessName = getString(body.pendingBusinessName);
+  const uid = getString(body.uid);
 
   if (kind === "membership" && (!name || !email)) {
     return NextResponse.json(
@@ -88,6 +94,10 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     const db = getFirebaseAdminDb();
     const baseUrl = getBaseUrl();
+
+    // MKE Black's Stripe account — payments transfer here after RAG's platform fee
+    const mkeBlackAccountId = getMKEBlackStripeAccountId();
+
     const memberRef =
       kind === "membership" ? db.collection("members").doc() : null;
 
@@ -99,9 +109,13 @@ export async function POST(req: NextRequest) {
         paymentSource: "stripe",
         status: "pending",
         membershipPlan,
-        uid: null,
+        uid: uid || null,
         businessId: null,
-        notes: "Stripe checkout started.",
+        pendingSubmissionId: pendingSubmissionId || null,
+        pendingBusinessName: pendingBusinessName || null,
+        notes: pendingSubmissionId
+          ? `Stripe checkout started for pending business submission ${pendingSubmissionId}.`
+          : "Stripe checkout started.",
         benefitIds: [],
         joinedAt: FieldValue.serverTimestamp(),
         expiresAt: null,
@@ -112,6 +126,7 @@ export async function POST(req: NextRequest) {
     }
 
     const plan = membershipPlanConfig[membershipPlan];
+
     const lineItem =
       kind === "membership"
         ? {
@@ -119,9 +134,7 @@ export async function POST(req: NextRequest) {
             price_data: {
               currency: "usd",
               unit_amount: plan.amount,
-              product_data: {
-                name: plan.label
-              },
+              product_data: { name: plan.label },
               recurring: {
                 interval: plan.interval,
                 interval_count: plan.intervalCount
@@ -133,13 +146,13 @@ export async function POST(req: NextRequest) {
             price_data: {
               currency: "usd",
               unit_amount: donationAmountCents,
-              product_data: {
-                name: "MKE Black community donation"
-              }
+              product_data: { name: "MKE Black community donation" }
             }
           };
 
-    const session = await stripe.checkout.sessions.create({
+    // Build session params — add transfer_data when Rick's account is configured
+    // This routes the payment to MKE Black's bank account automatically
+    const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode: kind === "membership" ? "subscription" : "payment",
       line_items: [lineItem],
       customer_email: email || undefined,
@@ -148,24 +161,61 @@ export async function POST(req: NextRequest) {
         kind,
         memberId: memberRef?.id ?? "",
         membershipPlan: kind === "membership" ? membershipPlan : "",
+        pendingSubmissionId,
+        pendingBusinessName,
+        uid,
         donationAmountCents: kind === "donation" ? String(donationAmountCents) : "",
         name,
         email
       },
       success_url: `${baseUrl}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/membership?checkout=cancelled`
-    });
+    };
+
+    // Add Stripe Connect destination charge when Rick's account ID is configured.
+    // For subscriptions: use on_behalf_of + transfer_data (can't use destination on subs)
+    // For one-time payments: use transfer_data.destination directly
+    if (mkeBlackAccountId) {
+      if (kind === "membership") {
+        // Subscriptions use on_behalf_of to set the settlement account
+        sessionParams.on_behalf_of = mkeBlackAccountId;
+        sessionParams.transfer_data = {
+          destination: mkeBlackAccountId
+        };
+      } else {
+        // One-time donations use transfer_data directly
+        sessionParams.transfer_data = {
+          destination: mkeBlackAccountId
+        };
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     if (memberRef) {
       await memberRef.update({
         stripeCheckoutSessionId: session.id,
         paymentReference: session.id
       });
+
+      if (pendingSubmissionId) {
+        await db.collection("contactSubmissions").doc(pendingSubmissionId).set(
+          {
+            solidarityCheckoutStarted: true,
+            solidarityMemberId: memberRef.id,
+            solidarityMembershipPlan: membershipPlan,
+            solidarityCheckoutSessionId: session.id,
+            solidarityCheckoutStartedAt: FieldValue.serverTimestamp()
+          },
+          { merge: true }
+        );
+      }
     }
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unable to start checkout.";
+    const message =
+      err instanceof Error ? err.message : "Unable to start checkout.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

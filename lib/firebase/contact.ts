@@ -42,6 +42,10 @@ export type BusinessListingSubmission = ContactFormData & {
   submittedAt: Date | null;
   approvedAt: Date | null;
   approvedBusinessId: string | null;
+  solidarityCheckoutStarted: boolean;
+  solidarityPaymentStatus: string;
+  solidarityMemberId: string | null;
+  solidarityMembershipPlan: string;
 };
 
 type FirestoreRecord = Record<string, unknown>;
@@ -110,7 +114,11 @@ function normalizeBusinessSubmission(
       status === "approved" || status === "rejected" ? status : "pending",
     submittedAt: parseDateValue(record.submittedAt),
     approvedAt: parseDateValue(record.approvedAt),
-    approvedBusinessId: stringValue(record.approvedBusinessId) || null
+    approvedBusinessId: stringValue(record.approvedBusinessId) || null,
+    solidarityCheckoutStarted: record.solidarityCheckoutStarted === true,
+    solidarityPaymentStatus: stringValue(record.solidarityPaymentStatus),
+    solidarityMemberId: stringValue(record.solidarityMemberId) || null,
+    solidarityMembershipPlan: stringValue(record.solidarityMembershipPlan)
   };
 }
 

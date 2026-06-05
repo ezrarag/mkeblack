@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const benefits = [
   {
@@ -59,6 +60,7 @@ type CheckoutKind = "membership" | "donation";
 type MembershipPlanId = (typeof membershipPlans)[number]["id"];
 
 export function MembershipPage() {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [checkoutKind, setCheckoutKind] = useState<CheckoutKind>("membership");
@@ -85,6 +87,12 @@ export function MembershipPage() {
     return () => window.removeEventListener("hashchange", syncHash);
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    setName((currentName) => currentName || user.displayName || "");
+    setEmail((currentEmail) => currentEmail || user.email || "");
+  }, [user]);
+
   async function startCheckout(kind: CheckoutKind) {
     if (kind === "membership" && (!name.trim() || !email.trim())) {
       setError("Enter your name and email before continuing to checkout.");
@@ -108,7 +116,8 @@ export function MembershipPage() {
           name: name.trim(),
           email: email.trim(),
           membershipPlan: selectedPlan,
-          donationAmountCents: Math.round(donationAmount * 100)
+          donationAmountCents: Math.round(donationAmount * 100),
+          uid: user?.uid ?? ""
         })
       });
       const payload = (await response.json()) as {

@@ -172,6 +172,23 @@ export function BusinessSubmissionsPanel() {
                   <span className="text-stone-500">Google account:</span>{" "}
                   {submission.submitterUid ? "Attached" : "Not attached"}
                 </p>
+                <p>
+                  <span className="text-stone-500">Solidarity Circle:</span>{" "}
+                  {submission.solidarityPaymentStatus === "active"
+                    ? "Paid / active"
+                    : submission.solidarityCheckoutStarted
+                    ? `Checkout started${
+                        submission.solidarityMembershipPlan
+                          ? ` (${submission.solidarityMembershipPlan})`
+                          : ""
+                      }`
+                    : "Not started"}
+                </p>
+                {submission.solidarityMemberId ? (
+                  <p className="text-xs font-mono text-stone-500">
+                    Member ID: {submission.solidarityMemberId}
+                  </p>
+                ) : null}
                 {submission.website ? (
                   <p>
                     <span className="text-stone-500">Website:</span>{" "}

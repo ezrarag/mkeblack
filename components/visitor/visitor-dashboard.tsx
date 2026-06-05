@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { PendingBusinessSubmissions } from "@/components/dashboard/pending-business-submissions";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useRecentViews } from "@/hooks/use-recent-views";
 import { useSavedMarketplace } from "@/hooks/use-saved-marketplace";
@@ -307,7 +308,7 @@ function SavedMarketplaceTab({ uid }: { uid: string }) {
   );
 }
 
-function AccountTab() {
+function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean }) {
   const { user } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
 
@@ -336,9 +337,6 @@ function AccountTab() {
         {user?.email ? (
           <p className="mt-0.5 text-sm text-stone-400">{user.email}</p>
         ) : null}
-        <p className="mt-3 text-xs text-stone-500">
-          UID: <span className="font-mono">{user?.uid}</span>
-        </p>
       </div>
 
       <div className="rounded-xl border border-line bg-panelAlt/60 px-5 py-5">
@@ -346,14 +344,18 @@ function AccountTab() {
           Your membership
         </p>
         <p className="mt-2 text-sm text-stone-300">
-          Support Milwaukee&apos;s Black business community by joining the Solidarity Circle.
+          {hasPendingSubmissions
+            ? "To attach membership to your pending listing, use the Solidarity Circle upgrade action on your business request above."
+            : "Support Milwaukee's Black business community by joining the Solidarity Circle."}
         </p>
-        <Link
-          href="/membership"
-          className="mt-3 inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
-        >
-          Learn about membership
-        </Link>
+        {hasPendingSubmissions ? null : (
+          <Link
+            href="/membership#join"
+            className="mt-3 inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
+          >
+            Join Solidarity Circle
+          </Link>
+        )}
       </div>
 
       <button
@@ -378,6 +380,10 @@ const tabs: { key: Tab; label: string }[] = [
 export function VisitorDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("favorites");
+  const [hasPendingSubmissions, setHasPendingSubmissions] = useState(false);
+  const handlePendingSubmissionsChange = useCallback((hasPending: boolean) => {
+    setHasPendingSubmissions(hasPending);
+  }, []);
 
   if (!user) return null;
 
@@ -387,8 +393,16 @@ export function VisitorDashboard() {
         My MKE Black
       </p>
       <h1 className="mt-1 font-display text-3xl font-black text-ink">
-        {user.displayName ? `Hi, ${user.displayName.split(" ")[0]}` : "My dashboard"}
+        {hasPendingSubmissions
+          ? "Business request pending"
+          : user.displayName
+          ? `Hi, ${user.displayName.split(" ")[0]}`
+          : "My dashboard"}
       </h1>
+
+      <PendingBusinessSubmissions
+        onHasPendingChange={handlePendingSubmissionsChange}
+      />
 
       <div className="mt-6 flex gap-1 rounded-full border border-line bg-panelAlt/60 p-1">
         {tabs.map(({ key, label }) => (
@@ -411,7 +425,9 @@ export function VisitorDashboard() {
         {activeTab === "favorites" && <FavoritesTab uid={user.uid} />}
         {activeTab === "marketplace" && <SavedMarketplaceTab uid={user.uid} />}
         {activeTab === "recent" && <RecentTab uid={user.uid} />}
-        {activeTab === "account" && <AccountTab />}
+        {activeTab === "account" && (
+          <AccountTab hasPendingSubmissions={hasPendingSubmissions} />
+        )}
       </div>
     </div>
   );
