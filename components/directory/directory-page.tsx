@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { BusinessCard } from "@/components/directory/business-card";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -545,6 +546,12 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
             {loading ? "Loading businesses..." : `${filteredBusinesses.length} matches`}
           </p>
         </div>
+        <Link
+          href="/contact?reason=submit_business"
+          className="rounded-full border border-accent bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
+        >
+          Submit your business
+        </Link>
       </div>
 
       {error ? (

@@ -276,7 +276,7 @@ function LiveSiteContentParitySection() {
                 Search business directory
               </Link>
               <Link
-                href="/contact"
+                href="/contact?reason=submit_business"
                 className="rounded-full border border-line bg-white/5 px-5 py-3 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
               >
                 Submit your business

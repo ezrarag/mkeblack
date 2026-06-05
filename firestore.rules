@@ -35,6 +35,18 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    function validContactSubmitterUid() {
+      return !("submitterUid" in request.resource.data)
+        || request.resource.data.submitterUid == null
+        || (signedIn() && request.resource.data.submitterUid == request.auth.uid);
+    }
+
+    function validContactSubmissionStatus() {
+      return !("status" in request.resource.data)
+        || request.resource.data.status == null
+        || request.resource.data.status == "pending";
+    }
+
     // ── Businesses ──────────────────────────────────────────────────────────
     match /businesses/{businessId} {
       allow read: if resource.data.active == true || isAdmin() || ownsBusiness();
@@ -71,7 +83,7 @@ service cloud.firestore {
 
     // ── Contact submissions ─────────────────────────────────────────────────
     match /contactSubmissions/{submissionId} {
-      allow create: if true;
+      allow create: if validContactSubmitterUid() && validContactSubmissionStatus();
       allow read, update, delete: if isAdmin();
     }
 

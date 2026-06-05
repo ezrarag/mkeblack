@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BusinessSubmissionsPanel } from "@/components/admin/business-submissions-panel";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -218,6 +219,8 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
             {feedback}
           </div>
         ) : null}
+
+        <BusinessSubmissionsPanel />
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
           <aside className="rounded-2xl border border-line bg-panel/85 p-5">
