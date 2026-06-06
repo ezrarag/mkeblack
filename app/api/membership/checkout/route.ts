@@ -173,19 +173,23 @@ export async function POST(req: NextRequest) {
     };
 
     // Add Stripe Connect destination charge when Rick's account ID is configured.
-    // For subscriptions: use on_behalf_of + transfer_data (can't use destination on subs)
-    // For one-time payments: use transfer_data.destination directly
+    // This routes settled funds to MKE Black's connected account automatically.
+    // For subscriptions, on_behalf_of + transfer_data live under subscription_data;
+    // for one-time payments they live under payment_intent_data.
     if (mkeBlackAccountId) {
       if (kind === "membership") {
-        // Subscriptions use on_behalf_of to set the settlement account
-        sessionParams.on_behalf_of = mkeBlackAccountId;
-        sessionParams.transfer_data = {
-          destination: mkeBlackAccountId
+        sessionParams.subscription_data = {
+          on_behalf_of: mkeBlackAccountId,
+          transfer_data: {
+            destination: mkeBlackAccountId
+          }
         };
       } else {
-        // One-time donations use transfer_data directly
-        sessionParams.transfer_data = {
-          destination: mkeBlackAccountId
+        sessionParams.payment_intent_data = {
+          on_behalf_of: mkeBlackAccountId,
+          transfer_data: {
+            destination: mkeBlackAccountId
+          }
         };
       }
     }
