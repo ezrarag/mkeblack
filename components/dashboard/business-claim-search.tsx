@@ -6,6 +6,7 @@ import {
   getFirebaseDb,
   loadFirebaseFirestoreModule
 } from "@/lib/firebase/client";
+import { createPendingBusinessClaim } from "@/lib/firebase/businesses";
 import { TeamMemberRoleType } from "@/lib/types";
 
 type SearchResult = {
@@ -125,29 +126,14 @@ export function BusinessClaimSearch({ onClaimed: _onClaimed }: ClaimSearchProps)
     const requestedRoleType = getRequestedRole(business);
 
     try {
-      const [firestoreModule, db] = await Promise.all([
-        loadFirebaseFirestoreModule(),
-        getFirebaseDb()
-      ]);
-
-      if (!db) throw new Error("Firestore not available");
-
-      // Write to a pending_claims collection so admin can verify
-      await firestoreModule.setDoc(
-        firestoreModule.doc(
-          firestoreModule.collection(db, "pending_claims")
-        ),
-        {
-          businessId: business.id,
-          businessName: business.name,
-          claimedByUid: user.uid,
-          claimedByEmail: user.email ?? "",
-          claimedByName: user.displayName ?? "",
-          requestedRoleType,
-          status: "pending_verification",
-          claimedAt: firestoreModule.serverTimestamp()
-        }
-      );
+      await createPendingBusinessClaim({
+        businessId: business.id,
+        businessName: business.name,
+        claimedByUid: user.uid,
+        claimedByEmail: user.email ?? "",
+        claimedByName: user.displayName ?? "",
+        requestedRoleType
+      });
 
       setFeedback({
         tone: "success",

@@ -21,7 +21,8 @@ import { updateBusinessCategoryUsageCounts } from "@/lib/firebase/categories";
 import {
   Business,
   BusinessClaimInvite,
-  BusinessFormValues
+  BusinessFormValues,
+  TeamMemberRoleType
 } from "@/lib/types";
 import { addCapability, removeCapability } from "@/lib/user-capabilities";
 import { normalizeUrl } from "@/lib/utils";
@@ -111,6 +112,8 @@ export function createBusinessDraft() {
 }
 
 export function normalizeBusinessPayload(values: BusinessFormValues) {
+  const email = values.email.trim();
+
   return {
     ...values,
     name: values.name.trim(),
@@ -120,7 +123,8 @@ export function normalizeBusinessPayload(values: BusinessFormValues) {
     phone: values.phone.trim(),
     website: normalizeUrl(values.website.trim()),
     instagramReelUrl: normalizeUrl(values.instagramReelUrl.trim()),
-    email: values.email.trim(),
+    email,
+    emailLower: email.toLowerCase(),
     hoursText: values.hoursText.trim(),
     neighborhood: values.neighborhood.trim(),
     tags: normalizeTagSlugs(values.tags),
@@ -133,6 +137,38 @@ export function normalizeBusinessPayload(values: BusinessFormValues) {
       lng: Number(values.location.lng)
     }
   };
+}
+
+export async function createPendingBusinessClaim({
+  businessId,
+  businessName,
+  claimedByUid,
+  claimedByEmail,
+  claimedByName,
+  requestedRoleType
+}: {
+  businessId: string;
+  businessName: string;
+  claimedByUid: string;
+  claimedByEmail: string;
+  claimedByName: string;
+  requestedRoleType: TeamMemberRoleType;
+}) {
+  const { db, firestoreModule } = await getFirestoreHelpers();
+
+  await firestoreModule.setDoc(
+    firestoreModule.doc(firestoreModule.collection(db, "pending_claims")),
+    {
+      businessId,
+      businessName,
+      claimedByUid,
+      claimedByEmail,
+      claimedByName,
+      requestedRoleType,
+      status: "pending_verification",
+      claimedAt: firestoreModule.serverTimestamp()
+    }
+  );
 }
 
 async function syncOwnerBusinessLink(ownerUid: string | null, businessId: string) {
@@ -449,6 +485,8 @@ export async function importBusinesses(
     // Normalize phone from Wix numeric format e.g. 4142150052 → (414) 215-0052
     const phone = normalizePhone(row.phone?.trim() ?? "");
 
+    const email = row.email?.trim() ?? "";
+
     await firestoreModule.setDoc(firestoreModule.doc(db, "businesses", businessReference.id), {
       id: businessReference.id,
       name,
@@ -458,7 +496,8 @@ export async function importBusinesses(
       phone,
       website: normalizeUrl(row.website?.trim() ?? ""),
       instagramReelUrl: "",
-      email: row.email?.trim() ?? "",
+      email,
+      emailLower: email.toLowerCase(),
       hoursText: row.hoursText?.trim() ?? "",
       neighborhood,
       tags,

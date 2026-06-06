@@ -105,11 +105,10 @@ export function LoginForm() {
             Business access
           </p>
           <h1 className="mt-4 font-display text-4xl font-black leading-tight text-ink sm:text-6xl">
-            Update your MKE Black listing in real time.
+            Admin Login. Business Login. Customer Login.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-stone-300">
-            Business owners land in a private dashboard for their listing only.
-            Admins are routed to the management workspace after sign-in.
+            Admins are routed to the management workspace. Business owners land in a private dashboard for their listing. Customers can browse favorites and member discounts.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             {[
@@ -128,10 +127,9 @@ export function LoginForm() {
         {/* Right — sign in form */}
         <div className="rounded-2xl border border-line bg-panel/90 p-8 sm:p-10">
           <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">Sign in</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-ink">Business login</h2>
+          <h2 className="mt-3 font-display text-3xl font-bold text-ink">Sign In</h2>
           <p className="mt-4 text-sm leading-7 text-stone-300">
-            Use your email and password, or sign in with Google. Contact the
-            directory team if you need admin access or a linked business profile.
+            Use your email and password or sign in with Google. You will be routed automatically — admins go to the workspace, business owners go to their dashboard, customers go to their favorites.
           </p>
 
           {/* ── In-app browser warning ── */}

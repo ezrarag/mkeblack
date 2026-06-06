@@ -22,13 +22,32 @@ export const metadata: Metadata = {
   description: "Milwaukee's community-forward Black business directory."
 };
 
+const themeBootstrapScript = `
+(function() {
+  try {
+    var preference = window.localStorage.getItem("mkeblack_theme_preference") || "system";
+    var resolved = preference === "light" || preference === "dark"
+      ? preference
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.dataset.themePreference = preference;
+  } catch (error) {
+    document.documentElement.dataset.theme = "light";
+    document.documentElement.dataset.themePreference = "system";
+  }
+})();
+`;
+
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
       <body
         className={`${displayFont.variable} ${sansFont.variable} min-h-screen bg-canvas font-sans text-ink antialiased`}
       >

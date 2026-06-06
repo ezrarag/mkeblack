@@ -24,19 +24,96 @@
 
   /* Semantic */
   --color-canvas: #F6F7F2;
+  --color-canvas-rgb: 246 247 242;
+  --color-charcoal-rgb: 238 241 234;
   --color-panel: #FFFFFF;
+  --color-panel-rgb: 255 255 255;
   --color-panel-alt: #F0F3EC;
+  --color-panel-alt-rgb: 240 243 236;
   --color-ink: #161616;
+  --color-ink-rgb: 22 22 22;
   --color-muted: #687166;
+  --color-muted-rgb: 104 113 102;
   --color-accent: #EC2024;
+  --color-accent-rgb: 236 32 36;
   --color-accent-soft: #FF4040;
+  --color-accent-soft-rgb: 255 64 64;
   --color-line: rgba(22, 22, 22, 0.14);
+  --color-line-rgb: 22 22 22;
+  --color-line-alpha: 0.14;
   --color-success: #0B8F3A;
+  --color-success-rgb: 11 143 58;
   --color-danger: #ef4444;
+  --color-danger-rgb: 239 68 68;
+  --color-info-rgb: 59 130 246;
+
+  --shadow-glow: 0 22px 70px rgba(22, 22, 22, 0.10);
+  --background-mesh-dark:
+    radial-gradient(circle at top left, rgba(236, 32, 36, 0.10), transparent 30%),
+    radial-gradient(circle at 85% 30%, rgba(11, 143, 58, 0.10), transparent 28%),
+    linear-gradient(180deg, rgba(250, 250, 246, 0.98), rgba(246, 247, 242, 1));
+
+  --compat-stone-100: #252825;
+  --compat-stone-200: #252825;
+  --compat-stone-300: #3E463D;
+  --compat-stone-400: #5B6559;
+  --compat-stone-500: #747D72;
+  --compat-stone-600: #747D72;
+  --compat-placeholder: #7C8579;
+  --compat-white-5: rgba(22, 22, 22, 0.04);
 
   /* Typography */
   --font-display: /* set by next/font */ system-ui, sans-serif;
   --font-sans: /* set by next/font */ system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --brand-charcoal: #101411;
+  --brand-canvas: #090B0A;
+  --brand-white: #151816;
+  --brand-off-white: #1B201C;
+  --brand-ink: #F7F5EF;
+
+  --color-canvas: #090B0A;
+  --color-canvas-rgb: 9 11 10;
+  --color-charcoal-rgb: 16 20 17;
+  --color-panel: #151816;
+  --color-panel-rgb: 21 24 22;
+  --color-panel-alt: #20261F;
+  --color-panel-alt-rgb: 32 38 31;
+  --color-ink: #F7F5EF;
+  --color-ink-rgb: 247 245 239;
+  --color-muted: #AAB3A6;
+  --color-muted-rgb: 170 179 166;
+  --color-accent: #FF4040;
+  --color-accent-rgb: 255 64 64;
+  --color-accent-soft: #FF6B6B;
+  --color-accent-soft-rgb: 255 107 107;
+  --color-line: rgba(247, 245, 239, 0.16);
+  --color-line-rgb: 247 245 239;
+  --color-line-alpha: 0.16;
+  --color-success: #31C96C;
+  --color-success-rgb: 49 201 108;
+  --color-danger: #FB7185;
+  --color-danger-rgb: 251 113 133;
+  --color-info-rgb: 96 165 250;
+
+  --shadow-glow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --background-mesh-dark:
+    radial-gradient(circle at top left, rgba(255, 64, 64, 0.18), transparent 30%),
+    radial-gradient(circle at 85% 30%, rgba(49, 201, 108, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(16, 20, 17, 0.98), rgba(9, 11, 10, 1));
+
+  --compat-stone-100: #F4F1EA;
+  --compat-stone-200: #E9E5DD;
+  --compat-stone-300: #D5D0C6;
+  --compat-stone-400: #B7B0A4;
+  --compat-stone-500: #958E82;
+  --compat-stone-600: #7C7468;
+  --compat-placeholder: #8E9688;
+  --compat-white-5: rgba(247, 245, 239, 0.06);
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────────────────── */
@@ -47,6 +124,8 @@ html {
 
 body {
   min-height: 100vh;
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
 
 a {
@@ -55,7 +134,7 @@ a {
 }
 
 * {
-  border-color: rgba(22, 22, 22, 0.14);
+  border-color: var(--color-line);
 }
 
 /* ─── Form Controls ──────────────────────────────────────────────────────── */
@@ -87,38 +166,66 @@ button:disabled {
 
 .text-stone-100,
 .text-stone-200 {
-  color: #252825;
+  color: var(--compat-stone-100);
 }
 
 .text-stone-300 {
-  color: #3E463D;
+  color: var(--compat-stone-300);
 }
 
 .text-stone-400 {
-  color: #5B6559;
+  color: var(--compat-stone-400);
 }
 
 .text-stone-500,
 .text-stone-600 {
-  color: #747D72;
+  color: var(--compat-stone-500);
 }
 
 .placeholder\:text-stone-500::placeholder,
 .placeholder\:text-stone-600::placeholder {
-  color: #7C8579;
+  color: var(--compat-placeholder);
 }
 
 .bg-white\/5 {
-  background-color: rgba(22, 22, 22, 0.04);
+  background-color: var(--compat-white-5);
 }
 
 .bg-canvas\/30 {
-  background-color: rgba(246, 247, 242, 0.72);
+  background-color: rgb(var(--color-canvas-rgb) / 0.72);
 }
 
 .bg-canvas\/40,
 .bg-canvas\/50,
 .bg-canvas\/60,
 .bg-canvas\/70 {
-  background-color: rgba(246, 247, 242, 0.86);
+  background-color: rgb(var(--color-canvas-rgb) / 0.86);
+}
+
+.border-line {
+  border-color: var(--color-line);
+}
+
+.divide-line > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-line);
+}
+
+.bg-line\/60 {
+  background-color: rgb(var(--color-line-rgb) / calc(0.6 * var(--color-line-alpha)));
+}
+
+.bg-line\/80 {
+  background-color: rgb(var(--color-line-rgb) / calc(0.8 * var(--color-line-alpha)));
+}
+
+.border-line\/60 {
+  border-color: rgb(var(--color-line-rgb) / calc(0.6 * var(--color-line-alpha)));
+}
+
+.border-line\/70 {
+  border-color: rgb(var(--color-line-rgb) / calc(0.7 * var(--color-line-alpha)));
+}
+
+.border-line\/80 {
+  border-color: rgb(var(--color-line-rgb) / calc(0.8 * var(--color-line-alpha)));
 }

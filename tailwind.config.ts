@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import { semanticTokens, shadows, backgroundImages } from "./lib/brand-config";
 
 const config: Config = {
   content: [
@@ -11,28 +10,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: semanticTokens.canvas,
-        charcoal: semanticTokens.charcoal,
-        ink: semanticTokens.ink,
-        accent: semanticTokens.accent,
-        accentSoft: semanticTokens.accentSoft,
-        panel: semanticTokens.panel,
-        panelAlt: semanticTokens.panelAlt,
-        muted: semanticTokens.muted,
-        line: semanticTokens.line,
-        success: semanticTokens.success,
-        danger: semanticTokens.danger,
-        info: semanticTokens.info,
+        canvas: "rgb(var(--color-canvas-rgb) / <alpha-value>)",
+        charcoal: "rgb(var(--color-charcoal-rgb) / <alpha-value>)",
+        ink: "rgb(var(--color-ink-rgb) / <alpha-value>)",
+        accent: "rgb(var(--color-accent-rgb) / <alpha-value>)",
+        accentSoft: "rgb(var(--color-accent-soft-rgb) / <alpha-value>)",
+        panel: "rgb(var(--color-panel-rgb) / <alpha-value>)",
+        panelAlt: "rgb(var(--color-panel-alt-rgb) / <alpha-value>)",
+        muted: "rgb(var(--color-muted-rgb) / <alpha-value>)",
+        line: "rgb(var(--color-line-rgb) / <alpha-value>)",
+        success: "rgb(var(--color-success-rgb) / <alpha-value>)",
+        danger: "rgb(var(--color-danger-rgb) / <alpha-value>)",
+        info: "rgb(var(--color-info-rgb) / <alpha-value>)",
       },
       boxShadow: {
-        glow: shadows.glow,
+        glow: "var(--shadow-glow)",
       },
       fontFamily: {
         display: ["var(--font-display)"],
         sans: ["var(--font-sans)"]
       },
       backgroundImage: {
-        "mesh-dark": backgroundImages.meshDark,
+        "mesh-dark": "var(--background-mesh-dark)",
       }
     }
   },
