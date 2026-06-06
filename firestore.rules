@@ -268,6 +268,174 @@ service cloud.firestore {
       }
     }
 
+    // ── Business reviews ──────────────────────────────────────────────────────
+    // One review per (visitor, business) pair, id = `${businessId}_${authorUid}`
+    // — an upsert pattern so resubmitting edits the existing review. Reviews
+    // are public read (social proof). Authors may only edit their own content
+    // fields; `status` (flagged/removed) is admin-controlled moderation.
+    function validNewReview() {
+      return request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.businessId is string
+        && exists(/databases/$(database)/documents/businesses/$(request.resource.data.businessId))
+        && reviewId == request.resource.data.businessId + "_" + request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 2000;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAdmin() || (signedIn() && validNewReview());
+      // Authors may resubmit/edit their own content — never reassign
+      // authorship or businessId, and never self-moderate `status`.
+      allow update: if isAdmin()
+                    || (
+                      signedIn()
+                      && resource.data.authorUid == request.auth.uid
+                      && request.resource.data.authorUid == resource.data.authorUid
+                      && request.resource.data.businessId == resource.data.businessId
+                      && request.resource.data.status == resource.data.status
+                      && request.resource.data.rating is int
+                      && request.resource.data.rating >= 1
+                      && request.resource.data.rating <= 5
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() <= 2000
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                        "rating",
+                        "text",
+                        "photos",
+                        "relatedListingId",
+                        "relatedListingName",
+                        "relatedEventId",
+                        "relatedEventName",
+                        "updatedAt"
+                      ])
+                    );
+      allow delete: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
+    }
+
+    // ── Visitor-created community groups ──────────────────────────────────────
+    // Facebook-style fan/community groups that any signed-in visitor can start,
+    // optionally tied to a business. Membership lives in a `members` subcollection
+    // keyed by uid (deterministic — one membership per person), and `posts` is a
+    // feed subcollection. Groups + posts are publicly readable (discovery/social
+    // proof); only members may post, and only the creator (owner) or admins may
+    // manage membership/moderation.
+    function isGroupMemberUid(groupId, uid) {
+      return exists(/databases/$(database)/documents/groups/$(groupId)/members/$(uid));
+    }
+
+    function isGroupOwnerUid(groupId, uid) {
+      let memberPath = /databases/$(database)/documents/groups/$(groupId)/members/$(uid);
+      return exists(memberPath) && get(memberPath).data.role == "owner";
+    }
+
+    function validNewGroup() {
+      return request.resource.data.creatorUid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 1000
+        && request.resource.data.status == "active";
+    }
+
+    match /groups/{groupId} {
+      allow read: if resource.data.status == "active"
+                  || isAdmin()
+                  || (signedIn() && resource.data.creatorUid == request.auth.uid);
+      allow create: if isAdmin() || (signedIn() && validNewGroup());
+      // Owners may edit their group's profile fields — never reassign creatorUid,
+      // touch timestamps, or self-moderate `status`.
+      allow update: if isAdmin()
+                    || (
+                      signedIn()
+                      && resource.data.creatorUid == request.auth.uid
+                      && request.resource.data.creatorUid == resource.data.creatorUid
+                      && request.resource.data.status == resource.data.status
+                      && request.resource.data.name is string
+                      && request.resource.data.name.size() > 0
+                      && request.resource.data.name.size() <= 80
+                      && request.resource.data.description is string
+                      && request.resource.data.description.size() <= 1000
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                        "name",
+                        "description",
+                        "businessId",
+                        "businessName",
+                        "coverPhotoUrl",
+                        "updatedAt"
+                      ])
+                    );
+      allow delete: if isAdmin();
+
+      match /members/{uid} {
+        allow read: if true;
+        // A person can only seat themselves — as "owner" exactly when they're
+        // the group's creator (the very first member), otherwise as "member".
+        allow create: if isAdmin()
+                      || (
+                        signedIn()
+                        && request.auth.uid == uid
+                        && request.resource.data.displayName is string
+                        && request.resource.data.role == (
+                          get(/databases/$(database)/documents/groups/$(groupId)).data.creatorUid == uid
+                            ? "owner"
+                            : "member"
+                        )
+                      );
+        // Role changes (e.g. promoting a co-owner) are admin-only.
+        allow update: if isAdmin();
+        allow delete: if isAdmin()
+                      || (signedIn() && request.auth.uid == uid)
+                      || (signedIn() && isGroupOwnerUid(groupId, request.auth.uid));
+      }
+
+      match /posts/{postId} {
+        allow read: if true;
+        allow create: if isAdmin()
+                      || (
+                        signedIn()
+                        && isGroupMemberUid(groupId, request.auth.uid)
+                        && request.resource.data.authorUid == request.auth.uid
+                        && request.resource.data.status == "published"
+                        && request.resource.data.text is string
+                        && request.resource.data.text.size() <= 4000
+                        && (request.resource.data.text.size() > 0 || request.resource.data.photos.size() > 0)
+                      );
+        // Authors may edit their own content; anyone signed in may toggle their
+        // own like; owners/admins moderate `status`. Each lane only touches its
+        // own fields — never reassigning authorship.
+        allow update: if isAdmin()
+                      || (
+                        signedIn()
+                        && resource.data.authorUid == request.auth.uid
+                        && request.resource.data.authorUid == resource.data.authorUid
+                        && request.resource.data.status == resource.data.status
+                        && request.resource.data.text is string
+                        && request.resource.data.text.size() <= 4000
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["text", "photos", "updatedAt"])
+                      )
+                      || (
+                        signedIn()
+                        && isGroupOwnerUid(groupId, request.auth.uid)
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "updatedAt"])
+                      )
+                      || (
+                        signedIn()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["likeUids", "updatedAt"])
+                        && request.resource.data.likeUids.toSet().difference(resource.data.likeUids.toSet())
+                            .union(resource.data.likeUids.toSet().difference(request.resource.data.likeUids.toSet()))
+                            == [request.auth.uid].toSet()
+                      );
+        allow delete: if isAdmin()
+                      || (signedIn() && resource.data.authorUid == request.auth.uid)
+                      || (signedIn() && isGroupOwnerUid(groupId, request.auth.uid));
+      }
+    }
+
     // ── Consumer favorites (subcollection under users) ───────────────────────
     match /users/{uid}/favorites/{businessId} {
       allow read: if true;

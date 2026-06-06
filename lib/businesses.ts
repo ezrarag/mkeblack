@@ -32,6 +32,37 @@ function numberValue(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+/**
+ * Some imported records still carry the raw Wix export format, where
+ * category arrives as a JSON-array string e.g. '["Food & Drink"]' or
+ * even '["Nonprofits","Event Venues & Working Spaces"]'. Clean that up
+ * to a single, plain category label so the directory's category list
+ * doesn't show duplicate/garbled entries alongside the real labels.
+ */
+function normalizeCategoryValue(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (!trimmed.startsWith("[")) return trimmed;
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return String(parsed[0]).trim();
+    }
+  } catch {
+    // Not valid JSON — fall through to manual cleanup
+  }
+
+  return (
+    trimmed
+      .replace(/^\[/, "")
+      .replace(/\]$/, "")
+      .split(",")[0]
+      ?.replace(/^"+|"+$/g, "")
+      .trim() ?? trimmed
+  );
+}
+
 function parseDateValue(value: unknown) {
   if (!value) {
     return null;
@@ -207,7 +238,8 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
   return {
     id,
     name: stringValue(record.name).trim(),
-    category: stringValue(record.category).trim() || BUSINESS_CATEGORIES[0],
+    category:
+      normalizeCategoryValue(stringValue(record.category)) || BUSINESS_CATEGORIES[0],
     description: stringValue(record.description).trim(),
     address: stringValue(record.address).trim(),
     phone: stringValue(record.phone).trim(),

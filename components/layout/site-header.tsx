@@ -22,7 +22,8 @@ type NavLink = {
 
 const primaryLinks: NavLink[] = [
   { href: "/directory", label: "Directory" },
-  { href: "/marketplace", label: "Marketplace" }
+  { href: "/marketplace", label: "Marketplace" },
+  { href: "/groups", label: "Groups" }
 ];
 
 const exploreLinks: NavLink[] = [
@@ -428,7 +429,7 @@ export function SiteHeader() {
                     />
                     <DropdownLink
                       href="/join"
-                      label="Customer Login"
+                      label="Visitor Login"
                       onSelect={() => setGuestAccountOpen(false)}
                     />
                   </div>

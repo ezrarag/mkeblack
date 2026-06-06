@@ -29,5 +29,22 @@ service firebase.storage {
       allow read: if true;
       allow write: if isAdmin() || ownsBusiness(businessId);
     }
+
+    // Review photos — uploaded by the reviewing visitor only.
+    match /reviews/{businessId}/{authorUid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() || (signedIn() && request.auth.uid == authorUid);
+    }
+
+    function isGroupMember(groupId) {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/groups/$(groupId)/members/$(request.auth.uid));
+    }
+
+    // Group cover photos and post photos — uploaded by group members only.
+    match /groups/{groupId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() || isGroupMember(groupId);
+    }
   }
 }

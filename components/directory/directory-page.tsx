@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { BusinessCard } from "@/components/directory/business-card";
 import { BusinessMap } from "@/components/map/business-map";
@@ -85,6 +86,19 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const activeTags = useMemo(
     () => businessTags.filter((tag) => tag.active),
     [businessTags]
+  );
+
+  const solidarityBusinesses = useMemo(
+    () => businesses.filter((business) => business.solidarityMember && business.active),
+    [businesses]
+  );
+
+  const featuredSolidarityBusinesses = useMemo(
+    () =>
+      [...solidarityBusinesses]
+        .sort((a, b) => (b.photos.length ? 1 : 0) - (a.photos.length ? 1 : 0))
+        .slice(0, 6),
+    [solidarityBusinesses]
   );
 
   const selectedNeighborhoodFeature =
@@ -307,16 +321,73 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 {selectedDay === "all" ? "All" : titleCase(selectedDay).slice(0, 3)}
               </p>
             </div>
-            <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-muted">
-                Map mode
+            <Link
+              href="/membership"
+              className="rounded-xl border border-success/30 bg-success/10 p-5 transition hover:border-success/50 hover:bg-success/15"
+            >
+              <p className="text-xs uppercase tracking-[0.24em] text-success/80">
+                Solidarity Circle
               </p>
               <p className="mt-2 font-display text-3xl font-bold text-ink">
-                Live
+                {loading ? "--" : solidarityBusinesses.length}
               </p>
-            </div>
+              <p className="mt-1 text-[11px] text-stone-400">members supporting the directory →</p>
+            </Link>
           </div>
         </div>
+
+        {!loading && featuredSolidarityBusinesses.length ? (
+          <div className="mt-8 rounded-xl border border-success/25 bg-success/5 p-5 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-success">
+                  Solidarity Circle members
+                </p>
+                <p className="mt-1 text-sm text-stone-300">
+                  These businesses chip in monthly to keep MKE Black running — and unlock
+                  direct messaging, marketplace, and event tools for their community.
+                </p>
+              </div>
+              <Link
+                href="/membership"
+                className="shrink-0 rounded-full border border-success/40 bg-success/10 px-4 py-2 text-xs font-semibold text-success transition hover:bg-success/20"
+              >
+                Become a member →
+              </Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {featuredSolidarityBusinesses.map((business) => (
+                <Link
+                  key={business.id}
+                  href={`/business/${business.id}`}
+                  className="flex items-center gap-3 rounded-full border border-line bg-panel/70 py-1.5 pl-1.5 pr-4 transition hover:border-success/40 hover:bg-success/10"
+                >
+                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line bg-panelAlt">
+                    {business.photos[0] ? (
+                      <Image
+                        src={business.photos[0]}
+                        alt={business.name}
+                        fill
+                        sizes="36px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center font-display text-xs font-black text-stone-500">
+                        {business.name.slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-sm font-medium text-stone-100">{business.name}</span>
+                </Link>
+              ))}
+              {solidarityBusinesses.length > featuredSolidarityBusinesses.length ? (
+                <span className="flex items-center px-2 text-sm text-stone-400">
+                  +{solidarityBusinesses.length - featuredSolidarityBusinesses.length} more
+                </span>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-10 rounded-xl border border-line bg-canvas/40 p-4 sm:p-5">
           <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr_auto_auto]">
@@ -325,8 +396,16 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 Search businesses
               </label>
               <input
+                type="search"
+                inputMode="search"
+                enterKeyHint="search"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
+                onInput={(event) => setSearchTerm(event.currentTarget.value)}
                 placeholder="Search by name, neighborhood, or what they offer"
               />
             </div>

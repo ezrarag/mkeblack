@@ -194,6 +194,72 @@ export type Message = {
   createdAt: Date | null;
 };
 
+// ── Business reviews ───────────────────────────────────────────────────────
+// One review per (visitor, business) pair, id = `${businessId}_${authorUid}`
+// — an upsert pattern so a visitor edits their existing review instead of
+// stacking duplicates. `status` is admin-controlled for moderation; authors
+// can only edit their own content fields.
+export type ReviewStatus = "published" | "flagged" | "removed";
+
+export type BusinessReview = {
+  id: string;
+  businessId: string;
+  businessName: string;
+  authorUid: string;
+  authorName: string;
+  rating: number;
+  text: string;
+  photos: string[];
+  relatedListingId: string | null;
+  relatedListingName: string | null;
+  relatedEventId: string | null;
+  relatedEventName: string | null;
+  status: ReviewStatus;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type GroupStatus = "active" | "archived" | "flagged";
+
+export type Group = {
+  id: string;
+  name: string;
+  description: string;
+  businessId: string | null;
+  businessName: string | null;
+  coverPhotoUrl: string;
+  creatorUid: string;
+  creatorName: string;
+  status: GroupStatus;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type GroupMemberRole = "owner" | "member";
+
+export type GroupMember = {
+  uid: string;
+  groupId: string;
+  displayName: string;
+  role: GroupMemberRole;
+  joinedAt: Date | null;
+};
+
+export type GroupPostStatus = "published" | "flagged" | "removed";
+
+export type GroupPost = {
+  id: string;
+  groupId: string;
+  authorUid: string;
+  authorName: string;
+  text: string;
+  photos: string[];
+  likeUids: string[];
+  status: GroupPostStatus;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type MarketplaceListingFormValues = {
   name: string;
   description: string;

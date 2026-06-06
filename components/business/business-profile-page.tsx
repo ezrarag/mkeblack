@@ -8,6 +8,9 @@ import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { MessageBusinessButton } from "@/components/messages/message-business-button";
+import { ReviewsPanel } from "@/components/reviews/reviews-panel";
+import { BusinessGroupsPanel } from "@/components/groups/business-groups-panel";
+import { BusinessRatingBadge } from "@/components/reviews/review-summary";
 import { getWeeklyHours } from "@/lib/business-hours";
 import { useBusiness } from "@/hooks/use-business";
 import { useBusinessTags } from "@/hooks/use-business-tags";
@@ -22,7 +25,7 @@ type BusinessProfilePageProps = {
 export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const { business, loading, error } = useBusiness(businessId);
   const { tags: businessTags } = useBusinessTags();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   // Track this view: localStorage always, Firebase if signed in
   useEffect(() => {
@@ -80,6 +83,7 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             <h1 className="mt-4 font-display text-4xl font-black leading-tight text-ink sm:text-5xl">
               {business.name}
             </h1>
+            <BusinessRatingBadge businessId={business.id} className="mt-3" />
             {business.solidarityMember ? (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5">
@@ -143,6 +147,21 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           </div>
 
           <BusinessTeamSection business={business} />
+
+          <BusinessGroupsPanel businessId={business.id} businessName={business.name} />
+
+          <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+              Reviews
+            </p>
+            <div className="mt-5">
+              <ReviewsPanel
+                businessId={business.id}
+                businessName={business.name}
+                isOwnBusiness={!!profile?.businessId && profile.businessId === business.id}
+              />
+            </div>
+          </div>
 
           <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-4 sm:p-5">
             <p className="mb-4 px-2 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
