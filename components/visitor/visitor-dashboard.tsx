@@ -2,19 +2,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { PendingBusinessSubmissions } from "@/components/dashboard/pending-business-submissions";
+import { MessagesPanel } from "@/components/messages/messages-panel";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useRecentViews } from "@/hooks/use-recent-views";
 import { useSavedMarketplace } from "@/hooks/use-saved-marketplace";
+import { BUSINESS_CATEGORIES } from "@/lib/constants";
 import { getFirebaseAuth, loadFirebaseAuthModule } from "@/lib/firebase/client";
 import { FavoriteRecord } from "@/lib/firebase/favorites";
 import { removeSavedMarketplaceListing } from "@/lib/firebase/saved-marketplace";
+import { updateVisitorProfileDetails } from "@/lib/firebase/visitor-profile";
+import { formatFirebaseError } from "@/lib/firebase-errors";
 import { RecentViewRecord } from "@/lib/recent-views";
-import { SavedMarketplaceListing } from "@/lib/types";
+import { REFERRAL_SOURCES, SavedMarketplaceListing } from "@/lib/types";
 
-type Tab = "favorites" | "marketplace" | "recent" | "account";
+type Tab = "favorites" | "marketplace" | "messages" | "recent" | "account";
 
 function formatPrice(priceCents: number): string {
   if (priceCents === 0) return "Contact for price";
@@ -308,6 +313,122 @@ function SavedMarketplaceTab({ uid }: { uid: string }) {
   );
 }
 
+function AboutYouEditor({ uid }: { uid: string }) {
+  const { profile } = useAuth();
+  const [neighborhood, setNeighborhood] = useState(profile?.neighborhood ?? "");
+  const [interests, setInterests] = useState<string[]>(profile?.interests ?? []);
+  const [referralSource, setReferralSource] = useState(profile?.referralSource ?? "");
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  function toggleInterest(category: string) {
+    setInterests((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setFeedback(null);
+    try {
+      await updateVisitorProfileDetails(uid, {
+        neighborhood: neighborhood.trim() || null,
+        interests,
+        referralSource: referralSource || null
+      });
+      setFeedback("Saved — thanks for sharing!");
+    } catch (err) {
+      setFeedback(formatFirebaseError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-line bg-panelAlt/60 px-5 py-5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
+        About you
+      </p>
+      <p className="mt-2 text-sm leading-6 text-stone-300">
+        Totally optional — sharing this helps MKE Black understand who&rsquo;s
+        finding the directory and what to build next. It&rsquo;s never shown
+        publicly.
+      </p>
+
+      <div className="mt-4 space-y-4">
+        <label className="block">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            Neighborhood
+          </span>
+          <input
+            type="text"
+            value={neighborhood}
+            onChange={(e) => setNeighborhood(e.target.value)}
+            placeholder="e.g. Bronzeville, Riverwest…"
+            className="mt-2 w-full rounded-xl border border-line bg-panel/70 px-4 py-2.5 text-sm text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
+        </label>
+
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            What are you most interested in?
+          </span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {BUSINESS_CATEGORIES.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => toggleInterest(category)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  interests.includes(category)
+                    ? "border-accent bg-accent text-white"
+                    : "border-line bg-panel/70 text-stone-300 hover:border-accent/40 hover:text-ink"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="block">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            How did you hear about MKE Black?
+          </span>
+          <select
+            value={referralSource}
+            onChange={(e) => setReferralSource(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-line bg-panel/70 px-4 py-2.5 text-sm text-ink transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
+          >
+            <option value="">Prefer not to say</option>
+            {REFERRAL_SOURCES.map((source) => (
+              <option key={source} value={source}>
+                {source}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className="rounded-full border border-accent bg-accent px-5 py-2 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+          {feedback ? (
+            <span className="text-xs text-stone-400">{feedback}</span>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean }) {
   const { user } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
@@ -358,6 +479,24 @@ function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean 
         )}
       </div>
 
+      <div className="rounded-xl border border-line bg-panelAlt/60 px-5 py-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
+          Know a business that belongs here?
+        </p>
+        <p className="mt-2 text-sm text-stone-300">
+          If there&rsquo;s a Black-owned business in Milwaukee that isn&rsquo;t in the
+          directory yet, send us a quick suggestion — we&rsquo;ll reach out to them.
+        </p>
+        <Link
+          href="/contact?reason=suggest_business"
+          className="mt-3 inline-flex rounded-full border border-line bg-panel/70 px-4 py-2 text-sm font-medium text-stone-200 transition hover:border-accent/40 hover:text-ink"
+        >
+          Suggest a business
+        </Link>
+      </div>
+
+      {user ? <AboutYouEditor uid={user.uid} /> : null}
+
       <button
         type="button"
         disabled={signingOut}
@@ -373,13 +512,31 @@ function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean 
 const tabs: { key: Tab; label: string }[] = [
   { key: "favorites", label: "Favorites" },
   { key: "marketplace", label: "Marketplace" },
+  { key: "messages", label: "Messages" },
   { key: "recent", label: "Recently viewed" },
   { key: "account", label: "Account" }
 ];
 
+const TAB_KEYS = tabs.map((tab) => tab.key);
+
+function isValidTab(value: string | null): value is Tab {
+  return !!value && (TAB_KEYS as string[]).includes(value);
+}
+
 export function VisitorDashboard() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("favorites");
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<Tab>(
+    isValidTab(requestedTab) ? requestedTab : "favorites"
+  );
+
+  useEffect(() => {
+    if (isValidTab(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedTab]);
   const [hasPendingSubmissions, setHasPendingSubmissions] = useState(false);
   const handlePendingSubmissionsChange = useCallback((hasPending: boolean) => {
     setHasPendingSubmissions(hasPending);
@@ -424,6 +581,14 @@ export function VisitorDashboard() {
       <div className="mt-6">
         {activeTab === "favorites" && <FavoritesTab uid={user.uid} />}
         {activeTab === "marketplace" && <SavedMarketplaceTab uid={user.uid} />}
+        {activeTab === "messages" && (
+          <MessagesPanel
+            side="visitor"
+            selfId={user.uid}
+            selfName={user.displayName || user.email || "MKE Black member"}
+            threadKey={user.uid}
+          />
+        )}
         {activeTab === "recent" && <RecentTab uid={user.uid} />}
         {activeTab === "account" && (
           <AccountTab hasPendingSubmissions={hasPendingSubmissions} />

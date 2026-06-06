@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ConsumerRoute } from "@/components/auth/consumer-route";
 import { VisitorDashboard } from "@/components/visitor/visitor-dashboard";
 
@@ -9,7 +10,9 @@ export const metadata = {
 export default function VisitorPage() {
   return (
     <ConsumerRoute>
-      <VisitorDashboard />
+      <Suspense>
+        <VisitorDashboard />
+      </Suspense>
     </ConsumerRoute>
   );
 }

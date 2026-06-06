@@ -163,6 +163,37 @@ export type SavedMarketplaceListing = {
   savedAt: Date | null;
 };
 
+// ── Visitor ↔ Business messaging ──────────────────────────────────────────
+// One thread per (visitor, business) pair. Only Solidarity Circle member
+// businesses can receive messages — gated both in the UI and in
+// firestore.rules (isSolidarityBusiness).
+export type MessageSenderRole = "visitor" | "business" | "admin";
+
+export type MessageThread = {
+  id: string;
+  businessId: string;
+  businessName: string;
+  businessPhotoUrl: string;
+  visitorUid: string;
+  visitorName: string;
+  lastMessage: string;
+  lastMessageAt: Date | null;
+  lastSenderRole: MessageSenderRole | null;
+  visitorUnread: number;
+  businessUnread: number;
+  createdAt: Date | null;
+};
+
+export type Message = {
+  id: string;
+  threadId: string;
+  senderId: string;
+  senderRole: MessageSenderRole;
+  senderName: string;
+  text: string;
+  createdAt: Date | null;
+};
+
 export type MarketplaceListingFormValues = {
   name: string;
   description: string;
@@ -452,7 +483,29 @@ export type UserProfile = {
   role: UserRole;
   capabilities?: UserCapability[];
   businessId: string | null;
+  // ── Optional / opt-in account details ──────────────────────────────────
+  // None of these are collected silently — visitors choose to fill them in
+  // from their dashboard ("About you"). Used for aggregate admin insight
+  // only; individual values stay private to the user + admins.
+  displayName?: string | null;
+  createdAt?: Date | null;
+  neighborhood?: string | null;
+  interests?: string[];
+  referralSource?: string | null;
 };
+
+// "How did you hear about us" — kept short and easy to pick from a select.
+export const REFERRAL_SOURCES = [
+  "Friend or family",
+  "Social media",
+  "A business in the directory",
+  "Search engine",
+  "Community event",
+  "News or article",
+  "Other"
+] as const;
+
+export type ReferralSource = (typeof REFERRAL_SOURCES)[number];
 
 export type BusinessFormValues = {
   name: string;

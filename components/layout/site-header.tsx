@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import {
+  SetupGuideDrawer,
+  SetupGuideTrigger
+} from "@/components/setup/setup-guide";
+import {
   getFirebaseAuth,
   loadFirebaseAuthModule
 } from "@/lib/firebase/client";
@@ -155,6 +159,7 @@ export function SiteHeader() {
   const [supportOpen, setSupportOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [guestAccountOpen, setGuestAccountOpen] = useState(false);
+  const [setupGuideOpen, setSetupGuideOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const avatarInitials = getAvatarInitials(user?.displayName, user?.email);
 
@@ -169,6 +174,7 @@ export function SiteHeader() {
       { href: "/admin/categories", label: "Categories" },
       { href: "/admin/marketplace", label: "Marketplace" },
       { href: "/admin/members", label: "Solidarity Circle" },
+      { href: "/admin/visitors", label: "Visitors" },
       { href: "/admin/claims", label: "Pending claims" },
       { href: "/admin/import", label: "Import spreadsheet" },
       { href: "/admin/team", label: "Team access" }
@@ -210,10 +216,11 @@ export function SiteHeader() {
       if (!menuRef.current?.contains(event.target as Node)) {
         setMenuOpen(false);
         setExploreOpen(false);
-        setSupportOpen(false);
-        setMobileMenuOpen(false);
-        setGuestAccountOpen(false);
-      }
+              setSupportOpen(false);
+              setMobileMenuOpen(false);
+              setGuestAccountOpen(false);
+              setSetupGuideOpen(false);
+            }
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -222,6 +229,7 @@ export function SiteHeader() {
         setSupportOpen(false);
         setMobileMenuOpen(false);
         setGuestAccountOpen(false);
+        setSetupGuideOpen(false);
       }
     }
     document.addEventListener("mousedown", handlePointerDown);
@@ -266,6 +274,7 @@ export function SiteHeader() {
               setSupportOpen(false);
               setGuestAccountOpen(false);
               setMenuOpen(false);
+              setSetupGuideOpen(false);
             }}
             links={[...primaryLinks, ...exploreLinks, ...supportLinks]}
             className="md:hidden"
@@ -285,6 +294,7 @@ export function SiteHeader() {
                 setMobileMenuOpen(false);
                 setGuestAccountOpen(false);
                 setMenuOpen(false);
+                setSetupGuideOpen(false);
               }}
               links={exploreLinks}
             />
@@ -298,10 +308,22 @@ export function SiteHeader() {
                 setMobileMenuOpen(false);
                 setGuestAccountOpen(false);
                 setMenuOpen(false);
+                setSetupGuideOpen(false);
               }}
               links={supportLinks}
             />
           </div>
+
+          <SetupGuideTrigger
+            onClick={() => {
+              setSetupGuideOpen(true);
+              setMenuOpen(false);
+              setExploreOpen(false);
+              setSupportOpen(false);
+              setMobileMenuOpen(false);
+              setGuestAccountOpen(false);
+            }}
+          />
 
           {loading ? (
             <span className="rounded-full border border-line px-4 py-2 text-sm text-muted">…</span>
@@ -318,6 +340,7 @@ export function SiteHeader() {
                   setSupportOpen(false);
                   setMobileMenuOpen(false);
                   setGuestAccountOpen(false);
+                  setSetupGuideOpen(false);
                 }}
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold uppercase tracking-[0.15em] transition",
@@ -384,6 +407,7 @@ export function SiteHeader() {
                   setExploreOpen(false);
                   setSupportOpen(false);
                   setMobileMenuOpen(false);
+                  setSetupGuideOpen(false);
                 }}
                 className="rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
               >
@@ -393,18 +417,18 @@ export function SiteHeader() {
                 <div className="absolute right-0 top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
                   <div className="flex flex-col gap-1.5">
                     <DropdownLink
-                      href="/join"
-                      label="Join as visitor"
+                      href="/login?next=/admin"
+                      label="Admin Login"
                       onSelect={() => setGuestAccountOpen(false)}
                     />
                     <DropdownLink
                       href="/login"
-                      label="Business owner login"
+                      label="Business Login"
                       onSelect={() => setGuestAccountOpen(false)}
                     />
                     <DropdownLink
-                      href="/login?next=/admin"
-                      label="Admin login"
+                      href="/join"
+                      label="Customer Login"
                       onSelect={() => setGuestAccountOpen(false)}
                     />
                   </div>
@@ -412,6 +436,10 @@ export function SiteHeader() {
               ) : null}
             </div>
           )}
+          <SetupGuideDrawer
+            open={setupGuideOpen}
+            onClose={() => setSetupGuideOpen(false)}
+          />
         </nav>
       </div>
     </header>

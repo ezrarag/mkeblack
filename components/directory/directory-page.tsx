@@ -552,12 +552,20 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
             {loading ? "Loading businesses..." : `${filteredBusinesses.length} matches`}
           </p>
         </div>
-        <Link
-          href="/contact?reason=submit_business"
-          className="rounded-full border border-accent bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
-        >
-          Submit your business
-        </Link>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            href="/contact?reason=suggest_business"
+            className="rounded-full border border-line bg-panelAlt/70 px-5 py-3 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
+          >
+            Suggest a business
+          </Link>
+          <Link
+            href="/contact?reason=submit_business"
+            className="rounded-full border border-accent bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
+          >
+            Submit your business
+          </Link>
+        </div>
       </div>
 
       {error ? (

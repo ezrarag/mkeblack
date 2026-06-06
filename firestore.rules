@@ -215,6 +215,59 @@ service cloud.firestore {
                     || ownsBusinessById(resource.data.businessId);
     }
 
+    // ── Visitor ↔ Business messaging ─────────────────────────────────────────
+    // One thread per (visitor, business) pair, id = `${businessId}_${visitorUid}`.
+    // Only the two participants and admin may read/write. Threads can only be
+    // created against Solidarity Circle member businesses.
+    function isThreadParticipant(threadData) {
+      return signedIn() && (
+        request.auth.uid == threadData.visitorUid ||
+        ownsBusinessById(threadData.businessId)
+      );
+    }
+
+    match /message_threads/{threadId} {
+      allow read: if isAdmin() || isThreadParticipant(resource.data);
+      allow create: if isAdmin()
+                    || (
+                      signedIn()
+                      && request.resource.data.visitorUid == request.auth.uid
+                      && request.resource.data.businessId is string
+                      && isSolidarityBusiness(request.resource.data.businessId)
+                      && threadId == request.resource.data.businessId + "_" + request.auth.uid
+                    );
+      // Participants may only update preview/unread fields — never reassign
+      // the thread to a different visitor or business.
+      allow update: if isAdmin()
+                    || (
+                      isThreadParticipant(resource.data)
+                      && request.resource.data.visitorUid == resource.data.visitorUid
+                      && request.resource.data.businessId == resource.data.businessId
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                        "lastMessage",
+                        "lastMessageAt",
+                        "lastSenderRole",
+                        "visitorUnread",
+                        "businessUnread"
+                      ])
+                    );
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isAdmin()
+                    || isThreadParticipant(get(/databases/$(database)/documents/message_threads/$(threadId)).data);
+        allow create: if isAdmin()
+                      || (
+                        isThreadParticipant(get(/databases/$(database)/documents/message_threads/$(threadId)).data)
+                        && request.resource.data.senderId == request.auth.uid
+                        && request.resource.data.text is string
+                        && request.resource.data.text.size() > 0
+                        && request.resource.data.text.size() <= 4000
+                      );
+        allow update, delete: if isAdmin();
+      }
+    }
+
     // ── Consumer favorites (subcollection under users) ───────────────────────
     match /users/{uid}/favorites/{businessId} {
       allow read: if true;

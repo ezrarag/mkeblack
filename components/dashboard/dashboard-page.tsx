@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { BusinessMarketplaceManager } from "@/components/marketplace/business-marketplace-manager";
+import { MessagesPanel } from "@/components/messages/messages-panel";
 import { BusinessEventsManager } from "@/components/events/business-events-manager";
+import { BusinessEmailClaimSuggestion } from "@/components/dashboard/business-email-claim-suggestion";
 import { BusinessClaimSearch } from "@/components/dashboard/business-claim-search";
 import { PendingBusinessSubmissions } from "@/components/dashboard/pending-business-submissions";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -21,12 +24,30 @@ import {
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { BusinessFormValues } from "@/lib/types";
 
+type DashboardTab = "listing" | "team" | "marketplace" | "messages" | "events";
+const DASHBOARD_TABS: DashboardTab[] = ["listing", "team", "marketplace", "messages", "events"];
+
+function isValidDashboardTab(value: string | null): value is DashboardTab {
+  return !!value && (DASHBOARD_TABS as string[]).includes(value);
+}
+
 export function DashboardPageContent() {
   const { user, profile, hasAdminAccess } = useAuth();
   const { business, loading, error } = useBusiness(profile?.businessId ?? "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"listing" | "team" | "marketplace" | "events">("listing");
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<DashboardTab>(
+    isValidDashboardTab(requestedTab) ? requestedTab : "listing"
+  );
+
+  useEffect(() => {
+    if (isValidDashboardTab(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedTab]);
   const [hasPendingSubmissions, setHasPendingSubmissions] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
@@ -181,7 +202,10 @@ export function DashboardPageContent() {
             />
 
             {!hasPendingSubmissions ? (
-              <BusinessClaimSearch onClaimed={handleClaimed} />
+              <>
+                <BusinessEmailClaimSuggestion />
+                <BusinessClaimSearch onClaimed={handleClaimed} />
+              </>
             ) : null}
 
             {/* Admin UID debug block */}
@@ -212,7 +236,7 @@ export function DashboardPageContent() {
         ) : (
           <div className="mt-6">
             <div className="mb-6 flex flex-wrap gap-2 rounded-xl border border-line bg-panel/80 p-2">
-              {(["listing", "team", "marketplace", "events"] as const).map((tab) => (
+              {DASHBOARD_TABS.map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -229,6 +253,8 @@ export function DashboardPageContent() {
                     ? "Team"
                     : tab === "marketplace"
                     ? "Marketplace"
+                    : tab === "messages"
+                    ? "Messages"
                     : "Events"}
                 </button>
               ))}
@@ -256,6 +282,35 @@ export function DashboardPageContent() {
                 businessName={business.name}
                 isSolidarityMember={business.solidarityMember}
               />
+            ) : activeTab === "messages" ? (
+              business.solidarityMember ? (
+                <MessagesPanel
+                  side="business"
+                  selfId={user?.uid ?? ""}
+                  selfName={business.name}
+                  threadKey={business.id}
+                />
+              ) : (
+                <div className="rounded-2xl border border-line bg-panel/80 p-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                    Messages
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-bold text-ink">
+                    Solidarity Circle members only
+                  </h2>
+                  <p className="mt-3 max-w-xl text-sm leading-7 text-stone-300">
+                    Visitors can message Solidarity Circle businesses directly
+                    about marketplace items, events, and prices. Join to start
+                    those conversations.
+                  </p>
+                  <Link
+                    href="/membership"
+                    className="mt-5 inline-flex rounded-full border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accentSoft"
+                  >
+                    Upgrade to Solidarity Circle
+                  </Link>
+                </div>
+              )
             ) : (
               <BusinessEventsManager
                 businessId={business.id}

@@ -12,6 +12,7 @@ import { normalizeUrl } from "@/lib/utils";
 export type ContactReason =
   | "general"
   | "submit_business"
+  | "suggest_business"
   | "partnership"
   | "correction"
   | "other";

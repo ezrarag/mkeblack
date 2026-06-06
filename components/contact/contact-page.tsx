@@ -21,6 +21,7 @@ import { formatFirebaseError } from "@/lib/firebase-errors";
 const reasonOptions: { value: ContactReason; label: string }[] = [
   { value: "general", label: "General inquiry" },
   { value: "submit_business", label: "Submit a business listing" },
+  { value: "suggest_business", label: "Suggest a business for the directory" },
   { value: "partnership", label: "Partnership or sponsorship" },
   { value: "correction", label: "Directory correction" },
   { value: "other", label: "Other" }
@@ -34,10 +35,13 @@ const businessSteps = ["Contact", "Business", "Details"];
 export function ContactPage() {
   const searchParams = useSearchParams();
   const forcedReason = searchParams.get("reason") === "submit_business";
+  const prefilledReason = searchParams.get("reason");
   const { user } = useAuth();
-  const [reason, setReason] = useState<ContactReason>(
-    forcedReason ? "submit_business" : "general"
-  );
+  const [reason, setReason] = useState<ContactReason>(() => {
+    if (forcedReason) return "submit_business";
+    if (prefilledReason === "suggest_business") return "suggest_business";
+    return "general";
+  });
   const [form, setForm] = useState<Omit<ContactFormData, "reason">>({
     ownerName: "",
     ownerEmail: "",
@@ -60,6 +64,7 @@ export function ContactPage() {
   const [error, setError] = useState<string | null>(null);
 
   const isBizSubmission = reason === "submit_business";
+  const isSuggestBusiness = reason === "suggest_business";
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -296,14 +301,20 @@ export function ContactPage() {
       <section className="bg-mesh-dark">
         <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-            {forcedReason ? "Directory listing" : "Contact"}
+            {forcedReason ? "Directory listing" : isSuggestBusiness ? "Suggest a business" : "Contact"}
           </p>
           <h1 className="mt-4 font-display text-5xl font-black leading-tight text-ink sm:text-6xl">
-            {forcedReason ? "Submit business." : "Get in touch."}
+            {forcedReason
+              ? "Submit business."
+              : isSuggestBusiness
+              ? "Know a business that belongs here?"
+              : "Get in touch."}
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
             {forcedReason
               ? "Send the core listing details. Admin approval publishes the business in the directory."
+              : isSuggestBusiness
+              ? "Tell us about a Black-owned business in Milwaukee that should be in the directory — we'll reach out to them directly."
               : "Questions, directory submissions, partnership inquiries, or corrections — send everything through here."}
           </p>
         </div>
@@ -574,13 +585,33 @@ export function ContactPage() {
               </label>
             </div>
 
+            {isSuggestBusiness ? (
+              <div className="sm:col-span-2">
+                <label className={labelClass}>
+                  Business name
+                  <input
+                    type="text"
+                    value={form.businessName}
+                    onChange={(e) => update("businessName", e.target.value)}
+                    placeholder="Name of the business you'd like to see listed"
+                    required
+                    className={inputClass}
+                  />
+                </label>
+              </div>
+            ) : null}
+
             <div className="sm:col-span-2">
               <label className={labelClass}>
-                Message
+                {isSuggestBusiness ? "Why should they be in the directory?" : "Message"}
                 <textarea
                   value={form.message}
                   onChange={(e) => update("message", e.target.value)}
-                  placeholder="How can we help?"
+                  placeholder={
+                    isSuggestBusiness
+                      ? "Tell us about the business — what they do, where they're located, how to reach them…"
+                      : "How can we help?"
+                  }
                   rows={4}
                   required
                   className={inputClass}

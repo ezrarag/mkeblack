@@ -7,6 +7,7 @@ import { BusinessTeamSection } from "@/components/business/business-team-section
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { FavoriteButton } from "@/components/ui/favorite-button";
+import { MessageBusinessButton } from "@/components/messages/message-business-button";
 import { getWeeklyHours } from "@/lib/business-hours";
 import { useBusiness } from "@/hooks/use-business";
 import { useBusinessTags } from "@/hooks/use-business-tags";
@@ -80,11 +81,14 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
               {business.name}
             </h1>
             {business.solidarityMember ? (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                <span className="text-xs font-semibold text-success">
-                  Solidarity Circle Member
-                </span>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                  <span className="text-xs font-semibold text-success">
+                    Solidarity Circle Member
+                  </span>
+                </div>
+                <MessageBusinessButton business={business} />
               </div>
             ) : null}
             {profileTags.length ? (
