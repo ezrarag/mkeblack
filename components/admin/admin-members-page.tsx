@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBenefitTypes } from "@/hooks/use-benefit-types";
@@ -18,7 +18,9 @@ const statusColors: Record<SolidarityMemberStatus, string> = {
   active: "border-success/40 bg-success/10 text-success",
   expired: "border-danger/40 bg-danger/10 text-rose-300",
   comp: "border-info/40 bg-info/10 text-blue-300",
-  pending: "border-line bg-panelAlt text-muted"
+  pending: "border-line bg-panelAlt text-muted",
+  rejected: "border-amber-400/40 bg-amber-400/10 text-amber-300",
+  trash: "border-stone-500/40 bg-stone-500/10 text-stone-400"
 };
 
 function fmt(date: Date | null) {
@@ -48,18 +50,19 @@ function MemberRow({
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  async function save() {
+  async function save(nextStatus = status) {
     setSaving(true);
     setFeedback(null);
     try {
       await saveMemberAdminState(member.id, {
-        status,
+        status: nextStatus,
         notes,
         uid: uid.trim() || null,
         businessId: businessId.trim() || null,
         expiresAt: expiry ? new Date(expiry) : null,
         benefitIds
       });
+      setStatus(nextStatus);
       setFeedback("Saved.");
     } catch (err) {
       setFeedback(formatFirebaseError(err));
@@ -77,7 +80,7 @@ function MemberRow({
   }
 
   return (
-    <div className="rounded-xl border border-line bg-panel/80 p-5">
+    <div id={`member-${member.id}`} className="rounded-xl border border-line bg-panel/80 p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-semibold text-ink">{member.name || "(no name)"}</p>
@@ -109,6 +112,8 @@ function MemberRow({
             <option value="active">Active</option>
             <option value="expired">Expired</option>
             <option value="comp">Comp</option>
+            <option value="rejected">Rejected</option>
+            <option value="trash">Trash</option>
           </select>
         </div>
         <div>
@@ -196,6 +201,36 @@ function MemberRow({
         >
           {saving ? "Saving…" : "Save"}
         </button>
+        {status !== "rejected" && status !== "trash" ? (
+          <button
+            type="button"
+            onClick={() => void save("rejected")}
+            disabled={saving}
+            className="rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-xs font-medium text-amber-300 transition hover:bg-amber-400/20 disabled:opacity-50"
+          >
+            Reject
+          </button>
+        ) : null}
+        {status === "rejected" ? (
+          <button
+            type="button"
+            onClick={() => void save("trash")}
+            disabled={saving}
+            className="rounded-full border border-danger/40 bg-danger/10 px-4 py-2 text-xs font-medium text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
+          >
+            Move to trash
+          </button>
+        ) : null}
+        {status === "trash" ? (
+          <button
+            type="button"
+            onClick={() => void save("pending")}
+            disabled={saving}
+            className="rounded-full border border-line px-4 py-2 text-xs font-medium text-stone-300 transition hover:border-accent/40 hover:text-ink disabled:opacity-50"
+          >
+            Restore to pending
+          </button>
+        ) : null}
         {businessId.trim() ? (
           <Link
             href={`/admin/businesses/${businessId.trim()}`}
@@ -217,8 +252,116 @@ const statusFilters: Array<{ value: SolidarityMemberStatus | "all"; label: strin
   { value: "active", label: "Active" },
   { value: "pending", label: "Pending" },
   { value: "comp", label: "Comp" },
-  { value: "expired", label: "Expired" }
+  { value: "expired", label: "Expired" },
+  { value: "rejected", label: "Rejected" },
+  { value: "trash", label: "Trash" }
 ];
+
+type DuplicateAuditGroup = {
+  key: string;
+  label: string;
+  members: SolidarityMember[];
+};
+
+function duplicateGroupsFor(
+  members: SolidarityMember[],
+  field: "email" | "businessId" | "paymentReference"
+): DuplicateAuditGroup[] {
+  const groups = new Map<string, SolidarityMember[]>();
+  members.forEach((member) => {
+    const raw = member[field]?.trim().toLowerCase();
+    if (!raw) return;
+    groups.set(raw, [...(groups.get(raw) ?? []), member]);
+  });
+
+  return Array.from(groups.entries())
+    .filter(([, grouped]) => grouped.length > 1)
+    .map(([key, grouped]) => ({
+      key,
+      label:
+        field === "email"
+          ? "Email"
+          : field === "businessId"
+            ? "Business ID"
+            : "Payment reference",
+      members: grouped
+    }))
+    .sort((a, b) => b.members.length - a.members.length);
+}
+
+function MemberAuditPanel({ members }: { members: SolidarityMember[] }) {
+  const auditGroups = useMemo(() => {
+    const activeRecords = members.filter((member) => member.status !== "trash");
+    return [
+      ...duplicateGroupsFor(activeRecords, "email"),
+      ...duplicateGroupsFor(activeRecords, "businessId"),
+      ...duplicateGroupsFor(activeRecords, "paymentReference")
+    ].slice(0, 8);
+  }, [members]);
+
+  return (
+    <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6 shadow-glow">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+            Duplicate audit
+          </p>
+          <p className="mt-2 max-w-2xl text-sm leading-7 text-stone-400">
+            This flags member requests that share an email, linked business ID, or
+            payment reference. Reject confirmed duplicates first, then move rejected
+            records to trash so they stay recoverable.
+          </p>
+        </div>
+        <span className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-stone-300">
+          {auditGroups.length} group{auditGroups.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      {auditGroups.length ? (
+        <div className="mt-4 grid gap-3">
+          {auditGroups.map((group) => (
+            <div
+              key={`${group.label}-${group.key}`}
+              className="rounded-xl border border-line bg-panelAlt/50 p-4"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-ink">
+                  {group.label}: <span className="text-accent">{group.key}</span>
+                </p>
+                <span className="text-xs text-stone-400">
+                  {group.members.length} records
+                </span>
+              </div>
+              <div className="mt-3 grid gap-2">
+                {group.members.map((member) => (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => {
+                      const element = document.getElementById(`member-${member.id}`);
+                      element?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-panel/50 px-3 py-2 text-left text-xs transition hover:border-accent/35"
+                  >
+                    <span className="font-semibold text-ink">{member.name || "(no name)"}</span>
+                    <span className="text-stone-400">{member.email || "no email"}</span>
+                    <span className={`rounded-full border px-2 py-0.5 uppercase ${statusColors[member.status]}`}>
+                      {member.status}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-4 rounded-xl border border-dashed border-line bg-panelAlt/40 p-4 text-sm text-stone-400">
+          No duplicate-looking member requests found outside trash.
+        </p>
+      )}
+    </div>
+  );
+}
 
 function BenefitTypesPanel({
   benefitTypes,
@@ -443,7 +586,9 @@ export function AdminMembersPage() {
     active: members.filter((m) => m.status === "active").length,
     pending: members.filter((m) => m.status === "pending").length,
     comp: members.filter((m) => m.status === "comp").length,
-    expired: members.filter((m) => m.status === "expired").length
+    expired: members.filter((m) => m.status === "expired").length,
+    rejected: members.filter((m) => m.status === "rejected").length,
+    trash: members.filter((m) => m.status === "trash").length
   };
 
   return (
@@ -459,7 +604,7 @@ export function AdminMembersPage() {
                 Solidarity Circle
               </h1>
               <p className="mt-2 text-sm text-stone-400">
-                {counts.active} active · {counts.pending} pending · {counts.comp} comp · {counts.expired} expired
+                {counts.active} active · {counts.pending} pending · {counts.rejected} rejected · {counts.trash} trash
               </p>
             </div>
             <Link
@@ -476,6 +621,8 @@ export function AdminMembersPage() {
           loading={benefitsLoading}
           error={benefitsError}
         />
+
+        <MemberAuditPanel members={members} />
 
         <div className="mt-6 flex flex-wrap gap-3">
           <input

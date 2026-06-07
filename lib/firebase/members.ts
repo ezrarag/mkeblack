@@ -46,7 +46,15 @@ function parseDateValue(value: unknown): Date | null {
 }
 
 function normalizeStatus(v: unknown): SolidarityMemberStatus {
-  if (v === "active" || v === "expired" || v === "comp") return v;
+  if (
+    v === "active" ||
+    v === "expired" ||
+    v === "comp" ||
+    v === "rejected" ||
+    v === "trash"
+  ) {
+    return v;
+  }
   return "pending";
 }
 

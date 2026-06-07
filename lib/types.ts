@@ -542,7 +542,13 @@ export type YelpHoursPeriod = {
   isOvernight: boolean;
 };
 
-export type SolidarityMemberStatus = "active" | "expired" | "comp" | "pending";
+export type SolidarityMemberStatus =
+  | "active"
+  | "expired"
+  | "comp"
+  | "pending"
+  | "rejected"
+  | "trash";
 
 export type SolidarityMember = {
   id: string;

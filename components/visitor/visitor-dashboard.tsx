@@ -3,10 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { PendingBusinessSubmissions } from "@/components/dashboard/pending-business-submissions";
+import { MessageBusinessButton } from "@/components/messages/message-business-button";
 import { MessagesPanel } from "@/components/messages/messages-panel";
+import { useBusinesses } from "@/hooks/use-businesses";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useRecentViews } from "@/hooks/use-recent-views";
 import { useSavedMarketplace } from "@/hooks/use-saved-marketplace";
@@ -17,7 +19,7 @@ import { removeSavedMarketplaceListing } from "@/lib/firebase/saved-marketplace"
 import { updateVisitorProfileDetails } from "@/lib/firebase/visitor-profile";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { RecentViewRecord } from "@/lib/recent-views";
-import { REFERRAL_SOURCES, SavedMarketplaceListing } from "@/lib/types";
+import { Business, REFERRAL_SOURCES, SavedMarketplaceListing } from "@/lib/types";
 
 type Tab = "favorites" | "marketplace" | "messages" | "recent" | "account";
 
@@ -313,6 +315,124 @@ function SavedMarketplaceTab({ uid }: { uid: string }) {
   );
 }
 
+function MessageStarterCard({ business }: { business: Business }) {
+  return (
+    <div className="rounded-xl border border-line bg-panelAlt/60 p-3">
+      <div className="flex gap-3">
+        <Link
+          href={`/business/${business.id}`}
+          className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-line bg-panel"
+        >
+          {business.photos[0] ? (
+            <Image
+              src={business.photos[0]}
+              alt={business.name}
+              fill
+              sizes="56px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center font-display text-xl font-black text-stone-500">
+              {business.name.slice(0, 2).toUpperCase()}
+            </div>
+          )}
+        </Link>
+        <div className="min-w-0 flex-1">
+          <Link
+            href={`/business/${business.id}`}
+            className="truncate text-sm font-semibold text-ink transition hover:text-accent"
+          >
+            {business.name}
+          </Link>
+          <p className="text-[11px] text-stone-400">{business.category}</p>
+          <p className="truncate text-[11px] text-stone-500">{business.address}</p>
+        </div>
+      </div>
+      <MessageBusinessButton business={business} className="mt-3" />
+    </div>
+  );
+}
+
+function MessagesTab({
+  uid,
+  selfName
+}: {
+  uid: string;
+  selfName: string;
+}) {
+  const { favorites, loading: favoritesLoading } = useFavorites(uid);
+  const { views, loading: viewsLoading } = useRecentViews(uid);
+  const { businesses, loading: businessesLoading } = useBusinesses();
+
+  const suggestedBusinesses = useMemo(() => {
+    const seenIds = [
+      ...favorites.map((favorite) => favorite.businessId),
+      ...views.map((view) => view.businessId)
+    ];
+    const orderedIds = Array.from(new Set(seenIds));
+    const byId = new Map(businesses.map((business) => [business.id, business]));
+    return orderedIds
+      .map((id) => byId.get(id))
+      .filter((business): business is Business => !!business?.solidarityMember)
+      .slice(0, 6);
+  }, [businesses, favorites, views]);
+
+  const loadingSuggestions = favoritesLoading || viewsLoading || businessesLoading;
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-line bg-panel/80 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
+              Start a conversation
+            </p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-400">
+              Message a Solidarity Circle business from places you have saved or
+              recently viewed.
+            </p>
+          </div>
+          <Link
+            href="/directory"
+            className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-ink"
+          >
+            Browse directory
+          </Link>
+        </div>
+
+        {loadingSuggestions ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[1, 2].map((item) => (
+              <div
+                key={item}
+                className="h-28 animate-pulse rounded-xl border border-line bg-panelAlt/60"
+              />
+            ))}
+          </div>
+        ) : suggestedBusinesses.length ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {suggestedBusinesses.map((business) => (
+              <MessageStarterCard key={business.id} business={business} />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 rounded-xl border border-dashed border-line bg-panelAlt/40 p-4 text-sm text-stone-400">
+            Save or view Solidarity Circle businesses and they will appear here as
+            message options.
+          </p>
+        )}
+      </div>
+
+      <MessagesPanel
+        side="visitor"
+        selfId={uid}
+        selfName={selfName}
+        threadKey={uid}
+      />
+    </div>
+  );
+}
+
 function AboutYouEditor({ uid }: { uid: string }) {
   const { profile } = useAuth();
   const [neighborhood, setNeighborhood] = useState(profile?.neighborhood ?? "");
@@ -582,11 +702,9 @@ export function VisitorDashboard() {
         {activeTab === "favorites" && <FavoritesTab uid={user.uid} />}
         {activeTab === "marketplace" && <SavedMarketplaceTab uid={user.uid} />}
         {activeTab === "messages" && (
-          <MessagesPanel
-            side="visitor"
-            selfId={user.uid}
+          <MessagesTab
+            uid={user.uid}
             selfName={user.displayName || user.email || "MKE Black member"}
-            threadKey={user.uid}
           />
         )}
         {activeTab === "recent" && <RecentTab uid={user.uid} />}
