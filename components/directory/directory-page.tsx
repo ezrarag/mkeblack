@@ -49,6 +49,8 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const [geolocating, setGeolocating] = useState(false);
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
+  const [listingPulse, setListingPulse] = useState(false);
+  const listingsRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -243,6 +245,15 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
     });
   }
 
+  function scrollToListings() {
+    listingsRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+    setListingPulse(true);
+    window.setTimeout(() => setListingPulse(false), 900);
+  }
+
   function toggleSelectedTag(slug: string) {
     setSelectedTags((current) =>
       current.includes(slug)
@@ -305,14 +316,19 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
+            <button
+              type="button"
+              onClick={scrollToListings}
+              className="rounded-xl border border-line bg-panelAlt/75 p-5 text-left transition hover:-translate-y-0.5 hover:border-accent/40 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent/30"
+            >
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Live listings
               </p>
               <p className="mt-2 font-display text-3xl font-bold text-ink">
                 {loading ? "--" : businesses.length}
               </p>
-            </div>
+              <p className="mt-1 text-[11px] text-stone-400">Jump to listings</p>
+            </button>
             <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-muted">
                 Highlighted day
@@ -622,7 +638,13 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
         </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-between gap-4">
+      <div
+        ref={listingsRef}
+        className={`mt-8 scroll-mt-24 rounded-2xl transition ${
+          listingPulse ? "ring-2 ring-accent/35 ring-offset-4 ring-offset-canvas" : ""
+        }`}
+      >
+      <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.26em] text-muted">
             Results
@@ -645,6 +667,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
             Submit your business
           </Link>
         </div>
+      </div>
       </div>
 
       {error ? (

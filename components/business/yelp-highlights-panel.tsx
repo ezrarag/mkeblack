@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { Business, YelpHoursPeriod } from "@/lib/types";
 
 const dayLabels = [
@@ -43,6 +44,7 @@ function formatYelpHours(periods: YelpHoursPeriod[]) {
 }
 
 export function YelpHighlightsPanel({ business }: { business: Business }) {
+  const [yelpModalOpen, setYelpModalOpen] = useState(false);
   const hasYelpData = Boolean(
     business.yelpUrl ||
       business.yelpRating ||
@@ -74,14 +76,13 @@ export function YelpHighlightsPanel({ business }: { business: Business }) {
           </p>
         </div>
         {business.yelpUrl ? (
-          <a
-            href={business.yelpUrl}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => setYelpModalOpen(true)}
             className="rounded-full border border-accent/35 bg-accent/10 px-4 py-2 text-sm font-semibold text-accentSoft transition hover:bg-accent/15"
           >
             View on Yelp
-          </a>
+          </button>
         ) : null}
       </div>
 
@@ -192,6 +193,52 @@ export function YelpHighlightsPanel({ business }: { business: Business }) {
         <p className="mt-4 rounded-xl border border-line bg-canvas/50 px-4 py-3 text-xs leading-6 text-stone-500">
           Sync note: {business.yelpLastSyncError}
         </p>
+      ) : null}
+
+      {yelpModalOpen && business.yelpUrl ? (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
+          <div className="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-line bg-panel shadow-glow">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-accentSoft">
+                  Yelp
+                </p>
+                <p className="mt-1 text-sm font-semibold text-ink">
+                  {business.name}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href={business.yelpUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft"
+                >
+                  Open in new tab
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setYelpModalOpen(false)}
+                  className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="h-[72vh] bg-canvas">
+              <iframe
+                src={business.yelpUrl}
+                title={`${business.name} on Yelp`}
+                className="h-full w-full border-0"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <p className="border-t border-line bg-panelAlt/60 px-4 py-3 text-xs leading-6 text-stone-500 sm:px-5">
+              If Yelp blocks embedded viewing, use Open in new tab. The popup
+              keeps this MKE Black page open underneath.
+            </p>
+          </div>
+        </div>
       ) : null}
     </div>
   );
