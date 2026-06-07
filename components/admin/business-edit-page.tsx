@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { BusinessMembershipPanel } from "@/components/admin/business-membership-panel";
+import { useAuth } from "@/components/providers/auth-provider";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusiness } from "@/hooks/use-business";
 import { businessToFormValues } from "@/lib/businesses";
@@ -25,9 +26,11 @@ type BusinessEditPageProps = {
 
 export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
   const { business, loading, error } = useBusiness(businessId);
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [syncingYelp, setSyncingYelp] = useState(false);
   const [unlinkingOwner, setUnlinkingOwner] = useState(false);
   const [activeTab, setActiveTab] = useState<"listing" | "team" | "membership">("listing");
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -112,6 +115,55 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
     }
   }
 
+  async function handleYelpSync() {
+    if (!business || !user) {
+      return;
+    }
+
+    setSyncingYelp(true);
+    setFeedback(null);
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch("/api/admin/yelp-sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          businessId: business.id,
+          yelpBusinessId: business.yelpBusinessId,
+          yelpAlias: business.yelpAlias
+        })
+      });
+      const data = (await response.json()) as {
+        error?: string;
+        reviewCount?: number;
+        photoCount?: number;
+        reviewError?: string | null;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Yelp sync failed.");
+      }
+
+      setFeedbackTone("success");
+      setFeedback(
+        `Yelp highlights synced. Pulled ${data.photoCount ?? 0} photo(s) and ${
+          data.reviewCount ?? 0
+        } review excerpt(s).${
+          data.reviewError ? ` Review note: ${data.reviewError}` : ""
+        }`
+      );
+    } catch (syncError) {
+      setFeedbackTone("error");
+      setFeedback(formatFirebaseError(syncError));
+    } finally {
+      setSyncingYelp(false);
+    }
+  }
+
   async function handleUnlinkOwner() {
     if (!business?.ownerUid) {
       return;
@@ -168,6 +220,14 @@ export function BusinessEditPage({ businessId }: BusinessEditPageProps) {
                 className="rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
               >
                 {inviting ? "Sending invite..." : "Claim this listing"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleYelpSync()}
+                disabled={syncingYelp || !business}
+                className="rounded-full border border-line bg-panelAlt/70 px-5 py-3 text-sm font-medium text-stone-200 transition hover:border-accent/35 hover:text-accentSoft disabled:opacity-50"
+              >
+                {syncingYelp ? "Syncing Yelp..." : "Sync Yelp"}
               </button>
               {business?.ownerUid ? (
                 <button

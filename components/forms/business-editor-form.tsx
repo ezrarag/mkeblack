@@ -357,6 +357,43 @@ export function BusinessEditorForm({
         </div>
       </div>
 
+      {showAdminFields ? (
+        <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
+          <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+            Yelp highlights
+          </p>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
+            Add a Yelp business ID or alias, then use the Yelp sync action from
+            the admin edit page to pull official Yelp photos, hours, rating, and
+            review excerpts.
+          </p>
+          <div className="mt-6 grid gap-5 lg:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                Yelp business ID
+              </label>
+              <input
+                value={values.yelpBusinessId}
+                onChange={(event) =>
+                  updateField("yelpBusinessId", event.target.value)
+                }
+                placeholder="Yelp business ID"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                Yelp alias
+              </label>
+              <input
+                value={values.yelpAlias}
+                onChange={(event) => updateField("yelpAlias", event.target.value)}
+                placeholder="9th-cloud-therapy-milwaukee"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {/* ── Tags ───────────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-7">
         <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
@@ -644,6 +681,16 @@ export function BusinessEditorForm({
                   googleMatchedName: "",
                   googleMapsUrl: "",
                   googleProfileLastSynced: null,
+                  yelpBusinessId: values.yelpBusinessId,
+                  yelpAlias: values.yelpAlias,
+                  yelpUrl: "",
+                  yelpRating: null,
+                  yelpReviewCount: null,
+                  yelpPhotos: [],
+                  yelpReviews: [],
+                  yelpHours: [],
+                  yelpLastSyncedAt: null,
+                  yelpLastSyncError: "",
                   location: values.location,
                   solidarityMember: false,
                   solidarityMemberSince: null,

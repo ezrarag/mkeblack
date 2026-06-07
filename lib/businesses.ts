@@ -32,6 +32,10 @@ function numberValue(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function nullableNumberValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 /**
  * Some imported records still carry the raw Wix export format, where
  * category arrives as a JSON-array string e.g. '["Food & Drink"]' or
@@ -104,6 +108,41 @@ function stringArrayValue(value: unknown) {
         .filter(Boolean)
     )
   );
+}
+
+function normalizeYelpReviews(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(isRecord)
+    .map((review) => ({
+      id: stringValue(review.id).trim(),
+      rating: nullableNumberValue(review.rating),
+      text: stringValue(review.text).trim(),
+      url: normalizeUrl(stringValue(review.url).trim()),
+      timeCreated: stringValue(review.timeCreated).trim(),
+      userName: stringValue(review.userName).trim(),
+      userImageUrl: normalizeUrl(stringValue(review.userImageUrl).trim())
+    }))
+    .filter((review) => review.id || review.text);
+}
+
+function normalizeYelpHours(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(isRecord)
+    .map((period) => ({
+      day: numberValue(period.day, 0),
+      start: stringValue(period.start).trim(),
+      end: stringValue(period.end).trim(),
+      isOvernight: booleanValue(period.isOvernight, false)
+    }))
+    .filter((period) => period.start && period.end);
 }
 
 function normalizeHours(value: unknown) {
@@ -267,6 +306,16 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
     googleMatchedName: stringValue(record.googleMatchedName).trim(),
     googleMapsUrl: normalizeUrl(stringValue(record.googleMapsUrl).trim()),
     googleProfileLastSynced: parseDateValue(record.googleProfileLastSynced),
+    yelpBusinessId: stringValue(record.yelpBusinessId).trim(),
+    yelpAlias: stringValue(record.yelpAlias).trim(),
+    yelpUrl: normalizeUrl(stringValue(record.yelpUrl).trim()),
+    yelpRating: nullableNumberValue(record.yelpRating),
+    yelpReviewCount: nullableNumberValue(record.yelpReviewCount),
+    yelpPhotos: stringArrayValue(record.yelpPhotos),
+    yelpReviews: normalizeYelpReviews(record.yelpReviews),
+    yelpHours: normalizeYelpHours(record.yelpHours),
+    yelpLastSyncedAt: parseDateValue(record.yelpLastSyncedAt),
+    yelpLastSyncError: stringValue(record.yelpLastSyncError).trim(),
     location: {
       lat: numberValue(
         isRecord(record.location) ? record.location.lat : undefined,
@@ -307,6 +356,8 @@ export function businessToFormValues(business: Business): BusinessFormValues {
     ownerUid: business.ownerUid ?? "",
     active: business.active,
     source: business.source,
+    yelpBusinessId: business.yelpBusinessId,
+    yelpAlias: business.yelpAlias,
     location: { ...business.location }
   };
 }

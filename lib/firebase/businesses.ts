@@ -132,6 +132,8 @@ export function normalizeBusinessPayload(values: BusinessFormValues) {
     ownerUid: values.ownerUid.trim(),
     active: Boolean(values.active),
     source: values.source,
+    yelpBusinessId: values.yelpBusinessId.trim(),
+    yelpAlias: values.yelpAlias.trim(),
     location: {
       lat: Number(values.location.lat),
       lng: Number(values.location.lng)

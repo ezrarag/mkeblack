@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { BusinessGallery } from "@/components/business/business-gallery";
 import { BusinessTeamSection } from "@/components/business/business-team-section";
+import { YelpHighlightsPanel } from "@/components/business/yelp-highlights-panel";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
 import { FavoriteButton } from "@/components/ui/favorite-button";
@@ -149,6 +150,8 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           <BusinessTeamSection business={business} />
 
           <BusinessGroupsPanel businessId={business.id} businessName={business.name} />
+
+          <YelpHighlightsPanel business={business} />
 
           <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">

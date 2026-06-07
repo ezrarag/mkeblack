@@ -72,6 +72,8 @@ export function createEmptyBusinessForm() {
     ownerUid: "",
     active: true,
     source: "manual" as const,
+    yelpBusinessId: "",
+    yelpAlias: "",
     location: { ...MILWAUKEE_CENTER }
   };
 }

@@ -19,6 +19,10 @@ const nextConfig = {
         // Wix CDN — team member photos on who-we-are page
         protocol: "https",
         hostname: "static.wixstatic.com"
+      },
+      {
+        protocol: "https",
+        hostname: "**.yelpcdn.com"
       }
     ]
   }

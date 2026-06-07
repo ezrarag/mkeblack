@@ -504,6 +504,16 @@ export type Business = {
   googleMatchedName: string;
   googleMapsUrl: string;
   googleProfileLastSynced: Date | null;
+  yelpBusinessId: string;
+  yelpAlias: string;
+  yelpUrl: string;
+  yelpRating: number | null;
+  yelpReviewCount: number | null;
+  yelpPhotos: string[];
+  yelpReviews: YelpReviewExcerpt[];
+  yelpHours: YelpHoursPeriod[];
+  yelpLastSyncedAt: Date | null;
+  yelpLastSyncError: string;
   location: {
     lat: number;
     lng: number;
@@ -513,6 +523,23 @@ export type Business = {
   solidarityMemberExpiry: Date | null;
   solidarityMembershipSource: "stripe" | "manual" | "comp";
   solidarityMembershipNotes: string;
+};
+
+export type YelpReviewExcerpt = {
+  id: string;
+  rating: number | null;
+  text: string;
+  url: string;
+  timeCreated: string;
+  userName: string;
+  userImageUrl: string;
+};
+
+export type YelpHoursPeriod = {
+  day: number;
+  start: string;
+  end: string;
+  isOvernight: boolean;
 };
 
 export type SolidarityMemberStatus = "active" | "expired" | "comp" | "pending";
@@ -590,6 +617,8 @@ export type BusinessFormValues = {
   ownerUid: string;
   active: boolean;
   source: BusinessSource;
+  yelpBusinessId: string;
+  yelpAlias: string;
   location: {
     lat: number;
     lng: number;
