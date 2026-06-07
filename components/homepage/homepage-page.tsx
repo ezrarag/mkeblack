@@ -444,8 +444,7 @@ function MemberDiscountCard({
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(90deg, rgba(246,247,242,0.97) 0%, rgba(246,247,242,0.91) 48%, rgba(246,247,242,0.58) 73%, rgba(246,247,242,0.24) 100%)"
+          background: "var(--homepage-card-image-overlay)"
         }}
       />
       {!imageUrl ? (
@@ -521,8 +520,7 @@ function renderHomepageModule(
               <div
                 className="absolute inset-0"
                 style={{
-                  background:
-                    "linear-gradient(90deg, rgba(246,247,242,0.98) 0%, rgba(246,247,242,0.94) 38%, rgba(246,247,242,0.62) 58%, rgba(246,247,242,0.18) 78%, rgba(246,247,242,0) 100%)"
+                  background: "var(--homepage-hero-image-overlay)"
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-b from-canvas/35 via-transparent to-canvas/80" />
