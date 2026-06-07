@@ -94,7 +94,12 @@ async function getVerifiedAdmin(req: NextRequest) {
 }
 
 function getYelpApiKey() {
-  return process.env.YELP_API_KEY ?? process.env.YELP_FUSION_API_KEY ?? "";
+  return (
+    process.env.YELP_API_KEY ??
+    process.env.YELP_FUSION_API_KEY ??
+    process.env.YEL_API_KEY ??
+    ""
+  );
 }
 
 async function fetchYelp<T>(path: string, apiKey: string) {
@@ -166,7 +171,7 @@ export async function POST(req: NextRequest) {
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: "YELP_API_KEY or YELP_FUSION_API_KEY is not configured." },
+      { error: "YELP_API_KEY, YELP_FUSION_API_KEY, or YEL_API_KEY is not configured." },
       { status: 500 }
     );
   }

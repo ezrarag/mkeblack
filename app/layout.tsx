@@ -19,7 +19,10 @@ const sansFont = Open_Sans({
 
 export const metadata: Metadata = {
   title: "MKE Black",
-  description: "Milwaukee's community-forward Black business directory."
+  description: "Milwaukee's community-forward Black business directory.",
+  icons: {
+    icon: "/header-mark.avif"
+  }
 };
 
 const themeBootstrapScript = `
