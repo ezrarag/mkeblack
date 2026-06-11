@@ -148,9 +148,12 @@ export async function createGroup(params: {
 
   const groupRef = firestoreModule.doc(firestoreModule.collection(db, "groups"));
   const memberRef = firestoreModule.doc(db, "groups", groupRef.id, "members", params.creatorUid);
-  const batch = firestoreModule.writeBatch(db);
 
-  batch.set(groupRef, {
+  // Two sequential writes, not a batch: the member-doc create rule looks up
+  // the group's creatorUid via get() to confirm "owner" status, and that
+  // get() can't see a sibling write still pending in the same batch — the
+  // group doc must already exist by the time the member doc is created.
+  await firestoreModule.setDoc(groupRef, {
     name,
     description,
     businessId: params.businessId || "",
@@ -163,13 +166,12 @@ export async function createGroup(params: {
     updatedAt: firestoreModule.serverTimestamp()
   });
 
-  batch.set(memberRef, {
+  await firestoreModule.setDoc(memberRef, {
     displayName: params.creatorName,
     role: "owner",
     joinedAt: firestoreModule.serverTimestamp()
   });
 
-  await batch.commit();
   return groupRef.id;
 }
 
