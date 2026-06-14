@@ -12,6 +12,10 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { createOrUpdateVisitorProfile } from "@/lib/firebase/visitor-profile";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { StatePanel } from "@/components/ui/state-panel";
+import {
+  recordAuthTracking,
+  recordPasswordResetRequest
+} from "@/lib/firebase/auth-tracking";
 
 function getSafeNextPath(nextPath: string | null) {
   if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
@@ -45,6 +49,7 @@ export function JoinForm() {
   const [submitting, setSubmitting] = useState(false);
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetFeedback, setResetFeedback] = useState<string | null>(null);
   const [inAppBrowser, setInAppBrowser] = useState(false);
   const nextPath = getSafeNextPath(searchParams.get("next"));
   const isSubmitting = submitting || googleSubmitting;
@@ -96,6 +101,11 @@ export function JoinForm() {
         firebaseUser.displayName ?? displayName.trim(),
         firebaseUser.email ?? email.trim()
       );
+      await recordAuthTracking({
+        user: firebaseUser,
+        intent: mode === "signup" ? "email_password_signup" : "email_password_signin",
+        providerId: "password"
+      });
     } catch (submitError) {
       setError(formatFirebaseError(submitError));
     } finally {
@@ -120,10 +130,38 @@ export function JoinForm() {
         firebaseUser.displayName ?? "",
         firebaseUser.email ?? ""
       );
+      await recordAuthTracking({
+        user: firebaseUser,
+        intent: "google_popup",
+        providerId: "google.com"
+      });
     } catch (googleError) {
       setError(formatFirebaseError(googleError));
     } finally {
       setGoogleSubmitting(false);
+    }
+  }
+
+  async function handlePasswordReset() {
+    const targetEmail = email.trim();
+    if (!targetEmail) {
+      setError("Enter your email address first, then request a reset link.");
+      return;
+    }
+
+    setError(null);
+    setResetFeedback(null);
+    try {
+      const [authModule, auth] = await Promise.all([
+        loadFirebaseAuthModule(),
+        getFirebaseAuth()
+      ]);
+      if (!auth) throw new Error("Firebase Auth is not available.");
+      await authModule.sendPasswordResetEmail(auth, targetEmail);
+      await recordPasswordResetRequest(targetEmail);
+      setResetFeedback("Password reset email sent. Check your inbox.");
+    } catch (resetError) {
+      setError(formatFirebaseError(resetError));
     }
   }
 
@@ -249,6 +287,12 @@ export function JoinForm() {
             </p>
           ) : null}
 
+          {resetFeedback ? (
+            <p className="rounded-xl border border-success/30 bg-success/10 px-4 py-2.5 text-sm text-stone-200">
+              {resetFeedback}
+            </p>
+          ) : null}
+
           <button
             type="submit"
             disabled={isSubmitting}
@@ -262,6 +306,16 @@ export function JoinForm() {
                 ? "Create account"
                 : "Sign in"}
           </button>
+          {mode === "signin" ? (
+            <button
+              type="button"
+              onClick={() => void handlePasswordReset()}
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-line px-4 py-3 text-sm font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft disabled:opacity-60"
+            >
+              Forgot password?
+            </button>
+          ) : null}
         </form>
 
         <p className="mt-5 text-center text-sm text-stone-500">

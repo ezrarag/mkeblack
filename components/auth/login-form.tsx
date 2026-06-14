@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -10,6 +10,10 @@ import {
 } from "@/lib/firebase/client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import {
+  recordAuthTracking,
+  recordPasswordResetRequest
+} from "@/lib/firebase/auth-tracking";
 
 function getSafeNextPath(nextPath: string | null) {
   if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
@@ -35,7 +39,14 @@ function isInAppBrowser(): boolean {
 }
 
 export function LoginForm() {
-  const { user, hasAdminAccess, loading } = useAuth();
+  const {
+    user,
+    hasAdminAccess,
+    hasBusinessAccess,
+    isVisitor,
+    loading,
+    profileLoading
+  } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -43,7 +54,9 @@ export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetFeedback, setResetFeedback] = useState<string | null>(null);
   const [inAppBrowser, setInAppBrowser] = useState(false);
+  const hasRedirectedRef = useRef(false);
   const nextPath = getSafeNextPath(searchParams.get("next"));
   const isSubmitting = submitting || googleSubmitting;
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -53,10 +66,28 @@ export function LoginForm() {
   }, []);
 
   useEffect(() => {
-    if (loading || !user) return;
-    const destination = nextPath ?? (hasAdminAccess ? "/admin" : "/dashboard");
+    if (loading || profileLoading || !user || hasRedirectedRef.current) return;
+    const destination =
+      nextPath ??
+      (hasAdminAccess
+        ? "/admin"
+        : hasBusinessAccess
+          ? "/dashboard"
+          : isVisitor
+            ? "/visitor"
+            : "/visitor");
+    hasRedirectedRef.current = true;
     router.replace(destination);
-  }, [hasAdminAccess, loading, nextPath, router, user]);
+  }, [
+    hasAdminAccess,
+    hasBusinessAccess,
+    isVisitor,
+    loading,
+    nextPath,
+    profileLoading,
+    router,
+    user
+  ]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,9 +99,19 @@ export function LoginForm() {
         getFirebaseAuth()
       ]);
       if (!auth) throw new Error("Firebase Auth is not available.");
-      await authModule.signInWithEmailAndPassword(auth, email.trim(), password);
+      const credential = await authModule.signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+      await recordAuthTracking({
+        user: credential.user,
+        intent: "email_password_signin",
+        providerId: "password"
+      });
     } catch (submitError) {
       setError(formatFirebaseError(submitError));
+      hasRedirectedRef.current = false;
     } finally {
       setSubmitting(false);
     }
@@ -87,12 +128,59 @@ export function LoginForm() {
       if (!auth) throw new Error("Firebase Auth is not available.");
       const provider = new authModule.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      await authModule.signInWithPopup(auth, provider);
+      const credential = await authModule.signInWithPopup(auth, provider);
+      await recordAuthTracking({
+        user: credential.user,
+        intent: "google_popup",
+        providerId: "google.com"
+      });
     } catch (submitError) {
       setError(formatFirebaseError(submitError));
+      hasRedirectedRef.current = false;
     } finally {
       setGoogleSubmitting(false);
     }
+  }
+
+  async function handlePasswordReset() {
+    const targetEmail = email.trim();
+    if (!targetEmail) {
+      setError("Enter your email address first, then request a reset link.");
+      return;
+    }
+
+    setError(null);
+    setResetFeedback(null);
+    try {
+      const [authModule, auth] = await Promise.all([
+        loadFirebaseAuthModule(),
+        getFirebaseAuth()
+      ]);
+      if (!auth) throw new Error("Firebase Auth is not available.");
+      await authModule.sendPasswordResetEmail(auth, targetEmail);
+      await recordPasswordResetRequest(targetEmail);
+      setResetFeedback("Password reset email sent. Check your inbox.");
+    } catch (resetError) {
+      setError(formatFirebaseError(resetError));
+    }
+  }
+
+  if (user && profileLoading) {
+    return (
+      <section className="mx-auto flex min-h-[calc(100vh-96px)] w-full max-w-3xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full rounded-2xl border border-line bg-panel/90 p-8 text-center shadow-glow sm:p-10">
+          <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+            Signing you in…
+          </p>
+          <h1 className="mt-4 font-display text-3xl font-black text-ink">
+            Loading your account
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-stone-300">
+            We&apos;re checking your profile so you land in the right workspace.
+          </p>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -248,12 +336,26 @@ export function LoginForm() {
               </div>
             )}
 
+            {resetFeedback ? (
+              <div className="rounded-3xl border border-success/35 bg-success/10 px-4 py-3 text-sm text-stone-100">
+                {resetFeedback}
+              </div>
+            ) : null}
+
             <button
               type="submit"
               disabled={isSubmitting || !isFirebaseConfigured}
               className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
             >
               {submitting ? "Signing in…" : "Sign in with email"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handlePasswordReset()}
+              disabled={isSubmitting || !isFirebaseConfigured}
+              className="w-full rounded-full border border-line px-5 py-3 text-sm font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft disabled:opacity-50"
+            >
+              Forgot password?
             </button>
           </form>
 

@@ -12,6 +12,7 @@ import {
 } from "@/lib/firebase/client";
 import { claimBusinessListing } from "@/lib/firebase/businesses";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import { recordAuthTracking } from "@/lib/firebase/auth-tracking";
 
 type ClaimListingPageProps = {
   businessId: string;
@@ -68,6 +69,11 @@ export function ClaimListingPage({ businessId }: ClaimListingPageProps) {
       );
 
       await claimBusinessListing(invite, credentials.user.uid);
+      await recordAuthTracking({
+        user: credentials.user,
+        intent: "claim_invite_password",
+        providerId: "password"
+      });
       router.replace("/dashboard");
     } catch (claimError) {
       setFeedback(formatFirebaseError(claimError));

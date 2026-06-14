@@ -15,6 +15,10 @@ import {
   saveBusiness,
   uploadBusinessPhotos
 } from "@/lib/firebase/businesses";
+import {
+  getFirebaseDb,
+  loadFirebaseFirestoreModule
+} from "@/lib/firebase/client";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { BusinessFormValues } from "@/lib/types";
 
@@ -37,6 +41,7 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
   const [uploading, setUploading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
+  const [openReportCount, setOpenReportCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!startCreating) {
@@ -53,6 +58,40 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
       setSelectedBusinessId(businesses[0].id);
     }
   }, [businesses, creating, loading, selectedBusinessId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadOpenReports() {
+      try {
+        const [firestoreModule, db] = await Promise.all([
+          loadFirebaseFirestoreModule(),
+          getFirebaseDb()
+        ]);
+        if (!db || cancelled) return;
+
+        const snapshot = await firestoreModule.getDocs(
+          firestoreModule.query(
+            firestoreModule.collection(db, "business_reports"),
+            firestoreModule.where("status", "==", "open")
+          )
+        );
+
+        if (!cancelled) {
+          setOpenReportCount(snapshot.size);
+        }
+      } catch {
+        if (!cancelled) {
+          setOpenReportCount(null);
+        }
+      }
+    }
+
+    void loadOpenReports();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredBusinesses = businesses.filter((business) =>
     [business.name, business.category, business.address]
@@ -191,6 +230,12 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
                     className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
                   >
                     Sync hours
+                  </Link>
+                  <Link
+                    href="/admin/reports"
+                    className="inline-flex rounded-full border border-danger/35 bg-danger/10 px-5 py-3 text-sm font-medium text-rose-300 transition hover:bg-danger/15"
+                  >
+                    Reports{openReportCount !== null ? ` (${openReportCount})` : ""}
                   </Link>
                 </div>
               </div>

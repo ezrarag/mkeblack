@@ -12,6 +12,10 @@ import {
   GroupPostStatus,
   GroupStatus
 } from "@/lib/types";
+import {
+  parseMentionUids,
+  writeGroupNotifications
+} from "@/lib/firebase/notifications";
 
 type FirestoreRecord = Record<string, unknown>;
 
@@ -227,6 +231,27 @@ export async function setGroupStatus(groupId: string, status: GroupStatus): Prom
 
 export async function deleteGroup(groupId: string): Promise<void> {
   const { db, firestoreModule } = await getFirestoreHelpers();
+  for (const subcollection of ["posts", "members"]) {
+    let hasMore = true;
+    while (hasMore) {
+      const snapshot = await firestoreModule.getDocs(
+        firestoreModule.query(
+          firestoreModule.collection(db, "groups", groupId, subcollection),
+          firestoreModule.limit(400)
+        )
+      );
+      if (snapshot.empty) {
+        hasMore = false;
+        continue;
+      }
+
+      const batch = firestoreModule.writeBatch(db);
+      snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+      await batch.commit();
+      hasMore = snapshot.size === 400;
+    }
+  }
+
   await firestoreModule.deleteDoc(firestoreModule.doc(db, "groups", groupId));
 }
 
@@ -234,10 +259,23 @@ export async function deleteGroup(groupId: string): Promise<void> {
 export async function joinGroup(params: { groupId: string; uid: string; displayName: string }): Promise<void> {
   const { db, firestoreModule } = await getFirestoreHelpers();
   const ref = firestoreModule.doc(db, "groups", params.groupId, "members", params.uid);
+  const groupSnapshot = await firestoreModule.getDoc(
+    firestoreModule.doc(db, "groups", params.groupId)
+  );
+  const groupName = String(groupSnapshot.data()?.name ?? "Group");
   await firestoreModule.setDoc(ref, {
     displayName: params.displayName,
     role: "member",
     joinedAt: firestoreModule.serverTimestamp()
+  });
+  await writeGroupNotifications({
+    type: "group_member_joined",
+    groupId: params.groupId,
+    groupName,
+    actorUid: params.uid,
+    actorName: params.displayName,
+    targetId: params.uid,
+    text: `${params.displayName} joined ${groupName}.`
   });
 }
 
@@ -298,6 +336,10 @@ export async function createGroupPost(params: {
   const ref = firestoreModule.doc(
     firestoreModule.collection(db, "groups", params.groupId, "posts")
   );
+  const groupSnapshot = await firestoreModule.getDoc(
+    firestoreModule.doc(db, "groups", params.groupId)
+  );
+  const groupName = String(groupSnapshot.data()?.name ?? "Group");
 
   await firestoreModule.setDoc(ref, {
     authorUid: params.authorUid,
@@ -309,6 +351,30 @@ export async function createGroupPost(params: {
     createdAt: firestoreModule.serverTimestamp(),
     updatedAt: firestoreModule.serverTimestamp()
   });
+
+  const mentionUids = Array.from(new Set(parseMentionUids(text)));
+  await writeGroupNotifications({
+    type: "group_post",
+    groupId: params.groupId,
+    groupName,
+    actorUid: params.authorUid,
+    actorName: params.authorName,
+    targetId: ref.id,
+    text: `${params.authorName} posted in ${groupName}: ${text || "Photo post"}`
+  });
+
+  if (mentionUids.length) {
+    await writeGroupNotifications({
+      type: "group_mention",
+      groupId: params.groupId,
+      groupName,
+      actorUid: params.authorUid,
+      actorName: params.authorName,
+      targetId: ref.id,
+      text: `${params.authorName} mentioned you in ${groupName}.`,
+      recipientUids: mentionUids
+    });
+  }
 
   return ref.id;
 }

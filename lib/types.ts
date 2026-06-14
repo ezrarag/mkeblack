@@ -260,6 +260,28 @@ export type GroupPost = {
   updatedAt: Date | null;
 };
 
+export type NotificationType =
+  | "group_post"
+  | "group_mention"
+  | "group_event"
+  | "group_member_joined";
+
+export type NotificationPrefs = Record<NotificationType, boolean>;
+
+export type UserNotification = {
+  id: string;
+  type: NotificationType;
+  groupId: string;
+  groupName: string;
+  actorUid: string;
+  actorName: string;
+  targetId: string;
+  text: string;
+  href: string;
+  read: boolean;
+  createdAt: Date | null;
+};
+
 export type MarketplaceListingFormValues = {
   name: string;
   description: string;
@@ -591,6 +613,14 @@ export type UserProfile = {
   neighborhood?: string | null;
   interests?: string[];
   referralSource?: string | null;
+  notificationPrefs?: Partial<NotificationPrefs>;
+  authProviderIds?: string[];
+  lastAuthProviderId?: string | null;
+  lastLoginMethod?: string | null;
+  lastLoginIntent?: string | null;
+  lastLoginAt?: Date | null;
+  lastRequestedLoginMethod?: string | null;
+  passwordResetRequestedAt?: Date | null;
 };
 
 // "How did you hear about us" — kept short and easy to pick from a select.

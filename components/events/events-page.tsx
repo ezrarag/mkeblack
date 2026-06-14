@@ -251,17 +251,26 @@ export function EventsPage() {
 
         <div className="mt-8 rounded-2xl border border-accent/30 bg-accent/5 p-8 text-center">
           <p className="font-display text-xl font-bold text-ink">
-            Want to partner on an event?
+            Hosting something?
           </p>
           <p className="mt-3 text-sm leading-7 text-stone-300">
-            Reach out and let&apos;s talk about how we can create something meaningful together.
+            Solidarity Circle members can add events from the owner dashboard.
+            Other organizers can send details through the contact form.
           </p>
-          <Link
-            href="/contact"
-            className="mt-6 inline-flex rounded-full border border-accent bg-accent px-6 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
-          >
-            Get in touch
-          </Link>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/dashboard?tab=events"
+              className="inline-flex rounded-full border border-accent bg-accent px-6 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
+            >
+              Submit your event
+            </Link>
+            <Link
+              href="/contact?reason=event"
+              className="inline-flex rounded-full border border-line px-6 py-3 text-sm font-medium text-stone-300 transition hover:border-accent/35 hover:text-accentSoft"
+            >
+              Contact MKE Black
+            </Link>
+          </div>
         </div>
       </section>
     </main>

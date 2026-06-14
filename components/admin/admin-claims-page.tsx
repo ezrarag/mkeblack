@@ -23,6 +23,8 @@ type PendingClaim = {
   claimedAtDate: Date | null;
 };
 
+type ClaimFilter = "pending_verification" | "auto_approved";
+
 const roleLabels: Record<TeamMemberRoleType, string> = {
   owner: "Primary owner",
   co_owner: "Co-owner",
@@ -38,6 +40,7 @@ export function AdminClaimsPage() {
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [filter, setFilter] = useState<ClaimFilter>("pending_verification");
 
   const loadClaims = useCallback(async () => {
     setLoading(true);
@@ -52,7 +55,7 @@ export function AdminClaimsPage() {
       const snap = await firestoreModule.getDocs(
         firestoreModule.query(
           firestoreModule.collection(db, "pending_claims"),
-          firestoreModule.where("status", "==", "pending_verification"),
+          firestoreModule.where("status", "==", filter),
           firestoreModule.limit(50)
         )
       );
@@ -88,7 +91,7 @@ export function AdminClaimsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filter]);
 
   useEffect(() => { void loadClaims(); }, [loadClaims]);
 
@@ -113,6 +116,7 @@ export function AdminClaimsPage() {
         const businessUserUpdate = {
           uid: claim.claimedByUid,
           email: claim.claimedByEmail,
+          emailLower: claim.claimedByEmail.trim().toLowerCase(),
           role: existingRole === "admin" ? "admin" : "business",
           capabilities: addCapability(existingCapabilities, "business"),
           businessId: claim.businessId
@@ -317,9 +321,30 @@ export function AdminClaimsPage() {
 
         <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
-              Awaiting verification
-            </p>
+            <div>
+              <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+                {filter === "pending_verification" ? "Awaiting verification" : "Auto-approved"}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  ["pending_verification", "Pending"],
+                  ["auto_approved", "Auto-approved"]
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFilter(value as ClaimFilter)}
+                    className={`rounded-full border px-4 py-2 text-xs transition ${
+                      filter === value
+                        ? "border-accent/50 bg-accent/15 text-accentSoft"
+                        : "border-line text-stone-400 hover:text-accentSoft"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => void loadClaims()}
@@ -336,7 +361,11 @@ export function AdminClaimsPage() {
               ))}
             </div>
           ) : !claims.length ? (
-            <p className="text-sm text-stone-500">No pending claims — you&apos;re all caught up.</p>
+            <p className="text-sm text-stone-500">
+              {filter === "pending_verification"
+                ? "No pending claims — you're all caught up."
+                : "No auto-approved claims yet."}
+            </p>
           ) : (
             <div className="space-y-3">
               {claims.map(claim => (
@@ -354,21 +383,23 @@ export function AdminClaimsPage() {
                     <p className="mt-0.5 text-xs text-stone-600 font-mono">{claim.claimedByUid}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleVerify(claim, true)}
-                      disabled={actingId === claim.id}
-                      className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white hover:bg-accentSoft transition disabled:opacity-50"
-                    >
-                      Approve
-                    </button>
+                    {filter === "pending_verification" ? (
+                      <button
+                        type="button"
+                        onClick={() => handleVerify(claim, true)}
+                        disabled={actingId === claim.id}
+                        className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white hover:bg-accentSoft transition disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => handleVerify(claim, false)}
                       disabled={actingId === claim.id}
                       className="rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-xs text-rose-300 hover:bg-danger/20 transition disabled:opacity-50"
                     >
-                      Reject
+                      {filter === "pending_verification" ? "Reject" : "Revoke"}
                     </button>
                     <button
                       type="button"

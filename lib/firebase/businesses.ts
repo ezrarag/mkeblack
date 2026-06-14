@@ -155,11 +155,73 @@ export async function createPendingBusinessClaim({
   claimedByEmail: string;
   claimedByName: string;
   requestedRoleType: TeamMemberRoleType;
-}) {
+}): Promise<"pending_verification" | "auto_approved"> {
   const { db, firestoreModule } = await getFirestoreHelpers();
+  const businessReference = firestoreModule.doc(db, "businesses", businessId);
+  const businessSnapshot = await firestoreModule.getDoc(businessReference);
+  const businessData = businessSnapshot.exists() ? businessSnapshot.data() : null;
+  const normalizedClaimEmail = claimedByEmail.trim().toLowerCase();
+  const normalizedBusinessEmail = String(
+    businessData?.emailLower ?? businessData?.email ?? ""
+  ).trim().toLowerCase();
+  const currentOwnerUid = String(businessData?.ownerUid ?? "").trim();
+  const autoApprove =
+    requestedRoleType === "owner" &&
+    !currentOwnerUid &&
+    normalizedClaimEmail.length > 0 &&
+    normalizedClaimEmail === normalizedBusinessEmail;
+  const claimReference = firestoreModule.doc(
+    firestoreModule.collection(db, "pending_claims")
+  );
+
+  if (autoApprove) {
+    const userReference = firestoreModule.doc(db, "users", claimedByUid);
+    const userSnapshot = await firestoreModule.getDoc(userReference);
+    const existingRole = userSnapshot.exists() ? userSnapshot.data().role : null;
+    const existingCapabilities = userSnapshot.exists()
+      ? userSnapshot.data().capabilities
+      : [];
+    const batch = firestoreModule.writeBatch(db);
+
+    batch.set(
+      businessReference,
+      {
+        ownerUid: claimedByUid,
+        claimInviteStatus: "claimed"
+      },
+      { merge: true }
+    );
+    batch.set(
+      userReference,
+      {
+        uid: claimedByUid,
+        email: claimedByEmail.trim(),
+        emailLower: claimedByEmail.trim().toLowerCase(),
+        role: existingRole === "admin" ? "admin" : "business",
+        capabilities: addCapability(existingCapabilities, "business"),
+        businessId
+      },
+      { merge: true }
+    );
+    batch.set(claimReference, {
+      businessId,
+      businessName,
+      claimedByUid,
+      claimedByEmail,
+      claimedByName,
+      requestedRoleType,
+      status: "auto_approved",
+      claimedAt: firestoreModule.serverTimestamp(),
+      resolvedAt: firestoreModule.serverTimestamp(),
+      autoApprovedReason: "email_match"
+    });
+
+    await batch.commit();
+    return "auto_approved";
+  }
 
   await firestoreModule.setDoc(
-    firestoreModule.doc(firestoreModule.collection(db, "pending_claims")),
+    claimReference,
     {
       businessId,
       businessName,
@@ -171,6 +233,8 @@ export async function createPendingBusinessClaim({
       claimedAt: firestoreModule.serverTimestamp()
     }
   );
+
+  return "pending_verification";
 }
 
 async function syncOwnerBusinessLink(ownerUid: string | null, businessId: string) {
@@ -598,6 +662,7 @@ export async function claimBusinessListing(
     {
       uid,
       email: invite.email.trim(),
+      emailLower: invite.email.trim().toLowerCase(),
       role: existingRole === "admin" ? "admin" : "business",
       capabilities: addCapability(existingCapabilities, "business"),
       businessId: invite.businessId

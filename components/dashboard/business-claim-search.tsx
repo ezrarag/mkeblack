@@ -126,7 +126,7 @@ export function BusinessClaimSearch({ onClaimed: _onClaimed }: ClaimSearchProps)
     const requestedRoleType = getRequestedRole(business);
 
     try {
-      await createPendingBusinessClaim({
+      const claimStatus = await createPendingBusinessClaim({
         businessId: business.id,
         businessName: business.name,
         claimedByUid: user.uid,
@@ -137,9 +137,12 @@ export function BusinessClaimSearch({ onClaimed: _onClaimed }: ClaimSearchProps)
 
       setFeedback({
         tone: "success",
-        text: requestedRoleType === "owner"
-          ? `Your ownership claim for ${business.name} was sent to the MKE Black team for review.`
-          : `Your ${requestedRoleType === "co_owner" ? "co-owner" : "team"} access request for ${business.name} was sent to the MKE Black team for review.`
+        text:
+          claimStatus === "auto_approved"
+            ? `Verified — ${business.name} is yours. You can edit it now.`
+            : requestedRoleType === "owner"
+              ? `Your claim was sent to MKE Black for verification because your account email doesn't match the one on this listing.`
+              : `Your ${requestedRoleType === "co_owner" ? "co-owner" : "team"} access request for ${business.name} was sent to the MKE Black team for review.`
       });
     } catch (err) {
       setFeedback({

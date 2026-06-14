@@ -254,13 +254,21 @@ export function BusinessMarketplaceManager({
             List products or services visitors can order directly.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openNew}
-          className="rounded-full border border-accent bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accentSoft"
-        >
-          + Add listing
-        </button>
+        <div className="flex flex-wrap justify-end gap-2">
+          <Link
+            href="/marketplace"
+            className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft"
+          >
+            View public listings
+          </Link>
+          <button
+            type="button"
+            onClick={openNew}
+            className="rounded-full border border-accent bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accentSoft"
+          >
+            + Add listing
+          </button>
+        </div>
       </div>
 
       {/* Feedback banner */}

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useRef, useState } from "react";
 import { GroupForm } from "@/components/groups/group-form";
 import { GroupMembersPanel } from "@/components/groups/group-members-panel";
@@ -15,6 +16,7 @@ import { useGroupPosts } from "@/hooks/use-group-posts";
 import {
   joinGroup,
   leaveGroup,
+  deleteGroup,
   setGroupStatus,
   uploadGroupCoverPhoto
 } from "@/lib/firebase/groups";
@@ -25,6 +27,7 @@ type GroupPageProps = {
 };
 
 export function GroupPage({ groupId }: GroupPageProps) {
+  const router = useRouter();
   const { user, profile, hasAdminAccess } = useAuth();
   const { group, loading, error } = useGroup(groupId);
   const { members, count, isMember, isOwner, loading: membersLoading } = useGroupMembers(
@@ -90,6 +93,26 @@ export function GroupPage({ groupId }: GroupPageProps) {
     } catch (err) {
       setActionError(formatFirebaseError(err));
     } finally {
+      setActionBusy(false);
+    }
+  }
+
+  async function handleDeleteGroup() {
+    if (!group || actionBusy) return;
+    const typed = window.prompt(
+      `Delete ${group.name}? This removes all posts and members. This cannot be undone.\n\nType the group name to confirm.`
+    );
+    if (typed !== group.name) {
+      return;
+    }
+
+    setActionBusy(true);
+    setActionError(null);
+    try {
+      await deleteGroup(groupId);
+      router.replace("/groups?deleted=1");
+    } catch (err) {
+      setActionError(formatFirebaseError(err));
       setActionBusy(false);
     }
   }
@@ -220,6 +243,16 @@ export function GroupPage({ groupId }: GroupPageProps) {
                   {editing ? "Close" : "Edit group"}
                 </button>
               ) : null}
+              {canManage ? (
+                <button
+                  type="button"
+                  onClick={handleDeleteGroup}
+                  disabled={actionBusy}
+                  className="inline-flex rounded-full border border-danger/35 bg-danger/10 px-4 py-2.5 text-sm font-semibold text-rose-300 transition hover:bg-danger/20 disabled:opacity-60"
+                >
+                  Delete group
+                </button>
+              ) : null}
               {hasAdminAccess ? (
                 <button
                   type="button"
@@ -259,7 +292,12 @@ export function GroupPage({ groupId }: GroupPageProps) {
             Group feed
           </p>
           {user && isMember ? (
-            <GroupPostForm groupId={groupId} authorUid={user.uid} authorName={displayName} />
+            <GroupPostForm
+              groupId={groupId}
+              authorUid={user.uid}
+              authorName={displayName}
+              members={members}
+            />
           ) : user ? (
             <div className="rounded-2xl border border-line bg-panel/60 px-5 py-4 text-sm text-stone-400">
               Join this group to post and join the conversation.

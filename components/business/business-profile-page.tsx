@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { BusinessGallery } from "@/components/business/business-gallery";
 import { BusinessTeamSection } from "@/components/business/business-team-section";
 import { YelpHighlightsPanel } from "@/components/business/yelp-highlights-panel";
@@ -18,6 +18,11 @@ import { useBusinessTags } from "@/hooks/use-business-tags";
 import { useAuth } from "@/components/providers/auth-provider";
 import { addLocalRecentView, persistRecentView } from "@/lib/recent-views";
 import { BusinessTag } from "@/lib/types";
+import {
+  BusinessReportReason,
+  submitBusinessReport
+} from "@/lib/firebase/business-reports";
+import { formatFirebaseError } from "@/lib/firebase-errors";
 
 type BusinessProfilePageProps = {
   businessId: string;
@@ -26,7 +31,14 @@ type BusinessProfilePageProps = {
 export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const { business, loading, error } = useBusiness(businessId);
   const { tags: businessTags } = useBusinessTags();
-  const { user, profile } = useAuth();
+  const { user, profile, hasAdminAccess } = useAuth();
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] =
+    useState<BusinessReportReason>("Business has closed");
+  const [reportComment, setReportComment] = useState("");
+  const [reporterEmail, setReporterEmail] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportFeedback, setReportFeedback] = useState<string | null>(null);
 
   // Track this view: localStorage always, Firebase if signed in
   useEffect(() => {
@@ -69,6 +81,59 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const profileTags = business.tags
     .map((slug) => businessTags.find((tag) => tag.slug === slug && tag.active))
     .filter((tag): tag is BusinessTag => Boolean(tag));
+  const isOwner = !!user && business.ownerUid === user.uid;
+  const claimHref = user
+    ? "/dashboard"
+    : `/login?next=${encodeURIComponent("/dashboard")}`;
+  const reportReasons: BusinessReportReason[] = [
+    "Business has closed",
+    "Wrong hours",
+    "Wrong address/phone",
+    "Other"
+  ];
+  const actionLinks = [
+    business.website
+      ? { href: business.website, label: "Website", external: true }
+      : null,
+    business.yelpUrl
+      ? { href: business.yelpUrl, label: "Yelp", external: true }
+      : null,
+    business.googleMapsUrl
+      ? { href: business.googleMapsUrl, label: "Directions", external: true }
+      : null,
+    business.instagramReelUrl
+      ? { href: business.instagramReelUrl, label: "Instagram", external: true }
+      : null,
+    business.phone ? { href: `tel:${business.phone}`, label: "Call" } : null,
+    business.email ? { href: `mailto:${business.email}`, label: "Email" } : null
+  ].filter(
+    (item): item is { href: string; label: string; external?: boolean } =>
+      Boolean(item)
+  );
+
+  async function handleReportSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!business) return;
+    setReportSubmitting(true);
+    setReportFeedback(null);
+
+    try {
+      await submitBusinessReport({
+        businessId: business.id,
+        businessName: business.name,
+        reason: reportReason,
+        comment: reportComment,
+        reporterEmail
+      });
+      setReportComment("");
+      setReporterEmail("");
+      setReportFeedback("Thanks. MKE Black will review this report.");
+    } catch (err) {
+      setReportFeedback(formatFirebaseError(err));
+    } finally {
+      setReportSubmitting(false);
+    }
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -112,6 +177,55 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             <p className="mt-5 text-base leading-8 text-stone-300">
               {business.description}
             </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {actionLinks.map((link) =>
+                link.external ? (
+                  <a
+                    key={`${link.label}-${link.href}`}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <a
+                    key={`${link.label}-${link.href}`}
+                    href={link.href}
+                    className="rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
+                  >
+                    {link.label}
+                  </a>
+                )
+              )}
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3 border-t border-line pt-5">
+              {!business.ownerUid ? (
+                <Link
+                  href={claimHref}
+                  className="rounded-full border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accentSoft"
+                >
+                  Own this business? Claim this listing
+                </Link>
+              ) : null}
+              {isOwner ? (
+                <Link
+                  href="/dashboard"
+                  className="rounded-full border border-accent/35 bg-accent/10 px-5 py-2.5 text-sm font-semibold text-accentSoft transition hover:bg-accent/15"
+                >
+                  Edit listing
+                </Link>
+              ) : null}
+              {hasAdminAccess ? (
+                <Link
+                  href={`/admin/businesses/${business.id}`}
+                  className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-stone-300 transition hover:border-accent/35 hover:text-accentSoft"
+                >
+                  Edit as admin
+                </Link>
+              ) : null}
+            </div>
           </div>
 
           <div className="mt-6">
@@ -171,6 +285,75 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
               Location
             </p>
             <BusinessMap businesses={[business]} />
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
+            <button
+              type="button"
+              onClick={() => {
+                setReportOpen((current) => !current);
+                setReportFeedback(null);
+              }}
+              className="text-sm font-semibold text-stone-400 underline underline-offset-4 transition hover:text-accentSoft"
+            >
+              Report an issue
+            </button>
+            {reportOpen ? (
+              <form className="mt-5 space-y-4" onSubmit={handleReportSubmit}>
+                <div>
+                  <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                    Reason
+                  </label>
+                  <select
+                    value={reportReason}
+                    onChange={(event) =>
+                      setReportReason(event.target.value as BusinessReportReason)
+                    }
+                  >
+                    {reportReasons.map((reason) => (
+                      <option key={reason} value={reason}>
+                        {reason}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                    Comment
+                  </label>
+                  <textarea
+                    value={reportComment}
+                    onChange={(event) => setReportComment(event.target.value)}
+                    rows={3}
+                    placeholder="Add anything the admin team should know."
+                    className="w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-ink placeholder:text-stone-500 focus:border-accent/60 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={reporterEmail}
+                    onChange={(event) => setReporterEmail(event.target.value)}
+                    placeholder="Optional"
+                  />
+                </div>
+                {reportFeedback ? (
+                  <p className="rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-stone-200">
+                    {reportFeedback}
+                  </p>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={reportSubmitting}
+                  className="rounded-full border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+                >
+                  {reportSubmitting ? "Sending..." : "Send report"}
+                </button>
+              </form>
+            ) : null}
           </div>
         </div>
 

@@ -8,6 +8,7 @@ import {
   SetupGuideDrawer,
   SetupGuideTrigger
 } from "@/components/setup/setup-guide";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import {
   getFirebaseAuth,
   loadFirebaseAuthModule
@@ -23,7 +24,7 @@ type NavLink = {
 const primaryLinks: NavLink[] = [
   { href: "/directory", label: "Directory" },
   { href: "/marketplace", label: "Marketplace" },
-  { href: "/groups", label: "Groups" }
+  { href: "/events", label: "Events" }
 ];
 
 const exploreLinks: NavLink[] = [
@@ -31,7 +32,7 @@ const exploreLinks: NavLink[] = [
   { href: "/what-we-do", label: "What we do" },
   { href: "/who-we-are", label: "Who we are" },
   { href: "/news-articles", label: "News" },
-  { href: "/events", label: "Events" },
+  { href: "/groups", label: "Groups" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -204,6 +205,11 @@ export function SiteHeader() {
     : isVisitor
       ? "MKE Black member"
       : "Business owner";
+  const setupHref = hasAdminAccess
+    ? "/admin"
+    : hasBusinessAccess
+      ? "/dashboard"
+      : "/visitor";
 
   useEffect(() => {
     if (
@@ -329,6 +335,8 @@ export function SiteHeader() {
           {loading ? (
             <span className="rounded-full border border-line px-4 py-2 text-sm text-muted">…</span>
           ) : user ? (
+            <>
+            <NotificationBell uid={user.uid} />
             <div className="relative">
               <button
                 type="button"
@@ -365,6 +373,14 @@ export function SiteHeader() {
                     {user.email && (
                       <p className="mt-0.5 text-xs text-stone-400">{user.email}</p>
                     )}
+                    <Link
+                      href={setupHref}
+                      onClick={() => setMenuOpen(false)}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-accent/35 bg-accent/10 px-4 py-2 text-xs font-semibold text-accentSoft transition hover:bg-accent/15"
+                    >
+                      <span aria-hidden="true">⚙</span>
+                      Account setup
+                    </Link>
                   </div>
 
                   <div className="mt-3 flex flex-col gap-1.5">
@@ -397,6 +413,7 @@ export function SiteHeader() {
                 </div>
               )}
             </div>
+            </>
           ) : (
             <div className="relative">
               <button

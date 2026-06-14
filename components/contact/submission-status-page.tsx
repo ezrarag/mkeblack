@@ -8,6 +8,7 @@ import {
   loadFirebaseAuthModule
 } from "@/lib/firebase/client";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import { recordAuthTracking } from "@/lib/firebase/auth-tracking";
 
 type SubmissionStatus = {
   id: string;
@@ -81,6 +82,11 @@ export function SubmissionStatusPage({ submissionId }: SubmissionStatusPageProps
       const provider = new authModule.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       const credential = await authModule.signInWithPopup(auth, provider);
+      await recordAuthTracking({
+        user: credential.user,
+        intent: "google_popup",
+        providerId: "google.com"
+      });
       const token = await credential.user.getIdToken();
       const response = await fetch(`/api/submissions/${submissionId}`, {
         method: "PATCH",

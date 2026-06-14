@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import {
   deleteGroupPost,
@@ -14,6 +15,27 @@ import { cn } from "@/lib/utils";
 function fmtDate(date: Date | null) {
   if (!date) return "";
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function renderPostText(text: string) {
+  const parts = text.split(/(@\[[^\]]+\]\([^)]+\))/g);
+
+  return parts.map((part, index) => {
+    const mention = /^@\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    if (!mention) {
+      return <span key={`${part}-${index}`}>{part}</span>;
+    }
+
+    return (
+      <Link
+        key={`${mention[2]}-${index}`}
+        href={`/visitor?member=${encodeURIComponent(mention[2])}`}
+        className="font-semibold text-accentSoft transition hover:text-accent"
+      >
+        @{mention[1]}
+      </Link>
+    );
+  });
 }
 
 function PostCard({
@@ -91,7 +113,9 @@ function PostCard({
       </div>
 
       {post.text ? (
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-300">{post.text}</p>
+        <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-300">
+          {renderPostText(post.text)}
+        </p>
       ) : null}
 
       {post.photos.length ? (

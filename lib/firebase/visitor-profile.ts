@@ -2,6 +2,10 @@ import {
   getFirebaseDb,
   loadFirebaseFirestoreModule
 } from "@/lib/firebase/client";
+import {
+  DEFAULT_NOTIFICATION_PREFS
+} from "@/lib/firebase/notifications";
+import { NotificationPrefs } from "@/lib/types";
 
 async function getFirestoreHelpers() {
   const [firestoreModule, db] = await Promise.all([
@@ -36,7 +40,7 @@ export async function createOrUpdateVisitorProfile(
     if (existing.role === "business" || existing.role === "admin") {
       await firestoreModule.setDoc(
         ref,
-        { displayName, email },
+        { displayName, email, emailLower: email.trim().toLowerCase() },
         { merge: true }
       );
       return;
@@ -47,6 +51,7 @@ export async function createOrUpdateVisitorProfile(
       {
         displayName,
         email,
+        emailLower: email.trim().toLowerCase(),
         ...(existing.createdAt
           ? {}
           : { createdAt: firestoreModule.serverTimestamp() })
@@ -61,9 +66,11 @@ export async function createOrUpdateVisitorProfile(
     {
       uid,
       email,
+      emailLower: email.trim().toLowerCase(),
       displayName,
       role: "visitor",
       businessId: null,
+      notificationPrefs: DEFAULT_NOTIFICATION_PREFS,
       createdAt: firestoreModule.serverTimestamp()
     },
     { merge: true }
@@ -74,6 +81,7 @@ export type VisitorProfileDetails = {
   neighborhood: string | null;
   interests: string[];
   referralSource: string | null;
+  notificationPrefs: Partial<NotificationPrefs>;
 };
 
 /**

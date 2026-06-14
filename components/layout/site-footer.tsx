@@ -117,6 +117,7 @@ export function SiteFooter() {
   } else {
     businessLinks.push(
       { href: "/dashboard", label: "My listing" },
+      { href: "/dashboard", label: "Claim your business" },
       { href: "/contact", label: "Submit a business" }
     );
   }

@@ -17,6 +17,7 @@ import {
   loadFirebaseAuthModule
 } from "@/lib/firebase/client";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import { recordAuthTracking } from "@/lib/firebase/auth-tracking";
 
 const reasonOptions: { value: ContactReason; label: string }[] = [
   { value: "general", label: "General inquiry" },
@@ -113,6 +114,11 @@ export function ContactPage() {
       const provider = new authModule.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       const credential = await authModule.signInWithPopup(auth, provider);
+      await recordAuthTracking({
+        user: credential.user,
+        intent: "google_popup",
+        providerId: "google.com"
+      });
       return credential.user;
     } catch (submitError) {
       setError(formatFirebaseError(submitError));

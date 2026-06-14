@@ -15,6 +15,7 @@ import { useSavedMarketplace } from "@/hooks/use-saved-marketplace";
 import { BUSINESS_CATEGORIES } from "@/lib/constants";
 import { getFirebaseAuth, loadFirebaseAuthModule } from "@/lib/firebase/client";
 import { FavoriteRecord } from "@/lib/firebase/favorites";
+import { DEFAULT_NOTIFICATION_PREFS } from "@/lib/firebase/notifications";
 import { removeSavedMarketplaceListing } from "@/lib/firebase/saved-marketplace";
 import { updateVisitorProfileDetails } from "@/lib/firebase/visitor-profile";
 import { formatFirebaseError } from "@/lib/firebase-errors";
@@ -550,8 +551,20 @@ function AboutYouEditor({ uid }: { uid: string }) {
 }
 
 function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean }) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    ...DEFAULT_NOTIFICATION_PREFS,
+    ...profile?.notificationPrefs
+  });
+  const [notificationFeedback, setNotificationFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNotificationPrefs({
+      ...DEFAULT_NOTIFICATION_PREFS,
+      ...profile?.notificationPrefs
+    });
+  }, [profile?.notificationPrefs]);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -563,6 +576,24 @@ function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean 
       if (auth) await authModule.signOut(auth);
     } finally {
       setSigningOut(false);
+    }
+  }
+
+  async function updateNotificationPref(
+    key: keyof typeof DEFAULT_NOTIFICATION_PREFS,
+    value: boolean
+  ) {
+    if (!user) return;
+    const nextPrefs = { ...notificationPrefs, [key]: value };
+    setNotificationPrefs(nextPrefs);
+    setNotificationFeedback(null);
+    try {
+      await updateVisitorProfileDetails(user.uid, {
+        notificationPrefs: nextPrefs
+      });
+      setNotificationFeedback("Notification preferences saved.");
+    } catch (err) {
+      setNotificationFeedback(formatFirebaseError(err));
     }
   }
 
@@ -597,6 +628,41 @@ function AccountTab({ hasPendingSubmissions }: { hasPendingSubmissions: boolean 
             Join Solidarity Circle
           </Link>
         )}
+      </div>
+
+      <div className="rounded-xl border border-line bg-panelAlt/60 px-5 py-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
+          Notifications
+        </p>
+        <div className="mt-4 space-y-3">
+          {[
+            ["group_post", "New posts in my groups"],
+            ["group_mention", "Someone mentions me"],
+            ["group_event", "Events in my groups"],
+            ["group_member_joined", "Members join my groups"]
+          ].map(([key, label]) => (
+            <label
+              key={key}
+              className="flex items-center justify-between gap-4 rounded-xl border border-line bg-panel/60 px-4 py-3 text-sm text-stone-200"
+            >
+              <span>{label}</span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs[key as keyof typeof DEFAULT_NOTIFICATION_PREFS]}
+                onChange={(event) =>
+                  void updateNotificationPref(
+                    key as keyof typeof DEFAULT_NOTIFICATION_PREFS,
+                    event.target.checked
+                  )
+                }
+                className="accent-accent"
+              />
+            </label>
+          ))}
+        </div>
+        {notificationFeedback ? (
+          <p className="mt-3 text-xs text-stone-400">{notificationFeedback}</p>
+        ) : null}
       </div>
 
       <div className="rounded-xl border border-line bg-panelAlt/60 px-5 py-5">

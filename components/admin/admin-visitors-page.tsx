@@ -7,10 +7,12 @@ import { useVisitors, VisitorRecord } from "@/hooks/use-visitors";
 
 function fmtDate(date: Date | null) {
   if (!date) return "—";
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleString("en-US", {
     year: "numeric",
     month: "short",
-    day: "numeric"
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
   });
 }
 
@@ -83,41 +85,79 @@ function BreakdownCard({
 }
 
 function VisitorRow({ visitor }: { visitor: VisitorRecord }) {
+  const providerLabel = visitor.authProviderIds.length
+    ? visitor.authProviderIds
+        .map((provider) => {
+          if (provider === "password") return "Email/password";
+          if (provider === "google.com") return "Google";
+          return provider;
+        })
+        .join(", ")
+    : "Unknown";
+
   return (
     <div className="rounded-xl border border-line bg-panel/80 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate font-medium text-stone-100">
-            {visitor.displayName || "(no name)"}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-medium text-stone-100">
+              {visitor.displayName || "(no name)"}
+            </p>
+            <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-stone-300">
+              {visitor.role}
+            </span>
+            {visitor.disabled ? (
+              <span className="rounded-full border border-danger/35 bg-danger/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-rose-300">
+                Disabled
+              </span>
+            ) : null}
+          </div>
           <p className="truncate text-sm text-stone-400">{visitor.email}</p>
+          <p className="mt-1 truncate text-xs font-mono text-stone-600">{visitor.uid}</p>
         </div>
         <span className="shrink-0 text-xs text-stone-500">
-          Joined {fmtDate(visitor.createdAt)}
+          Last sign-in {fmtDate(visitor.authLastSignInAt ?? visitor.lastLoginAt)}
         </span>
       </div>
-      {(visitor.neighborhood || visitor.referralSource || visitor.interests?.length) ? (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {visitor.neighborhood ? (
-            <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-stone-300">
-              📍 {visitor.neighborhood}
-            </span>
-          ) : null}
-          {visitor.referralSource ? (
-            <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-stone-300">
-              via {visitor.referralSource}
-            </span>
-          ) : null}
-          {(visitor.interests ?? []).map((interest) => (
-            <span
-              key={interest}
-              className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-accentSoft"
-            >
-              {interest}
-            </span>
-          ))}
+      <div className="mt-4 grid gap-3 text-xs sm:grid-cols-4">
+        <div className="rounded-xl border border-line bg-panelAlt/60 px-3 py-2">
+          <p className="uppercase tracking-[0.16em] text-muted">Auth providers</p>
+          <p className="mt-1 text-stone-200">{providerLabel}</p>
         </div>
-      ) : null}
+        <div className="rounded-xl border border-line bg-panelAlt/60 px-3 py-2">
+          <p className="uppercase tracking-[0.16em] text-muted">Last method</p>
+          <p className="mt-1 text-stone-200">{visitor.lastLoginMethod ?? "Unknown"}</p>
+        </div>
+        <div className="rounded-xl border border-line bg-panelAlt/60 px-3 py-2">
+          <p className="uppercase tracking-[0.16em] text-muted">Selected path</p>
+          <p className="mt-1 text-stone-200">{visitor.lastLoginIntent ?? "Not tracked yet"}</p>
+        </div>
+        <div className="rounded-xl border border-line bg-panelAlt/60 px-3 py-2">
+          <p className="uppercase tracking-[0.16em] text-muted">Reset request</p>
+          <p className="mt-1 text-stone-200">{fmtDate(visitor.passwordResetRequestedAt)}</p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-stone-300">
+          Joined {fmtDate(visitor.createdAt)}
+        </span>
+        {visitor.businessId ? (
+          <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-stone-300">
+            Business linked
+          </span>
+        ) : null}
+        {visitor.neighborhood ? (
+          <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-stone-300">
+            {visitor.neighborhood}
+          </span>
+        ) : null}
+        {visitor.referralSource ? (
+          <span className="rounded-full border border-line bg-panelAlt/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-stone-300">
+            via {visitor.referralSource}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -125,9 +165,12 @@ function VisitorRow({ visitor }: { visitor: VisitorRecord }) {
 export function AdminVisitorsPage() {
   const { visitors, loading, error } = useVisitors();
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | VisitorRecord["role"]>("all");
 
   const stats = useMemo(() => {
     const total = visitors.length;
+    const visitorsOnly = visitors.filter((v) => v.role === "visitor").length;
+    const businessUsers = visitors.filter((v) => v.role === "business").length;
     const withCreatedAt = visitors.filter((v) => v.createdAt);
     const optedIn = visitors.filter(
       (v) => v.neighborhood || v.referralSource || v.interests?.length
@@ -146,28 +189,42 @@ export function AdminVisitorsPage() {
     const neighborhoods = tallyOf(visitors.map((v) => v.neighborhood));
     const referralSources = tallyOf(visitors.map((v) => v.referralSource));
     const interests = tallyOf(visitors.flatMap((v) => v.interests ?? []));
+    const roles = tallyOf(visitors.map((v) => v.role));
+    const loginMethods = tallyOf(visitors.map((v) => v.lastLoginMethod));
+    const authProviders = tallyOf(visitors.flatMap((v) => v.authProviderIds));
+    const passwordResetRequests = visitors.filter((v) => v.passwordResetRequestedAt).length;
 
     return {
       total,
+      visitorsOnly,
+      businessUsers,
       optedIn,
       months,
       maxMonthly,
       neighborhoods,
       referralSources,
-      interests
+      interests,
+      roles,
+      loginMethods,
+      authProviders,
+      passwordResetRequests
     };
   }, [visitors]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return visitors;
     return visitors.filter(
       (v) =>
-        v.email.toLowerCase().includes(q) ||
-        (v.displayName ?? "").toLowerCase().includes(q) ||
-        (v.neighborhood ?? "").toLowerCase().includes(q)
+        (roleFilter === "all" || v.role === roleFilter) &&
+        (!q ||
+          v.email.toLowerCase().includes(q) ||
+          (v.displayName ?? "").toLowerCase().includes(q) ||
+          (v.neighborhood ?? "").toLowerCase().includes(q) ||
+          v.role.toLowerCase().includes(q) ||
+          (v.lastLoginMethod ?? "").toLowerCase().includes(q) ||
+          v.authProviderIds.join(" ").toLowerCase().includes(q))
     );
-  }, [visitors, search]);
+  }, [visitors, search, roleFilter]);
 
   return (
     <ProtectedRoute requireAdmin>
@@ -176,12 +233,12 @@ export function AdminVisitorsPage() {
           Admin
         </p>
         <h1 className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-5xl">
-          Visitor accounts
+          Signed-in accounts
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-300">
-          Aggregate insight into who&rsquo;s signing up to use the directory.
-          Demographic fields are entirely opt-in — visitors choose to share
-          them from their dashboard, and they&rsquo;re never shown publicly.
+          See visitor, business, and admin profiles alongside Firebase Auth
+          provider data, selected login paths, last sign-in timestamps, and
+          password-reset requests.
         </p>
 
         {error ? (
@@ -200,7 +257,7 @@ export function AdminVisitorsPage() {
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <div className="rounded-3xl border border-line bg-panelAlt/70 px-5 py-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">
-                  Total visitor accounts
+                  Total accounts
                 </p>
                 <p className="mt-2 font-display text-3xl font-black text-ink">
                   {stats.total}
@@ -208,25 +265,21 @@ export function AdminVisitorsPage() {
               </div>
               <div className="rounded-3xl border border-line bg-panelAlt/70 px-5 py-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">
-                  Shared &ldquo;About you&rdquo; info
+                  Visitors / businesses
                 </p>
                 <p className="mt-2 font-display text-3xl font-black text-ink">
-                  {stats.optedIn}
+                  {stats.visitorsOnly} / {stats.businessUsers}
                 </p>
                 <p className="mt-1 text-xs text-stone-500">
-                  {stats.total
-                    ? `${Math.round((stats.optedIn / stats.total) * 100)}% opt-in rate`
-                    : "No visitors yet"}
+                  visitor accounts / business accounts
                 </p>
               </div>
               <div className="rounded-3xl border border-line bg-panelAlt/70 px-5 py-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">
-                  New this month
+                  Password reset requests
                 </p>
                 <p className="mt-2 font-display text-3xl font-black text-ink">
-                  {stats.months.length
-                    ? stats.months[stats.months.length - 1][1]
-                    : 0}
+                  {stats.passwordResetRequests}
                 </p>
               </div>
             </div>
@@ -266,22 +319,22 @@ export function AdminVisitorsPage() {
             {/* ── Breakdowns ── */}
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <BreakdownCard
-                title="Neighborhoods"
-                tallies={stats.neighborhoods}
-                total={stats.neighborhoods.reduce((sum, t) => sum + t.count, 0)}
-                emptyHint="No visitors have shared a neighborhood yet."
+                title="Account roles"
+                tallies={stats.roles}
+                total={stats.total}
+                emptyHint="No account roles found."
               />
               <BreakdownCard
-                title="Interests"
-                tallies={stats.interests}
-                total={visitors.length}
-                emptyHint="No visitors have picked interests yet."
+                title="Login methods"
+                tallies={stats.loginMethods}
+                total={stats.loginMethods.reduce((sum, t) => sum + t.count, 0)}
+                emptyHint="No tracked login methods yet."
               />
               <BreakdownCard
-                title="How they found us"
-                tallies={stats.referralSources}
-                total={stats.referralSources.reduce((sum, t) => sum + t.count, 0)}
-                emptyHint="No visitors have shared a referral source yet."
+                title="Auth providers"
+                tallies={stats.authProviders}
+                total={stats.authProviders.reduce((sum, t) => sum + t.count, 0)}
+                emptyHint="No Auth provider metadata available."
               />
             </div>
 
@@ -289,15 +342,28 @@ export function AdminVisitorsPage() {
             <div className="mt-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="font-display text-xl font-bold text-ink">
-                  All visitors ({filtered.length})
+                  All accounts ({filtered.length})
                 </h2>
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name, email, neighborhood…"
-                  className="w-full max-w-xs rounded-xl border border-line bg-panelAlt/70 px-4 py-2.5 text-sm text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
-                />
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
+                    className="rounded-xl border border-line bg-panelAlt/70 px-4 py-2.5 text-sm text-ink"
+                  >
+                    <option value="all">All roles</option>
+                    <option value="visitor">Visitors</option>
+                    <option value="business">Businesses</option>
+                    <option value="admin">Admins</option>
+                    <option value="unknown">Unknown</option>
+                  </select>
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search name, email, role, provider…"
+                    className="w-full max-w-xs rounded-xl border border-line bg-panelAlt/70 px-4 py-2.5 text-sm text-ink placeholder-stone-500 transition focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
               </div>
 
               {filtered.length ? (
@@ -313,7 +379,7 @@ export function AdminVisitorsPage() {
                     description={
                       visitors.length
                         ? "Try a different search term."
-                        : "No one has created a visitor account yet."
+                        : "No accounts found yet."
                     }
                   />
                 </div>

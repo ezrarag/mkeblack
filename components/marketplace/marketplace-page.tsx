@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
 import { MarketplaceListingCard } from "@/components/marketplace/marketplace-listing-card";
 import { StatePanel } from "@/components/ui/state-panel";
@@ -178,7 +179,14 @@ export function MarketplacePage() {
               ? "Member businesses haven't added marketplace listings yet. Check back soon."
               : "Try adjusting your filters to find what you're looking for."}
           </p>
-          {listings.length > 0 && (
+          {listings.length === 0 ? (
+            <Link
+              href="/dashboard?tab=marketplace"
+              className="mt-4 inline-flex rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
+            >
+              Add a listing
+            </Link>
+          ) : (
             <button
               type="button"
               onClick={() => {

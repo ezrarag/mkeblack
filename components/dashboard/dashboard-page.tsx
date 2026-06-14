@@ -168,6 +168,31 @@ export function DashboardPageContent() {
               </div>
             </div>
           ) : null}
+
+          {business ? (
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link
+                href={`/business/${business.id}`}
+                className="rounded-full border border-line bg-panelAlt/70 px-5 py-2.5 text-sm font-semibold text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                View public profile
+              </Link>
+              <button
+                type="button"
+                onClick={() => setActiveTab("events")}
+                className="rounded-full border border-line bg-panelAlt/70 px-5 py-2.5 text-sm font-semibold text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                Add event
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("marketplace")}
+                className="rounded-full border border-line bg-panelAlt/70 px-5 py-2.5 text-sm font-semibold text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                Add marketplace listing
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {/* ── Feedback banner ── */}

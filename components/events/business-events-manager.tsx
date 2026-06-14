@@ -150,6 +150,12 @@ export function BusinessEventsManager({
     tone: "success" | "error";
   } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const baseUrl =
+    typeof window !== "undefined" ? window.location.origin : "https://mkeblack.org";
+  const eventPageUrl = `${baseUrl}/events`;
+  const embedUrl = `${baseUrl}/embed/events/${businessId}`;
+  const icsUrl = `${baseUrl}/api/events/${businessId}/calendar.ics`;
+  const iframeSnippet = `<iframe src="${embedUrl}" style="width:100%;border:0;" height="420"></iframe>`;
 
   if (!isSolidarityMember) {
     return (
@@ -282,6 +288,35 @@ export function BusinessEventsManager({
         >
           + Add event
         </button>
+      </div>
+
+      <div className="rounded-2xl border border-line bg-panel/80 p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+          Share & embed
+        </p>
+        <p className="mt-2 text-sm leading-7 text-stone-300">
+          Solidarity Circle members can publish events here and reuse them on
+          their own websites or calendars.
+        </p>
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          {[
+            ["Direct link", eventPageUrl],
+            ["Iframe embed", iframeSnippet],
+            ["ICS subscription", icsUrl]
+          ].map(([label, value]) => (
+            <div key={label}>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                {label}
+              </label>
+              <textarea
+                readOnly
+                value={value}
+                rows={3}
+                className="w-full resize-none rounded-xl border border-line bg-canvas/60 px-3 py-2 text-xs text-stone-200"
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {feedback ? (

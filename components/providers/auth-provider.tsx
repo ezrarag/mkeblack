@@ -22,6 +22,7 @@ type AuthContextValue = {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
+  profileLoading: boolean;
   isAdmin: boolean;
   hasAdminAccess: boolean;
   hasBusinessAccess: boolean;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   profile: null,
   loading: true,
+  profileLoading: false,
   isAdmin: false,
   hasAdminAccess: false,
   hasBusinessAccess: false,
@@ -42,11 +44,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const hasAdminAccess = isAdmin || profileHasCapability(profile, "admin");
   const hasBusinessAccess = profileHasCapability(profile, "business");
   const isVisitor =
-    !loading && !!user && !hasAdminAccess && !hasBusinessAccess;
+    !loading && !profileLoading && !!user && !hasAdminAccess && !hasBusinessAccess;
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -92,9 +95,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!nextUser) {
             setProfile(null);
             setIsAdmin(false);
+            setProfileLoading(false);
             setLoading(false);
             return;
           }
+
+          setProfile(null);
+          setProfileLoading(true);
 
           try {
             await syncPendingAdminInvite(nextUser);
@@ -109,16 +116,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           setIsAdmin(Boolean(tokenResult.claims.admin));
+          setLoading(false);
 
           profileUnsubscribe = firestoreModule.onSnapshot(
             firestoreModule.doc(db, "users", nextUser.uid),
             (snapshot) => {
               setProfile(snapshot.exists() ? (snapshot.data() as UserProfile) : null);
-              setLoading(false);
+              setProfileLoading(false);
             },
             () => {
               setProfile(null);
-              setLoading(false);
+              setProfileLoading(false);
             }
           );
         });
@@ -144,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         profile,
         loading,
+        profileLoading,
         isAdmin,
         hasAdminAccess,
         hasBusinessAccess,
