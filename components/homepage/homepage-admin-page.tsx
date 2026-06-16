@@ -6,10 +6,11 @@ import {
   Reorder,
   useDragControls
 } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { StatePanel } from "@/components/ui/state-panel";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import { DEFAULT_DIRECTORY_HERO_IMAGES } from "@/lib/directory-hero";
 import {
   HOMEPAGE_MODULE_LABELS,
   HOMEPAGE_MODULE_TYPES,
@@ -28,6 +29,11 @@ import {
   saveMemberDiscount,
   saveMemberDiscountArrangement
 } from "@/lib/firebase/homepage";
+import {
+  saveDirectoryHeroConfig,
+  uploadDirectoryHeroImage
+} from "@/lib/firebase/directory-hero";
+import { useDirectoryHeroConfig } from "@/hooks/use-directory-hero-config";
 import { useHomepageModules } from "@/hooks/use-homepage-modules";
 import { useMemberDiscounts } from "@/hooks/use-member-discounts";
 import {
@@ -204,6 +210,168 @@ function MemberDiscountRow({
         </div>
       </div>
     </Reorder.Item>
+  );
+}
+
+function DirectoryHeroImageManager({
+  onFeedback
+}: {
+  onFeedback: (tone: "success" | "error", message: string) => void;
+}) {
+  const { config, loading, error } = useDirectoryHeroConfig();
+  const [heroImages, setHeroImages] = useState<string[]>(config.heroImages);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    setHeroImages(config.heroImages);
+  }, [config.heroImages]);
+
+  function updateImage(index: number, value: string) {
+    setHeroImages((current) =>
+      current.map((imageUrl, currentIndex) =>
+        currentIndex === index ? value : imageUrl
+      )
+    );
+  }
+
+  async function saveImages(nextImages = heroImages) {
+    setSaving(true);
+
+    try {
+      await saveDirectoryHeroConfig({ heroImages: nextImages });
+      onFeedback("success", "Directory hero images saved.");
+    } catch (saveError) {
+      onFeedback("error", formatFirebaseError(saveError));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const imageUrl = await uploadDirectoryHeroImage(file);
+      const nextImages = [...heroImages, imageUrl];
+      setHeroImages(nextImages);
+      await saveImages(nextImages);
+      onFeedback("success", "Directory hero image uploaded.");
+    } catch (uploadError) {
+      onFeedback("error", formatFirebaseError(uploadError));
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-line bg-panel/85 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+            Directory hero images
+          </p>
+          <p className="mt-2 text-sm text-stone-400">
+            These images rotate behind the public directory hero.
+          </p>
+        </div>
+        <label className="cursor-pointer rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft">
+          {uploading ? "Uploading..." : "Upload image"}
+          <input
+            type="file"
+            accept="image/*"
+            disabled={uploading || saving}
+            onChange={(event) => void handleUpload(event)}
+            className="sr-only"
+          />
+        </label>
+      </div>
+
+      {loading ? (
+        <div className="mt-5 h-40 animate-pulse rounded-xl border border-line bg-panelAlt/70" />
+      ) : error ? (
+        <div className="mt-5">
+          <StatePanel title="Unable to load directory hero" description={error} />
+        </div>
+      ) : (
+        <>
+          <div className="mt-5 space-y-3">
+            {heroImages.map((imageUrl, index) => (
+              <div key={index} className="rounded-2xl border border-line bg-panelAlt/70 p-3">
+                <div className="flex gap-2">
+                  <input
+                    value={imageUrl}
+                    placeholder="https://..."
+                    onChange={(event) => updateImage(index, event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHeroImages((current) =>
+                        current.filter((_, currentIndex) => currentIndex !== index)
+                      )
+                    }
+                    className="shrink-0 rounded-xl border border-line px-3 py-2 text-xs text-stone-300 transition hover:border-danger/40 hover:text-danger"
+                  >
+                    Remove
+                  </button>
+                </div>
+                {imageUrl ? (
+                  <div className="mt-3 aspect-[16/10] overflow-hidden rounded-xl border border-line bg-canvas/70">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt="Directory hero preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ))}
+
+            {!heroImages.length ? (
+              <div className="rounded-xl border border-dashed border-line bg-canvas/35 p-5 text-sm text-stone-400">
+                Add or restore images before saving the directory hero.
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => void saveImages()}
+              disabled={saving || uploading}
+              className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition hover:bg-accentSoft disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save images"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setHeroImages(DEFAULT_DIRECTORY_HERO_IMAGES)}
+              disabled={saving || uploading}
+              className="rounded-full border border-line px-5 py-2.5 text-sm text-stone-300 transition hover:border-accent/35 hover:text-accentSoft disabled:opacity-50"
+            >
+              Restore suggestions
+            </button>
+            <button
+              type="button"
+              onClick={() => setHeroImages((current) => [...current, ""])}
+              disabled={saving || uploading}
+              className="rounded-full border border-line px-5 py-2.5 text-sm text-stone-300 transition hover:border-accent/35 hover:text-accentSoft disabled:opacity-50"
+            >
+              Add URL
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -1213,78 +1381,82 @@ export function HomepageAdminPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-line bg-panel/85 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
-                  Member discounts
-                </p>
-                <p className="mt-2 text-sm text-stone-400">
-                  Keep offers ordered and active from the same workspace.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void handleCreateDiscount()}
-                className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
-              >
-                New discount
-              </button>
-            </div>
+          <div className="space-y-6">
+            <DirectoryHeroImageManager onFeedback={setFeedbackMessage} />
 
-            {discountsLoading ? (
-              <div className="mt-5 space-y-3">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-24 animate-pulse rounded-xl border border-line bg-panelAlt/70"
+            <div className="rounded-2xl border border-line bg-panel/85 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+                    Member discounts
+                  </p>
+                  <p className="mt-2 text-sm text-stone-400">
+                    Keep offers ordered and active from the same workspace.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleCreateDiscount()}
+                  className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
+                >
+                  New discount
+                </button>
+              </div>
+
+              {discountsLoading ? (
+                <div className="mt-5 space-y-3">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="h-24 animate-pulse rounded-xl border border-line bg-panelAlt/70"
+                    />
+                  ))}
+                </div>
+              ) : discountsError ? (
+                <div className="mt-5">
+                  <StatePanel
+                    title="Unable to load member discounts"
+                    description={discountsError}
                   />
-                ))}
-              </div>
-            ) : discountsError ? (
-              <div className="mt-5">
-                <StatePanel
-                  title="Unable to load member discounts"
-                  description={discountsError}
-                />
-              </div>
-            ) : discounts.length ? (
-              <Reorder.Group
-                axis="y"
-                values={discounts}
-                onReorder={(nextDiscounts) =>
-                  queueDiscountArrangementSave(syncMemberDiscountOrder(nextDiscounts))
-                }
-                className="mt-5 space-y-3"
-              >
-                {discounts.map((discount) => (
-                  <MemberDiscountRow
-                    key={discount.id}
-                    discount={discount}
-                    onToggleActive={(discountId) =>
-                      queueDiscountArrangementSave(
-                        discounts.map((currentDiscount) =>
-                          currentDiscount.id === discountId
-                            ? {
-                                ...currentDiscount,
-                                active: !currentDiscount.active
-                              }
-                            : currentDiscount
+                </div>
+              ) : discounts.length ? (
+                <Reorder.Group
+                  axis="y"
+                  values={discounts}
+                  onReorder={(nextDiscounts) =>
+                    queueDiscountArrangementSave(syncMemberDiscountOrder(nextDiscounts))
+                  }
+                  className="mt-5 space-y-3"
+                >
+                  {discounts.map((discount) => (
+                    <MemberDiscountRow
+                      key={discount.id}
+                      discount={discount}
+                      onToggleActive={(discountId) =>
+                        queueDiscountArrangementSave(
+                          discounts.map((currentDiscount) =>
+                            currentDiscount.id === discountId
+                              ? {
+                                  ...currentDiscount,
+                                  active: !currentDiscount.active
+                                }
+                              : currentDiscount
+                          )
                         )
-                      )
-                    }
-                    onEdit={(selectedDiscount) => {
-                      setModuleDraft(null);
-                      setDiscountDraft(cloneMemberDiscount(selectedDiscount));
-                    }}
-                  />
-                ))}
-              </Reorder.Group>
-            ) : (
-              <div className="mt-5 rounded-xl border border-dashed border-line bg-canvas/35 p-6 text-sm text-stone-300">
-                Add the first member discount to populate the homepage offer section.
-              </div>
-            )}
+                      }
+                      onEdit={(selectedDiscount) => {
+                        setModuleDraft(null);
+                        setDiscountDraft(cloneMemberDiscount(selectedDiscount));
+                      }}
+                    />
+                  ))}
+                </Reorder.Group>
+              ) : (
+                <div className="mt-5 rounded-xl border border-dashed border-line bg-canvas/35 p-6 text-sm text-stone-300">
+                  Add the first member discount to populate the homepage offer section.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>

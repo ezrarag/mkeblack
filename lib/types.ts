@@ -466,6 +466,12 @@ export type ArticleSummary = {
   publishedAt: Date | null;
 };
 
+export type DirectoryHeroConfig = {
+  id: string;
+  heroImages: string[];
+  updatedAt: Date | null;
+};
+
 export type BusinessCategory =
   | "Food & Drink"
   | "Hair, Beauty & Grooming"

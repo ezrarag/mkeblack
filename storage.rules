@@ -30,6 +30,12 @@ service firebase.storage {
       allow write: if isAdmin() || ownsBusiness(businessId);
     }
 
+    // Site-level assets managed from admin tools.
+    match /assets/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Review photos — uploaded by the reviewing visitor only.
     match /reviews/{businessId}/{authorUid}/{allPaths=**} {
       allow read: if true;

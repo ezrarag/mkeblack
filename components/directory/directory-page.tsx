@@ -13,6 +13,7 @@ import { useBusinesses } from "@/hooks/use-businesses";
 import { useBusinessCategories } from "@/hooks/use-business-categories";
 import { useNeighborhoods } from "@/hooks/use-neighborhoods";
 import { useBusinessTags } from "@/hooks/use-business-tags";
+import { useDirectoryHeroConfig } from "@/hooks/use-directory-hero-config";
 import { Business, DAY_KEYS, DayKey } from "@/lib/types";
 import { haversineKm, titleCase } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const { categories: businessCategories, error: categoriesError } = useBusinessCategories();
   const { neighborhoods, error: neighborhoodsError } = useNeighborhoods();
   const { tags: businessTags, error: tagsError } = useBusinessTags();
+  const { config: directoryHeroConfig } = useDirectoryHeroConfig();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedNeighborhood, setSelectedNeighborhood] = useState("all");
@@ -50,8 +52,10 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [listingPulse, setListingPulse] = useState(false);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
   const listingsRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const heroImages = directoryHeroConfig.heroImages;
 
   useEffect(() => {
     const tagParams = initialTags
@@ -63,6 +67,20 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
       setSelectedTags(Array.from(new Set(tagParams)));
     }
   }, [initialTags]);
+
+  useEffect(() => {
+    setHeroImageIndex(0);
+
+    if (heroImages.length <= 1) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setHeroImageIndex((current) => (current + 1) % heroImages.length);
+    }, 7000);
+
+    return () => window.clearInterval(timer);
+  }, [heroImages.length]);
 
   const categories = useMemo(
     () =>
@@ -299,111 +317,158 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-line bg-panel/75 p-6 shadow-glow sm:p-8 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-accent">
-              Milwaukee directory
-            </p>
-            <h1 className="mt-4 max-w-3xl font-display text-4xl font-black leading-tight text-ink sm:text-5xl lg:text-6xl">
-              Find Black-owned Milwaukee businesses by the day they&apos;re open.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
-              MKE Black makes weekly-hours discovery front and center so residents
-              can quickly see where to eat, shop, book, and support the city&apos;s
-              Black business community.
-            </p>
-          </div>
+      <div className="overflow-hidden rounded-2xl border border-line bg-panel/75 shadow-glow">
+        <div className="relative min-h-[560px] overflow-hidden bg-mesh-dark px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
+          {heroImages.length ? (
+            <>
+              {heroImages.map((imageUrl, index) => (
+                <Image
+                  key={`${imageUrl}-${index}`}
+                  src={imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  fill
+                  sizes="(min-width: 1024px) 1184px, 100vw"
+                  priority={index === 0}
+                  className={`object-cover object-center transition-opacity duration-1000 ${
+                    index === heroImageIndex ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              ))}
+              <div
+                className="absolute inset-0"
+                style={{ background: "var(--directory-hero-image-overlay)" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-canvas/20 via-transparent to-canvas/80" />
+            </>
+          ) : null}
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <button
-              type="button"
-              onClick={scrollToListings}
-              className="rounded-xl border border-line bg-panelAlt/75 p-5 text-left transition hover:-translate-y-0.5 hover:border-accent/40 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent/30"
-            >
-              <p className="text-xs uppercase tracking-[0.24em] text-muted">
-                Live listings
-              </p>
-              <p className="mt-2 font-display text-3xl font-bold text-ink">
-                {loading ? "--" : businesses.length}
-              </p>
-              <p className="mt-1 text-[11px] text-stone-400">Jump to listings</p>
-            </button>
-            <div className="rounded-xl border border-line bg-panelAlt/75 p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-muted">
-                Highlighted day
-              </p>
-              <p className="mt-2 font-display text-3xl font-bold text-ink">
-                {selectedDay === "all" ? "All" : titleCase(selectedDay).slice(0, 3)}
-              </p>
+          <div className="relative flex min-h-[480px] flex-col justify-end">
+            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+                  Milwaukee directory
+                </p>
+                <h1 className="mt-4 max-w-3xl font-display text-4xl font-black leading-tight text-ink sm:text-5xl lg:text-6xl">
+                  Find Black-owned Milwaukee businesses by the day they&apos;re open.
+                </h1>
+                <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
+                  MKE Black makes weekly-hours discovery front and center so residents
+                  can quickly see where to eat, shop, book, and support the city&apos;s
+                  Black business community.
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <button
+                  type="button"
+                  onClick={scrollToListings}
+                  className="rounded-xl border border-line bg-panelAlt/80 p-5 text-left shadow-glow backdrop-blur transition hover:-translate-y-0.5 hover:border-accent/40 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent/30"
+                >
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted">
+                    Live listings
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-bold text-ink">
+                    {loading ? "--" : businesses.length}
+                  </p>
+                  <p className="mt-1 text-[11px] text-stone-400">Jump to listings</p>
+                </button>
+                <div className="rounded-xl border border-line bg-panelAlt/80 p-5 shadow-glow backdrop-blur">
+                  <p className="text-xs uppercase tracking-[0.24em] text-muted">
+                    Highlighted day
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-bold text-ink">
+                    {selectedDay === "all" ? "All" : titleCase(selectedDay).slice(0, 3)}
+                  </p>
+                </div>
+                <Link
+                  href="/membership"
+                  className="rounded-xl border border-success/30 bg-success/15 p-5 shadow-glow backdrop-blur transition hover:border-success/50 hover:bg-success/20"
+                >
+                  <p className="text-xs uppercase tracking-[0.24em] text-success/80">
+                    Solidarity Circle
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-bold text-ink">
+                    {loading ? "--" : solidarityBusinesses.length}
+                  </p>
+                  <p className="mt-1 text-[11px] text-stone-400">members supporting the directory →</p>
+                </Link>
+              </div>
             </div>
-            <Link
-              href="/membership"
-              className="rounded-xl border border-success/30 bg-success/10 p-5 transition hover:border-success/50 hover:bg-success/15"
-            >
-              <p className="text-xs uppercase tracking-[0.24em] text-success/80">
-                Solidarity Circle
-              </p>
-              <p className="mt-2 font-display text-3xl font-bold text-ink">
-                {loading ? "--" : solidarityBusinesses.length}
-              </p>
-              <p className="mt-1 text-[11px] text-stone-400">members supporting the directory →</p>
-            </Link>
+
+            {heroImages.length > 1 ? (
+              <div className="mt-8 flex gap-2">
+                {heroImages.map((imageUrl, index) => (
+                  <button
+                    key={`${imageUrl}-dot-${index}`}
+                    type="button"
+                    onClick={() => setHeroImageIndex(index)}
+                    aria-label={`Show directory hero image ${index + 1}`}
+                    className={`h-2.5 rounded-full border border-line transition ${
+                      index === heroImageIndex
+                        ? "w-8 bg-accent"
+                        : "w-2.5 bg-panelAlt/80 hover:bg-accent/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {!loading && featuredSolidarityBusinesses.length ? (
-          <div className="mt-8 rounded-xl border border-success/25 bg-success/5 p-5 sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-success">
-                  Solidarity Circle members
-                </p>
-                <p className="mt-1 text-sm text-stone-300">
-                  These businesses chip in monthly to keep MKE Black running — and unlock
-                  direct messaging, marketplace, and event tools for their community.
-                </p>
-              </div>
-              <Link
-                href="/membership"
-                className="shrink-0 rounded-full border border-success/40 bg-success/10 px-4 py-2 text-xs font-semibold text-success transition hover:bg-success/20"
-              >
-                Become a member →
-              </Link>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {featuredSolidarityBusinesses.map((business) => (
+        <div className="p-6 sm:p-8 lg:p-10">
+          {!loading && featuredSolidarityBusinesses.length ? (
+            <div className="rounded-xl border border-success/25 bg-success/5 p-5 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-success">
+                    Solidarity Circle members
+                  </p>
+                  <p className="mt-1 text-sm text-stone-300">
+                    These businesses chip in monthly to keep MKE Black running — and unlock
+                    direct messaging, marketplace, and event tools for their community.
+                  </p>
+                </div>
                 <Link
-                  key={business.id}
-                  href={`/business/${business.id}`}
-                  className="flex items-center gap-3 rounded-full border border-line bg-panel/70 py-1.5 pl-1.5 pr-4 transition hover:border-success/40 hover:bg-success/10"
+                  href="/membership"
+                  className="shrink-0 rounded-full border border-success/40 bg-success/10 px-4 py-2 text-xs font-semibold text-success transition hover:bg-success/20"
                 >
-                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line bg-panelAlt">
-                    {business.photos[0] ? (
-                      <Image
-                        src={business.photos[0]}
-                        alt={business.name}
-                        fill
-                        sizes="36px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="flex h-full w-full items-center justify-center font-display text-xs font-black text-stone-500">
-                        {business.name.slice(0, 2).toUpperCase()}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-sm font-medium text-stone-100">{business.name}</span>
+                  Become a member →
                 </Link>
-              ))}
-              {solidarityBusinesses.length > featuredSolidarityBusinesses.length ? (
-                <span className="flex items-center px-2 text-sm text-stone-400">
-                  +{solidarityBusinesses.length - featuredSolidarityBusinesses.length} more
-                </span>
-              ) : null}
+              </div>
+              <div className="mt-5 flex flex-wrap gap-3">
+                {featuredSolidarityBusinesses.map((business) => (
+                  <Link
+                    key={business.id}
+                    href={`/business/${business.id}`}
+                    className="flex items-center gap-3 rounded-full border border-line bg-panel/70 py-1.5 pl-1.5 pr-4 transition hover:border-success/40 hover:bg-success/10"
+                  >
+                    <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line bg-panelAlt">
+                      {business.photos[0] ? (
+                        <Image
+                          src={business.photos[0]}
+                          alt={business.name}
+                          fill
+                          sizes="36px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center font-display text-xs font-black text-stone-500">
+                          {business.name.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-sm font-medium text-stone-100">{business.name}</span>
+                  </Link>
+                ))}
+                {solidarityBusinesses.length > featuredSolidarityBusinesses.length ? (
+                  <span className="flex items-center px-2 text-sm text-stone-400">
+                    +{solidarityBusinesses.length - featuredSolidarityBusinesses.length} more
+                  </span>
+                ) : null}
+              </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
         <div className="mt-10 rounded-xl border border-line bg-canvas/40 p-4 sm:p-5">
           <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr_auto_auto]">
@@ -636,6 +701,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       <div

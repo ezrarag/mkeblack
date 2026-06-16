@@ -103,6 +103,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Public site configuration ────────────────────────────────────────────
+    match /site_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ── Newsletter subscribers ───────────────────────────────────────────────
     match /newsletter_subscribers/{subscriberId} {
       allow create, update: if true;
