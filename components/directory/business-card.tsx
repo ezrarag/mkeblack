@@ -9,6 +9,35 @@ import { Business, DayKey } from "@/lib/types";
 import { titleCase } from "@/lib/utils";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 
+type CategoryVisual = { emoji: string; from: string; to: string };
+
+const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
+  "Food & Drink":                       { emoji: "🍽️",  from: "#7c2d12", to: "#431407" },
+  "Hair, Beauty & Grooming":            { emoji: "✂️",  from: "#701a75", to: "#3b0764" },
+  "Retail & Shopping":                  { emoji: "🛍️", from: "#3730a3", to: "#1e1b4b" },
+  "Music, Entertainment & Culture":     { emoji: "🎵",  from: "#6b21a8", to: "#2e1065" },
+  "Arts, Media & Creative Services":    { emoji: "🎨",  from: "#0e7490", to: "#083344" },
+  "Professional & Business Services":   { emoji: "💼",  from: "#1d4ed8", to: "#1e3a8a" },
+  "Health & Wellness":                  { emoji: "🌱",  from: "#15803d", to: "#14532d" },
+  "Mental Health":                      { emoji: "🌿",  from: "#5b21b6", to: "#2e1065" },
+  "Education, Youth & Family Services": { emoji: "📚",  from: "#0369a1", to: "#0c4a6e" },
+  "Home, Cleaning & Maintenance":       { emoji: "🏠",  from: "#92400e", to: "#451a03" },
+  "Work & Event Spaces":                { emoji: "🏢",  from: "#374151", to: "#111827" },
+  "Legal & Consulting":                 { emoji: "⚖️",  from: "#1e3a8a", to: "#0f172a" },
+  "Automotive":                         { emoji: "🔧",  from: "#334155", to: "#0f172a" },
+  "Sports & Entertainment":             { emoji: "🏆",  from: "#b91c1c", to: "#7f1d1d" },
+  "Catering, Snacks & Drinks":          { emoji: "☕",  from: "#92400e", to: "#3b1a0d" },
+  "Online Goods & Products":            { emoji: "📦",  from: "#6d28d9", to: "#3b0764" },
+  "Online Clothing & Accessories":      { emoji: "👗",  from: "#be185d", to: "#500724" },
+  "Nonprofits":                         { emoji: "🤝",  from: "#065f46", to: "#022c22" },
+  "Resources":                          { emoji: "📋",  from: "#1d4ed8", to: "#1e3a8a" },
+  "Other":                              { emoji: "⭐",  from: "#44403c", to: "#1c1917" },
+};
+
+function getCategoryVisual(category: string): CategoryVisual {
+  return CATEGORY_VISUALS[category] ?? CATEGORY_VISUALS["Other"] ?? { emoji: "⭐", from: "#44403c", to: "#1c1917" };
+}
+
 type BusinessCardProps = {
   business: Business;
   layout: "grid" | "list";
@@ -41,6 +70,7 @@ export function BusinessCard({
     .map((word) => word[0])
     .join("")
     .toUpperCase();
+  const categoryVisual = getCategoryVisual(business.category);
 
   return (
     <article
@@ -77,8 +107,32 @@ export function BusinessCard({
             className="object-cover transition duration-500 group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-panelAlt font-display text-3xl font-black text-stone-500">
-            {initials}
+          <div
+            className="relative flex h-full items-center justify-center overflow-hidden"
+            style={{
+              background: `linear-gradient(150deg, ${categoryVisual.from} 0%, ${categoryVisual.to} 100%)`
+            }}
+          >
+            {/* Large illustrative watermark — cropped bottom-right */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -bottom-4 -right-3 select-none leading-none"
+              style={{ fontSize: "8rem", opacity: 0.22, transform: "rotate(12deg)" }}
+            >
+              {categoryVisual.emoji}
+            </span>
+            {/* Secondary echo — top-left */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -left-3 -top-3 select-none leading-none"
+              style={{ fontSize: "3.5rem", opacity: 0.1, transform: "rotate(-15deg)" }}
+            >
+              {categoryVisual.emoji}
+            </span>
+            {/* Initials */}
+            <span className="relative z-10 font-display text-4xl font-black tracking-tight text-white/60">
+              {initials}
+            </span>
           </div>
         )}
         <div className="absolute left-3 top-3 rounded-full border border-black/20 bg-black/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
