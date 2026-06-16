@@ -168,16 +168,16 @@ export function BusinessCard({
             <span
               className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] ${
                 isOpen
-                  ? "border border-success/40 bg-success/10 text-success"
-                  : "border border-danger/40 bg-danger/10 text-rose-300"
+                  ? "border border-success/50 bg-success/20 text-success"
+                  : "border border-stone-700 bg-transparent text-stone-500"
               }`}
             >
               {isOpen ? "Open" : "Closed"}
             </span>
           </div>
 
-          <p className="mt-3 max-h-[4.5rem] overflow-hidden text-sm leading-6 text-stone-300">
-            {business.description || "Community-rooted Milwaukee business listing."}
+          <p className={`mt-3 max-h-[4.5rem] overflow-hidden text-sm leading-6 ${business.description ? "text-stone-300" : "italic text-stone-500"}`}>
+            {business.description || "No description added yet — view the full profile to learn more."}
           </p>
         </div>
 

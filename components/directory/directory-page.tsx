@@ -6,7 +6,7 @@ import Link from "next/link";
 import { BusinessCard } from "@/components/directory/business-card";
 import { BusinessMap } from "@/components/map/business-map";
 import { StatePanel } from "@/components/ui/state-panel";
-import { isBusinessOpenOnDay } from "@/lib/business-hours";
+import { isBusinessOpenNow, isBusinessOpenOnDay } from "@/lib/business-hours";
 import { getGoogleMapsDirectionsUrl } from "@/lib/directions";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { useBusinesses } from "@/hooks/use-businesses";
@@ -50,6 +50,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const [mobileMapEnabled, setMobileMapEnabled] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
+  const [filterOpenNow, setFilterOpenNow] = useState(false);
   const [geolocating, setGeolocating] = useState(false);
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
@@ -170,12 +171,15 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
         selectedDays.length === 0 ||
         selectedDays.some((day) => isBusinessOpenOnDay(business.hours, day));
 
+      const matchesOpenNow = !filterOpenNow || isBusinessOpenNow(business.hours);
+
       return (
         matchesSearch &&
         matchesCategory &&
         matchesNeighborhood &&
         matchesTags &&
-        matchesDay
+        matchesDay &&
+        matchesOpenNow
       );
     });
 
@@ -206,6 +210,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
     selectedTags,
     tagMatchMode,
     selectedDays,
+    filterOpenNow,
     sortByDistance,
     userLocation
   ]);
@@ -585,7 +590,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           ) : null}
 
         <div className="mt-10 rounded-xl border border-line bg-canvas/40 p-4 sm:p-5">
-          <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr_auto_auto]">
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr_auto_auto_auto]">
             <div>
               <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
                 Search businesses
@@ -691,6 +696,22 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 )}
               </button>
             </div>
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                Status
+              </label>
+              <button
+                type="button"
+                onClick={() => setFilterOpenNow((current) => !current)}
+                className={`w-full rounded-full px-4 py-3 text-sm transition ${
+                  filterOpenNow
+                    ? "border border-success/50 bg-success/20 text-success"
+                    : "border border-line bg-panelAlt/70 text-stone-200 hover:border-success/35 hover:text-success"
+                }`}
+              >
+                {filterOpenNow ? "Open now ✕" : "Open now"}
+              </button>
+            </div>
             <div className="flex items-end">
               <button
                 type="button"
@@ -701,6 +722,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   setSelectedTags([]);
                   setTagMatchMode("any");
                   setSelectedDays([]);
+                  setFilterOpenNow(false);
                   setSortByDistance(false);
                   setUserLocation(null);
                   setLocationMessage(null);
