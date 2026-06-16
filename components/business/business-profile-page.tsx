@@ -17,7 +17,36 @@ import { useBusiness } from "@/hooks/use-business";
 import { useBusinessTags } from "@/hooks/use-business-tags";
 import { useAuth } from "@/components/providers/auth-provider";
 import { addLocalRecentView, persistRecentView } from "@/lib/recent-views";
-import { BusinessTag } from "@/lib/types";
+import { BusinessTag, YelpHoursPeriod } from "@/lib/types";
+
+// Yelp day numbers: 0=Mon … 6=Sun
+const YELP_DAY_LABELS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function formatYelpTime(time: string): string {
+  const h = parseInt(time.slice(0, 2), 10);
+  const m = time.slice(2);
+  const period = h >= 12 ? "PM" : "AM";
+  const displayH = h % 12 || 12;
+  return `${displayH}:${m} ${period}`;
+}
+
+function buildYelpWeeklyDisplay(periods: YelpHoursPeriod[]) {
+  const byDay = new Map<number, YelpHoursPeriod[]>();
+  for (const period of periods) {
+    if (!byDay.has(period.day)) byDay.set(period.day, []);
+    byDay.get(period.day)!.push(period);
+  }
+  return YELP_DAY_LABELS.map((label, index) => {
+    const dayPeriods = byDay.get(index) ?? [];
+    if (!dayPeriods.length) return { label, summary: "Closed" };
+    const summaries = dayPeriods.map((p) =>
+      p.isOvernight
+        ? `${formatYelpTime(p.start)} – overnight`
+        : `${formatYelpTime(p.start)} – ${formatYelpTime(p.end)}`
+    );
+    return { label, summary: summaries.join(", ") };
+  });
+}
 import {
   BusinessReportReason,
   submitBusinessReport
@@ -76,8 +105,11 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
     );
   }
 
-  const weeklyHours = getWeeklyHours(business.hours);
-  const hasOnlyClosedHours = weeklyHours.every((day) => day.summary === "Closed");
+  const hasYelpHours = business.yelpHours.length > 0;
+  const weeklyHours = hasYelpHours
+    ? buildYelpWeeklyDisplay(business.yelpHours)
+    : getWeeklyHours(business.hours);
+  const hasOnlyClosedHours = !hasYelpHours && weeklyHours.every((day) => day.summary === "Closed");
   const profileTags = business.tags
     .map((slug) => businessTags.find((tag) => tag.slug === slug && tag.active))
     .filter((tag): tag is BusinessTag => Boolean(tag));
@@ -413,10 +445,17 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           </div>
 
           <div className="rounded-2xl border border-line bg-panel/85 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-              Weekly hours
-            </p>
-            {business.hoursText ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+                Weekly hours
+              </p>
+              {hasYelpHours ? (
+                <span className="rounded-full border border-[#d32323]/30 bg-[#d32323]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#ff6347]">
+                  Synced from Yelp
+                </span>
+              ) : null}
+            </div>
+            {!hasYelpHours && business.hoursText ? (
               <div className="mt-5 rounded-xl border border-line bg-panelAlt/70 p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">
                   Imported hours note
@@ -429,18 +468,23 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             <div className="mt-5 divide-y divide-line">
               {weeklyHours.map((day) => (
                 <div
-                  key={day.day}
+                  key={day.label}
                   className="flex items-center justify-between gap-4 py-3 text-sm"
                 >
                   <span className="text-stone-200">{day.label}</span>
                   <span className="text-stone-400">
-                    {hasOnlyClosedHours && business.hoursText
+                    {!hasYelpHours && hasOnlyClosedHours && business.hoursText
                       ? "See imported hours note"
                       : day.summary}
                   </span>
                 </div>
               ))}
             </div>
+            {hasYelpHours && business.yelpLastSyncedAt ? (
+              <p className="mt-4 text-[11px] text-stone-600">
+                Last synced {business.yelpLastSyncedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
