@@ -51,6 +51,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [filterOpenNow, setFilterOpenNow] = useState(false);
+  const [locationFilter, setLocationFilter] = useState<"all" | "in-person" | "online">("all");
   const [geolocating, setGeolocating] = useState(false);
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
@@ -173,13 +174,19 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
 
       const matchesOpenNow = !filterOpenNow || isBusinessOpenNow(business.hours);
 
+      const matchesLocation =
+        locationFilter === "all" ||
+        (locationFilter === "online" && business.onlineBased) ||
+        (locationFilter === "in-person" && !business.onlineBased);
+
       return (
         matchesSearch &&
         matchesCategory &&
         matchesNeighborhood &&
         matchesTags &&
         matchesDay &&
-        matchesOpenNow
+        matchesOpenNow &&
+        matchesLocation
       );
     });
 
@@ -211,6 +218,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
     tagMatchMode,
     selectedDays,
     filterOpenNow,
+    locationFilter,
     sortByDistance,
     userLocation
   ]);
@@ -392,15 +400,15 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 </p>
               </div>
 
-              <div className="relative min-h-[430px]">
+              <div className="relative min-h-[560px]">
                 <button
                   type="button"
                   onClick={() => selectHeroCard("live")}
                   aria-pressed={activeHeroCard === "live"}
-                  className={`absolute right-3 top-0 z-10 w-[88%] rounded-xl border p-5 text-left shadow-glow backdrop-blur transition duration-300 sm:right-5 ${
+                  className={`absolute left-1/2 top-0 w-[92%] max-w-[560px] -translate-x-1/2 rounded-xl border p-5 text-left shadow-glow backdrop-blur transition duration-300 ${
                     activeHeroCard === "live"
-                      ? "translate-y-0 border-accent/45 bg-panelAlt/90"
-                      : "translate-y-2 border-line bg-panelAlt/65 hover:-translate-y-0.5 hover:border-accent/35"
+                      ? "z-30 translate-y-0 border-accent/45 bg-panelAlt/90"
+                      : "z-10 translate-y-2 border-line bg-panelAlt/65 hover:-translate-y-0.5 hover:border-accent/35"
                   }`}
                 >
                   <p className="text-xs uppercase tracking-[0.24em] text-muted">
@@ -418,10 +426,10 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   type="button"
                   onClick={() => selectHeroCard("solidarity")}
                   aria-pressed={activeHeroCard === "solidarity"}
-                  className={`absolute right-0 top-20 z-20 w-[92%] rounded-xl border p-5 text-left shadow-glow backdrop-blur transition duration-300 ${
+                  className={`absolute left-1/2 top-28 min-h-[164px] w-[92%] max-w-[560px] -translate-x-1/2 rounded-xl border p-5 text-left shadow-glow backdrop-blur transition duration-300 ${
                     activeHeroCard === "solidarity"
-                      ? "translate-y-0 border-success/45 bg-panelAlt/90"
-                      : "translate-y-2 border-line bg-panelAlt/70 hover:-translate-y-0.5 hover:border-success/40"
+                      ? "z-30 -translate-y-16 border-success/45 bg-panelAlt/95"
+                      : "z-20 translate-y-0 border-line bg-panelAlt/70 hover:-translate-y-1 hover:border-success/40"
                   }`}
                 >
                   <p className="text-xs uppercase tracking-[0.24em] text-success/80">
@@ -442,10 +450,10 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 </button>
 
                 <div
-                  className={`absolute inset-x-0 top-36 z-30 rounded-xl border p-5 shadow-glow backdrop-blur transition duration-300 ${
+                  className={`absolute left-1/2 top-60 w-[92%] max-w-[560px] -translate-x-1/2 rounded-xl border p-5 shadow-glow backdrop-blur transition duration-300 ${
                     activeHeroCard === "day"
-                      ? "border-accent/45 bg-panelAlt/95"
-                      : "border-line bg-panelAlt/85"
+                      ? "z-30 border-accent/45 bg-panelAlt/95"
+                      : "z-20 border-line bg-panelAlt/85"
                   }`}
                 >
                   <button
@@ -712,6 +720,27 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 {filterOpenNow ? "Open now ✕" : "Open now"}
               </button>
             </div>
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
+                Location type
+              </label>
+              <div className="flex rounded-full border border-line bg-panelAlt/70 p-1">
+                {(["all", "in-person", "online"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setLocationFilter(opt)}
+                    className={`flex-1 rounded-full px-2 py-2 text-xs font-medium transition ${
+                      locationFilter === opt
+                        ? "bg-accent text-white"
+                        : "text-stone-300 hover:text-ink"
+                    }`}
+                  >
+                    {opt === "all" ? "All" : opt === "in-person" ? "In-person" : "Online"}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex items-end">
               <button
                 type="button"
@@ -723,6 +752,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   setTagMatchMode("any");
                   setSelectedDays([]);
                   setFilterOpenNow(false);
+                  setLocationFilter("all");
                   setSortByDistance(false);
                   setUserLocation(null);
                   setLocationMessage(null);
@@ -916,7 +946,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           {mobileMapEnabled ? (
             <div className="mb-6 xl:hidden">
               <BusinessMap
-                businesses={filteredBusinesses}
+                businesses={filteredBusinesses.filter((b) => !b.onlineBased)}
                 heightClassName="h-[280px]"
                 userLocation={sortByDistance ? userLocation : null}
                 selectedNeighborhoodFeature={selectedNeighborhoodFeature}
@@ -938,7 +968,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           </div>
           <div className="hidden xl:block xl:sticky xl:top-0 xl:h-screen">
             <BusinessMap
-              businesses={filteredBusinesses}
+              businesses={filteredBusinesses.filter((b) => !b.onlineBased)}
               heightClassName="h-screen"
               userLocation={sortByDistance ? userLocation : null}
               selectedNeighborhoodFeature={selectedNeighborhoodFeature}

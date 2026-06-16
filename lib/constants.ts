@@ -71,6 +71,7 @@ export function createEmptyBusinessForm() {
     photos: [],
     ownerUid: "",
     active: true,
+    onlineBased: false,
     source: "manual" as const,
     yelpBusinessId: "",
     yelpAlias: "",

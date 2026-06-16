@@ -158,7 +158,11 @@ export function BusinessCard({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="font-display text-xl font-bold leading-snug text-ink">{business.name}</h3>
-              <p className="mt-1 text-xs text-stone-400">{business.address}</p>
+              {business.onlineBased ? (
+                <p className="mt-1 text-xs font-semibold text-accent/80">Online-based</p>
+              ) : (
+                <p className="mt-1 text-xs text-stone-400">{business.address}</p>
+              )}
               {business.neighborhood ? (
                 <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
                   {business.neighborhood}

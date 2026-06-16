@@ -252,6 +252,24 @@ export function BusinessEditorForm({
             />
           </div>
           <div className="lg:col-span-2">
+            <div className="mb-4 flex items-center gap-3 rounded-xl border border-line bg-panelAlt/60 px-4 py-3">
+              <input
+                id="onlineBased"
+                type="checkbox"
+                checked={values.onlineBased}
+                onChange={(event) => updateField("onlineBased", event.target.checked)}
+                className="h-4 w-4 accent-accent"
+              />
+              <label htmlFor="onlineBased" className="cursor-pointer text-sm font-medium text-stone-200">
+                Online-based business
+                <span className="ml-2 text-xs text-stone-500">
+                  — hides address and map pin from public listing
+                </span>
+              </label>
+            </div>
+          </div>
+          {!values.onlineBased ? (
+          <div className="lg:col-span-2">
             <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
               Address
             </label>
@@ -291,6 +309,7 @@ export function BusinessEditorForm({
               </div>
             ) : null}
           </div>
+          ) : null}
           <div>
             <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
               Phone
@@ -612,6 +631,8 @@ export function BusinessEditorForm({
                 remain editable here.
               </p>
             </div>
+            {!values.onlineBased ? (
+            <>
             <div>
               <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted">
                 Latitude
@@ -644,8 +665,11 @@ export function BusinessEditorForm({
                 }
               />
             </div>
+            </>
+            ) : null}
           </div>
 
+          {!values.onlineBased ? (
           <div className="mt-6">
             <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">
               Map preview
@@ -692,6 +716,7 @@ export function BusinessEditorForm({
                   yelpLastSyncedAt: null,
                   yelpLastSyncError: "",
                   location: values.location,
+                  onlineBased: false,
                   solidarityMember: false,
                   solidarityMemberSince: null,
                   solidarityMemberExpiry: null,
@@ -702,6 +727,7 @@ export function BusinessEditorForm({
               heightClassName="h-[340px]"
             />
           </div>
+          ) : null}
         </div>
       ) : null}
 

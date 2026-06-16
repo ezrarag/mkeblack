@@ -68,6 +68,8 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const [reporterEmail, setReporterEmail] = useState("");
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportFeedback, setReportFeedback] = useState<string | null>(null);
+  const [flagSubmitting, setFlagSubmitting] = useState(false);
+  const [flagFeedback, setFlagFeedback] = useState<string | null>(null);
 
   // Track this view: localStorage always, Firebase if signed in
   useEffect(() => {
@@ -143,6 +145,26 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
       Boolean(item)
   );
 
+  async function handleFlagForUpdate() {
+    if (!business || flagSubmitting) return;
+    setFlagSubmitting(true);
+    setFlagFeedback(null);
+    try {
+      await submitBusinessReport({
+        businessId: business.id,
+        businessName: business.name,
+        reason: "Needs updating",
+        comment: "",
+        reporterEmail: profile?.email ?? user?.email ?? ""
+      });
+      setFlagFeedback("Flagged — thanks for keeping the directory accurate.");
+    } catch (err) {
+      setFlagFeedback(formatFirebaseError(err));
+    } finally {
+      setFlagSubmitting(false);
+    }
+  }
+
   async function handleReportSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!business) return;
@@ -173,9 +195,16 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
         <div>
           <div className="rounded-2xl border border-line bg-panel/80 p-5 shadow-glow sm:p-6">
             <div className="flex items-start justify-between gap-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-                {business.category}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+                  {business.category}
+                </p>
+                {business.onlineBased ? (
+                  <span className="rounded-full border border-accent/35 bg-accent/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-accentSoft">
+                    Online-based
+                  </span>
+                ) : null}
+              </div>
               <FavoriteButton business={business} className="shrink-0" />
             </div>
             <h1 className="mt-4 font-display text-4xl font-black leading-tight text-ink sm:text-5xl">
@@ -312,21 +341,36 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-4 sm:p-5">
-            <p className="mb-4 px-2 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-              Location
-            </p>
-            <BusinessMap businesses={[business]} />
-          </div>
+          {!business.onlineBased ? (
+            <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-4 sm:p-5">
+              <p className="mb-4 px-2 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+                Location
+              </p>
+              <BusinessMap businesses={[business]} />
+            </div>
+          ) : null}
 
           <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                disabled={flagSubmitting || !!flagFeedback}
+                onClick={() => void handleFlagForUpdate()}
+                className="rounded-full border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-60"
+              >
+                {flagSubmitting ? "Flagging…" : "Flag info as outdated"}
+              </button>
+              {flagFeedback ? (
+                <p className="text-sm text-stone-400">{flagFeedback}</p>
+              ) : null}
+            </div>
             <button
               type="button"
               onClick={() => {
                 setReportOpen((current) => !current);
                 setReportFeedback(null);
               }}
-              className="text-sm font-semibold text-stone-400 underline underline-offset-4 transition hover:text-accentSoft"
+              className="mt-4 text-sm font-semibold text-stone-500 underline underline-offset-4 transition hover:text-accentSoft"
             >
               Report an issue
             </button>
@@ -395,12 +439,20 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
               Contact
             </p>
             <div className="mt-5 space-y-4 text-sm leading-7 text-stone-200">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-muted">
-                  Address
-                </p>
-                <p className="mt-1">{business.address}</p>
-              </div>
+              {business.onlineBased ? (
+                <div>
+                  <p className="text-xs uppercase tracking-[0.22em] text-muted">Location</p>
+                  <p className="mt-1 font-medium text-accentSoft">Online-based business</p>
+                  <p className="mt-0.5 text-xs text-stone-500">No physical storefront</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                    Address
+                  </p>
+                  <p className="mt-1">{business.address}</p>
+                </div>
+              )}
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">
                   Phone

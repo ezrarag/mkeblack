@@ -326,6 +326,7 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
         MILWAUKEE_CENTER.lng
       )
     },
+    onlineBased: booleanValue(record.onlineBased, false),
     solidarityMember: booleanValue(record.solidarityMember, false),
     solidarityMemberSince: parseDateValue(record.solidarityMemberSince),
     solidarityMemberExpiry: parseDateValue(record.solidarityMemberExpiry),
@@ -355,6 +356,7 @@ export function businessToFormValues(business: Business): BusinessFormValues {
     photos: [...business.photos],
     ownerUid: business.ownerUid ?? "",
     active: business.active,
+    onlineBased: business.onlineBased,
     source: business.source,
     yelpBusinessId: business.yelpBusinessId,
     yelpAlias: business.yelpAlias,

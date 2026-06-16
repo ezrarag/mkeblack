@@ -546,6 +546,7 @@ export type Business = {
     lat: number;
     lng: number;
   };
+  onlineBased: boolean;
   solidarityMember: boolean;
   solidarityMemberSince: Date | null;
   solidarityMemberExpiry: Date | null;
@@ -658,6 +659,7 @@ export type BusinessFormValues = {
   photos: string[];
   ownerUid: string;
   active: boolean;
+  onlineBased: boolean;
   source: BusinessSource;
   yelpBusinessId: string;
   yelpAlias: string;

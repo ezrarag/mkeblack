@@ -7,6 +7,7 @@ export type BusinessReportReason =
   | "Business has closed"
   | "Wrong hours"
   | "Wrong address/phone"
+  | "Needs updating"
   | "Other";
 
 export type BusinessReport = {
