@@ -21,6 +21,8 @@ type DirectoryPageProps = {
   initialTags?: string[];
 };
 
+type HeroActionCard = "day" | "live" | "solidarity";
+
 export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const { businesses, loading, error } = useBusinesses();
   const { categories: businessCategories, error: categoriesError } = useBusinessCategories();
@@ -43,7 +45,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const [tagMatchMode, setTagMatchMode] = useState<"any" | "all">("any");
   const [tagsExpanded, setTagsExpanded] = useState(false);
   const [openOnExpanded, setOpenOnExpanded] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<DayKey | "all">("all");
+  const [selectedDays, setSelectedDays] = useState<DayKey[]>([]);
   const [layout, setLayout] = useState<"grid" | "list">("grid");
   const [mobileMapEnabled, setMobileMapEnabled] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -53,9 +55,18 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [listingPulse, setListingPulse] = useState(false);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [activeHeroCard, setActiveHeroCard] = useState<HeroActionCard>("day");
   const listingsRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const heroImages = directoryHeroConfig.heroImages;
+  const selectedDayForCards: DayKey | "all" =
+    selectedDays.length === 1 ? selectedDays[0] : "all";
+  const selectedDayLabel =
+    selectedDays.length === 0
+      ? "All"
+      : selectedDays.length === 1
+        ? titleCase(selectedDays[0]).slice(0, 3)
+        : `${selectedDays.length} days`;
 
   useEffect(() => {
     const tagParams = initialTags
@@ -156,7 +167,8 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
           : selectedTags.some((tag) => business.tags.includes(tag)));
 
       const matchesDay =
-        selectedDay === "all" || isBusinessOpenOnDay(business.hours, selectedDay);
+        selectedDays.length === 0 ||
+        selectedDays.some((day) => isBusinessOpenOnDay(business.hours, day));
 
       return (
         matchesSearch &&
@@ -193,7 +205,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
     selectedNeighborhood,
     selectedTags,
     tagMatchMode,
-    selectedDay,
+    selectedDays,
     sortByDistance,
     userLocation
   ]);
@@ -272,6 +284,22 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
     window.setTimeout(() => setListingPulse(false), 900);
   }
 
+  function selectHeroCard(card: HeroActionCard) {
+    setActiveHeroCard(card);
+
+    if (card === "live") {
+      scrollToListings();
+    }
+  }
+
+  function toggleSelectedDay(day: DayKey) {
+    setSelectedDays((current) =>
+      current.includes(day)
+        ? current.filter((selected) => selected !== day)
+        : [...current, day]
+    );
+  }
+
   function toggleSelectedTag(slug: string) {
     setSelectedTags((current) =>
       current.includes(slug)
@@ -291,7 +319,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
         <BusinessCard
           business={business}
           layout={layout}
-          selectedDay={selectedDay}
+          selectedDay={selectedDayForCards}
           distanceMiles={getDistanceMiles(business)}
           directionsUrl={
             sortByDistance && userLocation
@@ -359,40 +387,126 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="relative min-h-[430px]">
                 <button
                   type="button"
-                  onClick={scrollToListings}
-                  className="rounded-xl border border-line bg-panelAlt/80 p-5 text-left shadow-glow backdrop-blur transition hover:-translate-y-0.5 hover:border-accent/40 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  onClick={() => selectHeroCard("live")}
+                  aria-pressed={activeHeroCard === "live"}
+                  className={`absolute right-3 top-0 z-10 w-[88%] rounded-xl border p-5 text-left shadow-glow backdrop-blur transition duration-300 sm:right-5 ${
+                    activeHeroCard === "live"
+                      ? "translate-y-0 border-accent/45 bg-panelAlt/90"
+                      : "translate-y-2 border-line bg-panelAlt/65 hover:-translate-y-0.5 hover:border-accent/35"
+                  }`}
                 >
                   <p className="text-xs uppercase tracking-[0.24em] text-muted">
                     Live listings
                   </p>
-                  <p className="mt-2 font-display text-3xl font-bold text-ink">
-                    {loading ? "--" : businesses.length}
-                  </p>
-                  <p className="mt-1 text-[11px] text-stone-400">Jump to listings</p>
+                  <div className="mt-2 flex items-end justify-between gap-4">
+                    <p className="font-display text-4xl font-bold text-ink">
+                      {loading ? "--" : businesses.length}
+                    </p>
+                    <p className="text-xs font-semibold text-accent">Jump down</p>
+                  </div>
                 </button>
-                <div className="rounded-xl border border-line bg-panelAlt/80 p-5 shadow-glow backdrop-blur">
-                  <p className="text-xs uppercase tracking-[0.24em] text-muted">
-                    Highlighted day
-                  </p>
-                  <p className="mt-2 font-display text-3xl font-bold text-ink">
-                    {selectedDay === "all" ? "All" : titleCase(selectedDay).slice(0, 3)}
-                  </p>
-                </div>
-                <Link
-                  href="/membership"
-                  className="rounded-xl border border-success/30 bg-success/15 p-5 shadow-glow backdrop-blur transition hover:border-success/50 hover:bg-success/20"
+
+                <button
+                  type="button"
+                  onClick={() => selectHeroCard("solidarity")}
+                  aria-pressed={activeHeroCard === "solidarity"}
+                  className={`absolute right-0 top-20 z-20 w-[92%] rounded-xl border p-5 text-left shadow-glow backdrop-blur transition duration-300 ${
+                    activeHeroCard === "solidarity"
+                      ? "translate-y-0 border-success/45 bg-panelAlt/90"
+                      : "translate-y-2 border-line bg-panelAlt/70 hover:-translate-y-0.5 hover:border-success/40"
+                  }`}
                 >
                   <p className="text-xs uppercase tracking-[0.24em] text-success/80">
                     Solidarity Circle
                   </p>
-                  <p className="mt-2 font-display text-3xl font-bold text-ink">
-                    {loading ? "--" : solidarityBusinesses.length}
+                  {solidarityBusinesses.length >= 50 ? (
+                    <p className="mt-2 font-display text-4xl font-bold text-ink">
+                      {loading ? "--" : solidarityBusinesses.length}
+                    </p>
+                  ) : (
+                    <p className="mt-2 font-display text-2xl font-bold leading-tight text-ink">
+                      Be one of the first to support
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs text-stone-400">
+                    See members supporting the directory →
                   </p>
-                  <p className="mt-1 text-[11px] text-stone-400">members supporting the directory →</p>
-                </Link>
+                </button>
+
+                <div
+                  className={`absolute inset-x-0 top-36 z-30 rounded-xl border p-5 shadow-glow backdrop-blur transition duration-300 ${
+                    activeHeroCard === "day"
+                      ? "border-accent/45 bg-panelAlt/95"
+                      : "border-line bg-panelAlt/85"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => selectHeroCard("day")}
+                    aria-pressed={activeHeroCard === "day"}
+                    className="block w-full text-left"
+                  >
+                    <p className="text-xs uppercase tracking-[0.24em] text-muted">
+                      Highlighted day
+                    </p>
+                    <div className="mt-2 flex items-end justify-between gap-4">
+                      <p className="font-display text-5xl font-bold text-ink">
+                        {selectedDayLabel}
+                      </p>
+                      <p className="text-xs font-semibold text-accent">
+                        {selectedDays.length ? "Filtering" : "Choose days"}
+                      </p>
+                    </div>
+                  </button>
+
+                  <div
+                    className={`grid transition-all duration-300 ${
+                      activeHeroCard === "day"
+                        ? "mt-5 grid-rows-[1fr] opacity-100"
+                        : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDays([])}
+                          className={`rounded-full px-3 py-2 text-xs font-medium transition ${
+                            selectedDays.length === 0
+                              ? "bg-accent text-white"
+                              : "border border-line bg-canvas/60 text-stone-200 hover:border-accent/35"
+                          }`}
+                        >
+                          All days
+                        </button>
+                        {DAY_KEYS.map((day) => {
+                          const selected = selectedDays.includes(day);
+
+                          return (
+                            <button
+                              key={day}
+                              type="button"
+                              onClick={() => toggleSelectedDay(day)}
+                              className={`rounded-full px-3 py-2 text-xs font-medium transition ${
+                                selected
+                                  ? "bg-accent text-white"
+                                  : "border border-line bg-canvas/60 text-stone-200 hover:border-accent/35"
+                              }`}
+                            >
+                              {titleCase(day).slice(0, 3)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="mt-4 text-xs leading-5 text-stone-400">
+                        Pick one or more days to show businesses open when you need them.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -417,7 +531,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
         </div>
 
         <div className="p-6 sm:p-8 lg:p-10">
-          {!loading && featuredSolidarityBusinesses.length ? (
+          {activeHeroCard === "solidarity" && !loading && featuredSolidarityBusinesses.length ? (
             <div className="rounded-xl border border-success/25 bg-success/5 p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -586,7 +700,7 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                   setSelectedNeighborhood("all");
                   setSelectedTags([]);
                   setTagMatchMode("any");
-                  setSelectedDay("all");
+                  setSelectedDays([]);
                   setSortByDistance(false);
                   setUserLocation(null);
                   setLocationMessage(null);
@@ -670,14 +784,14 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
               className="mb-3 rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm text-stone-200 transition hover:border-accent/35"
             >
               {openOnExpanded ? "Hide open on" : "Show open on"}
-              {selectedDay !== "all" ? ` (${titleCase(selectedDay)})` : " (All days)"}
+              {selectedDays.length ? ` (${selectedDayLabel})` : " (All days)"}
             </button>
             <div className={`${openOnExpanded ? "flex" : "hidden"} gap-2 overflow-x-auto pb-1`}>
               <button
                 type="button"
-                onClick={() => setSelectedDay("all")}
+                onClick={() => setSelectedDays([])}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-                  selectedDay === "all"
+                  selectedDays.length === 0
                     ? "bg-accent text-white"
                     : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                 }`}
@@ -688,9 +802,9 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
                 <button
                   key={day}
                   type="button"
-                  onClick={() => setSelectedDay(day)}
+                  onClick={() => toggleSelectedDay(day)}
                   className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-                    selectedDay === day
+                    selectedDays.includes(day)
                       ? "bg-accent text-white"
                       : "border border-line bg-panelAlt/70 text-stone-200 hover:border-accent/35"
                   }`}
