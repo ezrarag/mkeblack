@@ -19,6 +19,7 @@ type BusinessMapProps = {
 
 type MapboxGlobal = {
   accessToken: string;
+  supported?: (options?: { failIfMajorPerformanceCaveat?: boolean }) => boolean;
   Map: new (options: Record<string, unknown>) => MapboxMap;
   Popup: new (options?: Record<string, unknown>) => MapboxPopup;
   NavigationControl: new (options?: Record<string, unknown>) => unknown;
@@ -277,6 +278,7 @@ export function BusinessMap({
   const userLocationRef = useRef(userLocation);
   const onBusinessSelectRef = useRef(onBusinessSelect);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [mapUnsupported, setMapUnsupported] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const businessData = useMemo(() => businessFeatureCollection(businesses), [businesses]);
 
@@ -306,6 +308,15 @@ export function BusinessMap({
         }
 
         mapboxgl.accessToken = mapboxToken;
+
+        if (
+          typeof mapboxgl.supported === "function" &&
+          !mapboxgl.supported({ failIfMajorPerformanceCaveat: true })
+        ) {
+          setMapUnsupported(true);
+          return;
+        }
+
         const map = new mapboxgl.Map({
           container: containerRef.current,
           style: "mapbox://styles/mapbox/dark-v11",
@@ -638,6 +649,17 @@ export function BusinessMap({
         className={`flex items-center justify-center rounded-2xl border border-danger/35 bg-danger/10 p-8 text-center text-sm leading-7 text-stone-100 ${heightClassName}`}
       >
         {loadError}
+      </div>
+    );
+  }
+
+  if (mapUnsupported) {
+    return (
+      <div
+        className={`flex items-center justify-center rounded-2xl border border-line bg-panel/80 p-8 text-center text-sm leading-7 text-stone-300 ${heightClassName}`}
+      >
+        Interactive map unavailable on this device. You can still browse the
+        listings and open directions from each business card.
       </div>
     );
   }
