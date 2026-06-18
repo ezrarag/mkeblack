@@ -115,7 +115,7 @@ function HeaderDropdown({
       {open ? (
         <div
           className={cn(
-            "absolute top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl",
+            "absolute top-full z-[60] mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl",
             align === "left" ? "left-0" : "right-0"
           )}
         >
@@ -218,16 +218,17 @@ export function SiteHeader() {
       !supportOpen &&
       !mobileMenuOpen &&
       !guestAccountOpen
-    ) return;
+    ) {
+      return;
+    }
     function handlePointerDown(event: MouseEvent) {
       if (!menuRef.current?.contains(event.target as Node)) {
         setMenuOpen(false);
         setExploreOpen(false);
-              setSupportOpen(false);
-              setMobileMenuOpen(false);
-              setGuestAccountOpen(false);
-              setSetupGuideOpen(false);
-            }
+        setSupportOpen(false);
+        setMobileMenuOpen(false);
+        setGuestAccountOpen(false);
+      }
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -248,7 +249,7 @@ export function SiteHeader() {
   }, [menuOpen, exploreOpen, supportOpen, mobileMenuOpen, guestAccountOpen]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-charcoal/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-line bg-charcoal/95 backdrop-blur-xl">
       <div ref={menuRef} className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="group flex min-w-0 items-center gap-3">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-accent/30 ring-offset-1 ring-offset-charcoal">
@@ -362,7 +363,7 @@ export function SiteHeader() {
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-40 mt-3 w-72 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
+                <div className="absolute right-0 top-full z-[60] mt-3 w-72 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
                   <div className="rounded-xl border border-line bg-panelAlt/70 px-4 py-4">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-muted">
                       {accountLabel}
@@ -432,7 +433,7 @@ export function SiteHeader() {
                 Account
               </button>
               {guestAccountOpen ? (
-                <div className="absolute right-0 top-full z-40 mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
+                <div className="absolute right-0 top-full z-[60] mt-3 w-64 rounded-2xl border border-line bg-canvas/95 p-3 shadow-glow backdrop-blur-xl">
                   <div className="flex flex-col gap-1.5">
                     <DropdownLink
                       href="/login?next=/admin"
