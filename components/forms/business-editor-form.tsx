@@ -716,6 +716,8 @@ export function BusinessEditorForm({
                   yelpLastSyncedAt: null,
                   yelpLastSyncError: "",
                   location: values.location,
+                  locationVerified: true,
+                  geocodingStatus: "manual",
                   onlineBased: false,
                   solidarityMember: false,
                   solidarityMemberSince: null,

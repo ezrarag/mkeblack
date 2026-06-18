@@ -546,6 +546,8 @@ export type Business = {
     lat: number;
     lng: number;
   };
+  locationVerified: boolean;
+  geocodingStatus: "verified" | "manual" | "failed" | "needs_geocode";
   onlineBased: boolean;
   solidarityMember: boolean;
   solidarityMemberSince: Date | null;

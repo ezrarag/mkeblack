@@ -36,6 +36,26 @@ function nullableNumberValue(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function isDefaultMapLocation(location: { lat: number; lng: number }) {
+  return (
+    Math.abs(location.lat - MILWAUKEE_CENTER.lat) < 0.000001 &&
+    Math.abs(location.lng - MILWAUKEE_CENTER.lng) < 0.000001
+  );
+}
+
+function normalizeGeocodingStatus(value: unknown) {
+  if (
+    value === "verified" ||
+    value === "manual" ||
+    value === "failed" ||
+    value === "needs_geocode"
+  ) {
+    return value;
+  }
+
+  return null;
+}
+
 /**
  * Some imported records still carry the raw Wix export format, where
  * category arrives as a JSON-array string e.g. '["Food & Drink"]' or
@@ -273,6 +293,24 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
   const record = isRecord(value) ? value : {};
   const ownerUid = stringValue(record.ownerUid).trim() || null;
   const source = normalizeBusinessSource(record.source, ownerUid);
+  const location = {
+    lat: numberValue(
+      isRecord(record.location) ? record.location.lat : undefined,
+      MILWAUKEE_CENTER.lat
+    ),
+    lng: numberValue(
+      isRecord(record.location) ? record.location.lng : undefined,
+      MILWAUKEE_CENTER.lng
+    )
+  };
+  const inferredLocationVerified = !isDefaultMapLocation(location);
+  const locationVerified = booleanValue(
+    record.locationVerified,
+    inferredLocationVerified
+  );
+  const normalizedGeocodingStatus = normalizeGeocodingStatus(
+    record.geocodingStatus
+  );
 
   return {
     id,
@@ -316,16 +354,11 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
     yelpHours: normalizeYelpHours(record.yelpHours),
     yelpLastSyncedAt: parseDateValue(record.yelpLastSyncedAt),
     yelpLastSyncError: stringValue(record.yelpLastSyncError).trim(),
-    location: {
-      lat: numberValue(
-        isRecord(record.location) ? record.location.lat : undefined,
-        MILWAUKEE_CENTER.lat
-      ),
-      lng: numberValue(
-        isRecord(record.location) ? record.location.lng : undefined,
-        MILWAUKEE_CENTER.lng
-      )
-    },
+    location,
+    locationVerified,
+    geocodingStatus:
+      normalizedGeocodingStatus ??
+      (locationVerified ? "verified" : record.address ? "failed" : "needs_geocode"),
     onlineBased: booleanValue(record.onlineBased, false),
     solidarityMember: booleanValue(record.solidarityMember, false),
     solidarityMemberSince: parseDateValue(record.solidarityMemberSince),

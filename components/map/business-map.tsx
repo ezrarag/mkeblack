@@ -127,27 +127,75 @@ function escapeHtml(value: string) {
     .replace(/'/g, "&#039;");
 }
 
+function hasMappableLocation(business: Business) {
+  return (
+    business.locationVerified !== false &&
+    Number.isFinite(business.location.lat) &&
+    Number.isFinite(business.location.lng)
+  );
+}
+
+function coordinateKey(business: Business) {
+  return `${business.location.lat.toFixed(6)},${business.location.lng.toFixed(6)}`;
+}
+
+function businessIdsFromFeature(properties?: Record<string, unknown>) {
+  const rawIds = properties?.businessIds;
+
+  if (typeof rawIds !== "string") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawIds);
+    return Array.isArray(parsed)
+      ? parsed.filter((id): id is string => typeof id === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 function businessFeatureCollection(businesses: Business[]) {
+  const groupedBusinesses = businesses
+    .filter(hasMappableLocation)
+    .reduce((groups, business) => {
+      const key = coordinateKey(business);
+      const existingGroup = groups.get(key);
+
+      if (existingGroup) {
+        existingGroup.push(business);
+      } else {
+        groups.set(key, [business]);
+      }
+
+      return groups;
+    }, new Map<string, Business[]>());
+
   return {
     type: "FeatureCollection",
-    features: businesses
-      .filter((business) =>
-        Number.isFinite(business.location.lat) &&
-        Number.isFinite(business.location.lng)
-      )
-      .map((business) => ({
+    features: Array.from(groupedBusinesses.values()).map((group) => {
+      const [business] = group;
+
+      return {
         type: "Feature",
         properties: {
           id: business.id,
+          businessIds: JSON.stringify(group.map((item) => item.id)),
+          businessCount: group.length,
           name: business.name,
-          category: business.category,
-          openNow: isBusinessOpenNow(business.hours)
+          category:
+            group.length > 1
+              ? `${group.length} businesses at this location`
+              : business.category,
+          openNow: group.some((item) => isBusinessOpenNow(item.hours))
         },
         geometry: {
           type: "Point",
           coordinates: [business.location.lng, business.location.lat]
         }
-      }))
+      };
+    })
   };
 }
 
@@ -174,6 +222,42 @@ function popupHtml(
         <a href="/business/${encodeURIComponent(business.id)}" style="color:#EC2024;font-size:12px;font-weight:700">View listing &rarr;</a>
         <a href="${directionsUrl}" target="_blank" rel="noreferrer" style="color:#3b82f6;font-size:12px;font-weight:700">Directions &rarr;</a>
       </div>
+    </div>
+  `;
+}
+
+function groupedPopupHtml(
+  businesses: Business[],
+  userLocation?: { lat: number; lng: number } | null
+) {
+  if (businesses.length <= 1) {
+    return popupHtml(businesses[0], userLocation);
+  }
+
+  const visibleBusinesses = businesses.slice(0, 8);
+  const hiddenCount = businesses.length - visibleBusinesses.length;
+
+  return `
+    <div style="min-width:230px;max-width:280px;background:#ffffff;color:#161616;font-family:system-ui,sans-serif;border-radius:8px;padding:2px">
+      <div style="font-weight:800;font-size:14px;line-height:1.35">${businesses.length} businesses at this location</div>
+      <div style="margin-top:8px;display:grid;gap:8px">
+        ${visibleBusinesses
+          .map(
+            (business) => `
+              <div style="border-top:1px solid #e7e5e4;padding-top:8px">
+                <div style="font-weight:700;font-size:12px;line-height:1.35">${escapeHtml(business.name)}</div>
+                <div style="margin-top:2px;color:#5B6559;font-size:11px">${escapeHtml(business.category)}</div>
+                <a href="/business/${encodeURIComponent(business.id)}" style="display:inline-block;margin-top:5px;color:#EC2024;font-size:11px;font-weight:700">View listing &rarr;</a>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+      ${
+        hiddenCount > 0
+          ? `<div style="margin-top:8px;color:#5B6559;font-size:11px">+ ${hiddenCount} more at this coordinate</div>`
+          : ""
+      }
     </div>
   `;
 }
@@ -242,9 +326,12 @@ export function BusinessMap({
           map.addSource(BUSINESSES_SOURCE_ID, {
             type: "geojson",
             data: businessFeatureCollection(businessesRef.current),
-            cluster: businessesRef.current.length > 15,
+            cluster: true,
             clusterMaxZoom: 14,
-            clusterRadius: 48
+            clusterRadius: 48,
+            clusterProperties: {
+              business_count_sum: ["+", ["get", "businessCount"]]
+            }
           });
 
           map.addLayer({
@@ -267,7 +354,10 @@ export function BusinessMap({
             source: BUSINESSES_SOURCE_ID,
             filter: ["has", "point_count"],
             layout: {
-              "text-field": ["get", "point_count_abbreviated"],
+              "text-field": [
+                "to-string",
+                ["coalesce", ["get", "business_count_sum"], ["get", "point_count"]]
+              ],
               "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
               "text-size": 12
             },
@@ -286,6 +376,22 @@ export function BusinessMap({
               "circle-radius": 7,
               "circle-stroke-color": "#0b0b0b",
               "circle-stroke-width": 2
+            }
+          });
+
+          map.addLayer({
+            id: "business-pin-count",
+            type: "symbol",
+            source: BUSINESSES_SOURCE_ID,
+            filter: [">", ["get", "businessCount"], 1],
+            layout: {
+              "text-field": ["to-string", ["get", "businessCount"]],
+              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+              "text-size": 11,
+              "text-allow-overlap": true
+            },
+            paint: {
+              "text-color": "#ffffff"
             }
           });
 
@@ -313,15 +419,23 @@ export function BusinessMap({
           });
 
           map.on("click", "business-pins", (event) => {
-            const id = event.features?.[0]?.properties?.id;
-            const business = businessesRef.current.find((item) => item.id === id);
+            const feature = event.features?.[0];
+            const businessIds = businessIdsFromFeature(feature?.properties);
+            const selectedBusinesses = businessIds
+              .map((id) => businessesRef.current.find((item) => item.id === id))
+              .filter((business): business is Business => Boolean(business));
+            const fallbackId = feature?.properties?.id;
+            const businessesForPopup = selectedBusinesses.length
+              ? selectedBusinesses
+              : businessesRef.current.filter((item) => item.id === fallbackId);
+            const coordinates = feature?.geometry?.coordinates;
 
-            if (business) {
+            if (businessesForPopup.length && coordinates) {
               popupRef.current
-                ?.setLngLat([business.location.lng, business.location.lat])
-                .setHTML(popupHtml(business, userLocationRef.current))
+                ?.setLngLat(coordinates)
+                .setHTML(groupedPopupHtml(businessesForPopup, userLocationRef.current))
                 .addTo(map);
-              onBusinessSelectRef.current?.(business);
+              onBusinessSelectRef.current?.(businessesForPopup[0]);
             }
           });
 
@@ -365,10 +479,7 @@ export function BusinessMap({
     source.setData(businessData);
 
     const coordinates = businesses
-      .filter((business) =>
-        Number.isFinite(business.location.lat) &&
-        Number.isFinite(business.location.lng)
-      )
+      .filter(hasMappableLocation)
       .map((business) => [business.location.lng, business.location.lat] as [number, number]);
 
     if (coordinates.length === 1) {
@@ -496,7 +607,7 @@ export function BusinessMap({
     const map = mapRef.current;
     const business = businesses.find((item) => item.id === selectedBusinessId);
 
-    if (!loaded || !map || !business) {
+    if (!loaded || !map || !business || !hasMappableLocation(business)) {
       return;
     }
 

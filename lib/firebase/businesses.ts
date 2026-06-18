@@ -1,6 +1,7 @@
 import {
   createClosedBusinessHours,
-  createEmptyBusinessForm
+  createEmptyBusinessForm,
+  MILWAUKEE_CENTER
 } from "@/lib/constants";
 import {
   createBusinessDuplicateKey,
@@ -111,8 +112,26 @@ export function createBusinessDraft() {
   return createEmptyBusinessForm();
 }
 
+function isDefaultMapLocation(location: { lat: number; lng: number }) {
+  return (
+    Math.abs(location.lat - MILWAUKEE_CENTER.lat) < 0.000001 &&
+    Math.abs(location.lng - MILWAUKEE_CENTER.lng) < 0.000001
+  );
+}
+
 export function normalizeBusinessPayload(values: BusinessFormValues) {
   const email = values.email.trim();
+  const location = {
+    lat: Number(values.location.lat),
+    lng: Number(values.location.lng)
+  };
+  const locationVerified =
+    Number.isFinite(location.lat) &&
+    Number.isFinite(location.lng) &&
+    !isDefaultMapLocation(location);
+  const geocodingStatus = (
+    locationVerified ? "manual" : "needs_geocode"
+  ) as Business["geocodingStatus"];
 
   return {
     ...values,
@@ -134,10 +153,9 @@ export function normalizeBusinessPayload(values: BusinessFormValues) {
     source: values.source,
     yelpBusinessId: values.yelpBusinessId.trim(),
     yelpAlias: values.yelpAlias.trim(),
-    location: {
-      lat: Number(values.location.lat),
-      lng: Number(values.location.lng)
-    }
+    location,
+    locationVerified,
+    geocodingStatus
   };
 }
 
@@ -317,6 +335,11 @@ export async function saveBusiness(
 
   if (!payload.address) {
     payload.location = values.location;
+    payload.locationVerified =
+      Number.isFinite(payload.location.lat) &&
+      Number.isFinite(payload.location.lng) &&
+      !isDefaultMapLocation(payload.location);
+    payload.geocodingStatus = payload.locationVerified ? "manual" : "needs_geocode";
   } else if (
     payload.address !== previousAddress ||
     !Number.isFinite(payload.location.lat) ||
@@ -326,16 +349,23 @@ export async function saveBusiness(
 
     if (geocodedLocation) {
       payload.location = geocodedLocation;
+      payload.locationVerified = true;
+      payload.geocodingStatus = "verified";
+    } else {
+      payload.locationVerified = false;
+      payload.geocodingStatus = "failed";
     }
   }
 
   const neighborhoods = await getMilwaukeeNeighborhoods();
-  payload.neighborhood =
-    getNeighborhoodForPoint(
-      payload.location.lat,
-      payload.location.lng,
-      neighborhoods
-    ) ?? payload.neighborhood;
+  if (payload.locationVerified) {
+    payload.neighborhood =
+      getNeighborhoodForPoint(
+        payload.location.lat,
+        payload.location.lng,
+        neighborhoods
+      ) ?? payload.neighborhood;
+  }
 
   await firestoreModule.setDoc(
     businessReference,
@@ -579,7 +609,9 @@ export async function importBusinesses(
       importedAt: firestoreModule.serverTimestamp(),
       claimInviteStatus: "not_invited",
       claimInvitedAt: null,
-      location: location ?? createEmptyBusinessForm().location
+      location: location ?? createEmptyBusinessForm().location,
+      locationVerified: Boolean(location),
+      geocodingStatus: location ? "verified" : address ? "failed" : "needs_geocode"
     });
 
     await updateBusinessTagUsageCounts([], tags);

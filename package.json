@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "audit:business-locations": "node scripts/audit-business-locations.js",
     "lint": "next lint"
   },
   "dependencies": {
