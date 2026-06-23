@@ -7,7 +7,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useAllBusinesses } from "@/hooks/use-all-businesses";
-import { businessToFormValues } from "@/lib/businesses";
+import { businessToFormValues, findPossibleDuplicates } from "@/lib/businesses";
 import {
   createBusiness,
   createBusinessDraft,
@@ -36,7 +36,9 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [creating, setCreating] = useState(startCreating);
-  const [draftValues, setDraftValues] = useState(createBusinessDraft());
+  const [draftValues, setDraftValues] = useState<BusinessFormValues>(
+    createBusinessDraft()
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -102,6 +104,15 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
 
   const selectedBusiness =
     businesses.find((business) => business.id === selectedBusinessId) ?? null;
+  // Client-side duplicate warnings are enough at the current dataset size.
+  // If listings grow substantially, add a server-side duplicate check as well.
+  const draftDuplicates = creating
+    ? findPossibleDuplicates(
+        businesses,
+        draftValues.name,
+        draftValues.address
+      )
+    : [];
 
   async function handleUpdate(values: BusinessFormValues) {
     if (!selectedBusiness) {
@@ -369,7 +380,9 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
                 description="Add a business manually, then assign an owner UID if one already exists in Firebase Auth."
                 submitLabel="Create listing"
                 onSubmit={handleCreate}
+                onChange={setDraftValues}
                 saving={saving}
+                duplicateCandidates={draftDuplicates}
                 showAdminFields
               />
             ) : selectedBusiness ? (

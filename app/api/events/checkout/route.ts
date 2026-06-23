@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
+import { isEventPast } from "@/lib/events";
 import { getFirebaseAdminDb } from "@/lib/firebase/admin";
 import { getBaseUrl, getStripe } from "@/lib/stripe/server";
 
@@ -12,6 +13,15 @@ type TicketRecord = {
   quantitySold: number;
   active: boolean;
 };
+
+class HttpError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
 
 function getString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -51,6 +61,33 @@ function normalizeTickets(value: unknown): TicketRecord[] {
           : 0,
       active: item.active !== false
     }));
+}
+
+function parseDateValue(value: unknown) {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof value.toDate === "function"
+  ) {
+    const parsed = value.toDate();
+    return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+  }
+
+  return null;
 }
 
 export async function POST(req: NextRequest) {
@@ -93,18 +130,30 @@ export async function POST(req: NextRequest) {
     await db.runTransaction(async (transaction) => {
       const eventSnapshot = await transaction.get(eventRef);
       if (!eventSnapshot.exists) {
-        throw new Error("Event not found.");
+        throw new HttpError(404, "Event not found.");
       }
 
       const eventData = eventSnapshot.data() ?? {};
       if (eventData.status !== "published") {
-        throw new Error("This event is not accepting tickets yet.");
+        throw new HttpError(400, "This event is not accepting tickets yet.");
+      }
+
+      if (
+        isEventPast({
+          startsAt: parseDateValue(eventData.startsAt),
+          endsAt: parseDateValue(eventData.endsAt)
+        })
+      ) {
+        throw new HttpError(
+          400,
+          "This event has ended and is no longer accepting RSVPs."
+        );
       }
 
       const tickets = normalizeTickets(eventData.ticketTypes);
       const selectedTicket = tickets.find((candidate) => candidate.id === ticketTypeId);
       if (!selectedTicket?.active) {
-        throw new Error("This ticket is not available.");
+        throw new HttpError(400, "This ticket is not available.");
       }
 
       const remaining =
@@ -113,7 +162,7 @@ export async function POST(req: NextRequest) {
           : Number.MAX_SAFE_INTEGER;
 
       if (remaining < quantity) {
-        throw new Error("Not enough tickets remain.");
+        throw new HttpError(400, "Not enough tickets remain.");
       }
 
       ticket = selectedTicket;
@@ -203,6 +252,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unable to start checkout.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const status = err instanceof HttpError ? err.status : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

@@ -495,14 +495,20 @@ export function BusinessMap({
 
     if (coordinates.length === 1) {
       map.flyTo({ center: coordinates[0], zoom: 14, essential: true });
-    } else if (coordinates.length > 1 && !selectedNeighborhoodFeature) {
+    } else if (
+      coordinates.length > 1 &&
+      !selectedNeighborhoodFeature &&
+      !selectedBusinessId
+    ) {
+      // Only auto-fit when no single business is actively selected — otherwise
+      // selecting a pin would re-frame the whole set and zoom the user out.
       const bounds: [[number, number], [number, number]] = [
         [Math.min(...coordinates.map((point) => point[0])), Math.min(...coordinates.map((point) => point[1]))],
         [Math.max(...coordinates.map((point) => point[0])), Math.max(...coordinates.map((point) => point[1]))]
       ];
       map.fitBounds(bounds, { padding: 64, maxZoom: 13 });
     }
-  }, [businessData, businesses, loaded, selectedNeighborhoodFeature]);
+  }, [businessData, businesses, loaded, selectedNeighborhoodFeature, selectedBusinessId]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -622,9 +628,10 @@ export function BusinessMap({
       return;
     }
 
+    // Pan to the selected business without forcing a zoom level — this keeps
+    // nearby businesses in view instead of snapping to a fixed zoom.
     map.flyTo({
       center: [business.location.lng, business.location.lat],
-      zoom: 14,
       essential: true
     });
     popupRef.current

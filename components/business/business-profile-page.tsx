@@ -286,7 +286,18 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                   Edit as admin
                 </Link>
               ) : null}
+              <button
+                type="button"
+                disabled={flagSubmitting || !!flagFeedback}
+                onClick={() => void handleFlagForUpdate()}
+                className="rounded-full border border-amber-500/35 bg-amber-500/10 px-5 py-2.5 text-sm font-semibold text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-60"
+              >
+                {flagSubmitting ? "Flagging…" : "Flag info as outdated"}
+              </button>
             </div>
+            {flagFeedback ? (
+              <p className="mt-3 text-sm text-stone-400">{flagFeedback}</p>
+            ) : null}
           </div>
 
           <div className="mt-6">
@@ -351,26 +362,13 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
           ) : null}
 
           <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                disabled={flagSubmitting || !!flagFeedback}
-                onClick={() => void handleFlagForUpdate()}
-                className="rounded-full border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-60"
-              >
-                {flagSubmitting ? "Flagging…" : "Flag info as outdated"}
-              </button>
-              {flagFeedback ? (
-                <p className="text-sm text-stone-400">{flagFeedback}</p>
-              ) : null}
-            </div>
             <button
               type="button"
               onClick={() => {
                 setReportOpen((current) => !current);
                 setReportFeedback(null);
               }}
-              className="mt-4 text-sm font-semibold text-stone-500 underline underline-offset-4 transition hover:text-accentSoft"
+              className="text-sm font-semibold text-stone-500 underline underline-offset-4 transition hover:text-accentSoft"
             >
               Report an issue
             </button>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useBusinessEvents } from "@/hooks/use-business-events";
+import { isEventPast } from "@/lib/events";
 import { BusinessEvent, EventTicketType } from "@/lib/types";
 
 function priceDisplay(cents: number) {
@@ -141,10 +142,17 @@ function EventTicketForm({
 }
 
 function EventCard({ event }: { event: BusinessEvent }) {
+  const eventPast = isEventPast(event);
   const tickets = event.ticketTypes.filter((ticket) => ticket.active);
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-line bg-panel/80 shadow-glow">
+    <article
+      className={`overflow-hidden rounded-2xl border bg-panel/80 shadow-glow transition ${
+        eventPast
+          ? "border-line/70 opacity-80"
+          : "border-line"
+      }`}
+    >
       {event.imageUrl ? (
         <div className="relative aspect-[16/7] w-full bg-panelAlt">
           <Image
@@ -159,13 +167,24 @@ function EventCard({ event }: { event: BusinessEvent }) {
       ) : null}
 
       <div className="p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-          {event.businessName}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p
+            className={`text-xs font-semibold uppercase tracking-[0.24em] ${
+              eventPast ? "text-stone-500" : "text-accent"
+            }`}
+          >
+            {event.businessName}
+          </p>
+          {eventPast ? (
+            <span className="rounded-full border border-line bg-panelAlt/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-300">
+              Ended
+            </span>
+          ) : null}
+        </div>
         <h2 className="mt-3 font-display text-3xl font-black text-ink">
           {event.title}
         </h2>
-        <p className="mt-3 text-sm leading-7 text-stone-300">
+        <p className={`mt-3 text-sm leading-7 ${eventPast ? "text-stone-400" : "text-stone-300"}`}>
           {event.description}
         </p>
         <div className="mt-5 grid gap-3 text-sm text-stone-400 sm:grid-cols-2">
@@ -185,7 +204,11 @@ function EventCard({ event }: { event: BusinessEvent }) {
         </div>
 
         <div className="mt-6 space-y-3">
-          {tickets.length ? (
+          {eventPast ? (
+            <p className="rounded-xl border border-line bg-canvas/40 px-4 py-3 text-sm text-stone-300">
+              This event has ended.
+            </p>
+          ) : tickets.length ? (
             tickets.map((ticket) => (
               <EventTicketForm
                 key={ticket.id}
@@ -206,6 +229,11 @@ function EventCard({ event }: { event: BusinessEvent }) {
 
 export function EventsPage() {
   const { events, loading, error } = useBusinessEvents({ publishedOnly: true });
+  const upcomingEvents = events.filter((event) => !isEventPast(event));
+  const pastEvents = [...events.filter((event) => isEventPast(event))].sort(
+    (left, right) =>
+      (right.startsAt?.getTime() ?? 0) - (left.startsAt?.getTime() ?? 0)
+  );
 
   return (
     <main>
@@ -215,7 +243,7 @@ export function EventsPage() {
             Events
           </p>
           <h1 className="mt-4 font-display text-5xl font-black leading-tight text-ink sm:text-6xl">
-            Black cultural &amp; business events.
+            Black Cultural &amp; Business Events
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
             Discover community gatherings, business workshops, pop-ups, and
@@ -232,10 +260,41 @@ export function EventsPage() {
             {error}
           </div>
         ) : events.length ? (
-          <div className="space-y-8">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+          <div className="space-y-12">
+            {upcomingEvents.length ? (
+              <div className="space-y-8">
+                {upcomingEvents.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-line bg-panel/80 p-8 text-center">
+                <p className="font-display text-2xl font-bold text-ink">
+                  No upcoming events right now.
+                </p>
+                <p className="mt-3 text-sm leading-7 text-stone-400">
+                  Check back soon for the next community gathering, workshop, or celebration.
+                </p>
+              </div>
+            )}
+
+            {pastEvents.length ? (
+              <div>
+                <div className="mb-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">
+                    Past Events
+                  </p>
+                  <h2 className="mt-2 font-display text-3xl font-bold text-ink">
+                    Event Archive
+                  </h2>
+                </div>
+                <div className="space-y-8">
+                  {pastEvents.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="rounded-2xl border border-line bg-panel/80 p-12 text-center">

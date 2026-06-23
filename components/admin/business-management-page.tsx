@@ -76,6 +76,9 @@ export function BusinessManagementPage() {
   const allVisibleIds = filteredBusinesses.map((business) => business.id);
   const allVisibleSelected =
     allVisibleIds.length > 0 && allVisibleIds.every((id) => selectedIds.includes(id));
+  const selectedCount = selectedIds.length;
+  const bulkButtonClass =
+    "rounded-full px-4 py-2 text-sm transition disabled:cursor-not-allowed disabled:border-line disabled:bg-panelAlt/60 disabled:text-stone-500";
 
   function getDraft(businessId: string) {
     const existingDraft = drafts[businessId];
@@ -133,7 +136,7 @@ export function BusinessManagementPage() {
   }
 
   async function handleBulkActive(active: boolean) {
-    if (!filteredBusinesses.length) {
+    if (!selectedIds.length) {
       return;
     }
 
@@ -141,13 +144,11 @@ export function BusinessManagementPage() {
     setFeedback(null);
 
     try {
-      await setBusinessesActive(
-        filteredBusinesses.map((business) => business.id),
-        active
-      );
+      await setBusinessesActive(selectedIds, active);
+      setSelectedIds([]);
       setFeedbackTone("success");
       setFeedback(
-        `${active ? "Activated" : "Deactivated"} ${filteredBusinesses.length} visible listings.`
+        `${active ? "Activated" : "Deactivated"} ${selectedIds.length} selected listing${selectedIds.length === 1 ? "" : "s"}.`
       );
     } catch (bulkError) {
       setFeedbackTone("error");
@@ -301,29 +302,31 @@ export function BusinessManagementPage() {
             <button
               type="button"
               onClick={() => void handleBulkActive(true)}
-              disabled={bulkSaving || !filteredBusinesses.length}
-              className="rounded-full border border-success/35 bg-success/10 px-4 py-2 text-sm text-success transition hover:bg-success/15"
+              disabled={bulkSaving || selectedCount === 0}
+              className={`${bulkButtonClass} border border-success/35 bg-success/10 text-success hover:bg-success/15 disabled:hover:bg-panelAlt/60`}
             >
-              Activate all
+              Activate Selected ({selectedCount})
             </button>
             <button
               type="button"
               onClick={() => void handleBulkActive(false)}
-              disabled={bulkSaving || !filteredBusinesses.length}
-              className="rounded-full border border-danger/35 bg-danger/10 px-4 py-2 text-sm text-rose-200 transition hover:bg-danger/15"
+              disabled={bulkSaving || selectedCount === 0}
+              className={`${bulkButtonClass} border border-danger/35 bg-danger/10 text-rose-200 hover:bg-danger/15 disabled:hover:bg-panelAlt/60`}
             >
-              Deactivate all
+              Deactivate Selected ({selectedCount})
             </button>
             <button
               type="button"
               onClick={() => void handleDeleteSelected()}
-              disabled={bulkSaving || !selectedIds.length}
-              className="rounded-full border border-danger/35 bg-danger/10 px-4 py-2 text-sm text-rose-200 transition hover:bg-danger/15"
+              disabled={bulkSaving || selectedCount === 0}
+              className={`${bulkButtonClass} border border-danger/35 bg-danger/10 text-rose-200 hover:bg-danger/15 disabled:hover:bg-panelAlt/60`}
             >
-              Delete selected
+              Delete Selected ({selectedCount})
             </button>
             <p className="self-center text-sm text-stone-400">
-              Bulk actions apply to the current filtered table.
+              {selectedCount
+                ? `${selectedCount} listing${selectedCount === 1 ? "" : "s"} selected.`
+                : "Select listings to enable bulk actions."}
             </p>
           </div>
         </div>
@@ -352,10 +355,10 @@ export function BusinessManagementPage() {
                         type="checkbox"
                         checked={allVisibleSelected}
                         onChange={(event) =>
-                          setSelectedIds(
+                          setSelectedIds((current) =>
                             event.target.checked
-                              ? allVisibleIds
-                              : selectedIds.filter((id) => !allVisibleIds.includes(id))
+                              ? Array.from(new Set([...current, ...allVisibleIds]))
+                              : current.filter((id) => !allVisibleIds.includes(id))
                           )
                         }
                       />

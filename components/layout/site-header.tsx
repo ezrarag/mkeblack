@@ -29,9 +29,9 @@ const primaryLinks: NavLink[] = [
 
 const exploreLinks: NavLink[] = [
   { href: "/about", label: "About" },
-  { href: "/what-we-do", label: "What we do" },
-  { href: "/who-we-are", label: "Who we are" },
-  { href: "/news-articles", label: "News" },
+  { href: "/what-we-do", label: "What We Do" },
+  { href: "/who-we-are", label: "Who We Are" },
+  { href: "/news-articles", label: "News & Articles" },
   { href: "/groups", label: "Groups" },
   { href: "/contact", label: "Contact" }
 ];

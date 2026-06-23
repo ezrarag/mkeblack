@@ -36,7 +36,7 @@ export function WhatWeDoPage() {
             What We Do
           </p>
           <h1 className="mt-4 font-display text-5xl font-black leading-tight text-ink sm:text-6xl">
-            Four pillars of community investment.
+            Four Pillars of Community Investment
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
             MKE Black creates sustainable pathways to visibility, connection, and wealth

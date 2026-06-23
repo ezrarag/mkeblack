@@ -146,7 +146,7 @@ export function WhoWeArePage() {
             Who We Are
           </p>
           <h1 className="mt-4 font-display text-5xl font-black leading-tight text-ink sm:text-6xl">
-            The people behind MKE Black.
+            The People Behind MKE Black
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
             A dedicated team of community builders, advocates, and leaders driving

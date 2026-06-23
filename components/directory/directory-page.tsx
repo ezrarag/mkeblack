@@ -388,10 +388,10 @@ export function DirectoryPage({ initialTags = [] }: DirectoryPageProps) {
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-accent">
-                  Milwaukee directory
+                  Milwaukee Directory
                 </p>
                 <h1 className="mt-4 max-w-3xl font-display text-4xl font-black leading-tight text-ink sm:text-5xl lg:text-6xl">
-                  Find Black-owned Milwaukee businesses by the day they&apos;re open.
+                  Find Black-Owned Milwaukee Businesses by the Day They&apos;re Open
                 </h1>
                 <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
                   MKE Black makes weekly-hours discovery front and center so residents

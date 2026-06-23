@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useBusinesses } from "@/hooks/use-businesses";
+import { findPossibleDuplicates } from "@/lib/businesses";
 import {
   attachGoogleAccountToBusinessSubmission,
   submitContactForm,
@@ -38,6 +40,7 @@ export function ContactPage() {
   const forcedReason = searchParams.get("reason") === "submit_business";
   const prefilledReason = searchParams.get("reason");
   const { user } = useAuth();
+  const { businesses } = useBusinesses();
   const [reason, setReason] = useState<ContactReason>(() => {
     if (forcedReason) return "submit_business";
     if (prefilledReason === "suggest_business") return "suggest_business";
@@ -63,13 +66,33 @@ export function ContactPage() {
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [postSubmitAttached, setPostSubmitAttached] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateOverrideConfirmed, setDuplicateOverrideConfirmed] = useState(false);
 
   const isBizSubmission = reason === "submit_business";
   const isSuggestBusiness = reason === "suggest_business";
+  // Client-side duplicate matching keeps this lightweight for now.
+  // Add a server-side duplicate check later if the listings dataset grows.
+  const possibleDuplicates = isBizSubmission
+    ? findPossibleDuplicates(
+        businesses,
+        form.businessName ?? "",
+        form.address ?? ""
+      )
+    : [];
+  const showDuplicateWarning =
+    isBizSubmission &&
+    Boolean(form.businessName?.trim()) &&
+    Boolean(form.address?.trim()) &&
+    possibleDuplicates.length > 0 &&
+    (!forcedReason || businessStep === businessSteps.length - 1);
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
+
+  useEffect(() => {
+    setDuplicateOverrideConfirmed(false);
+  }, [reason, form.businessName, form.address]);
 
   function getBusinessStepError() {
     if (businessStep === 0) {
@@ -169,6 +192,14 @@ export function ContactPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+
+    if (showDuplicateWarning && !duplicateOverrideConfirmed) {
+      setError(
+        "A similar business may already be listed. Review the duplicate warning before continuing."
+      );
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -772,6 +803,46 @@ export function ContactPage() {
             )}
           </div>
 
+          {showDuplicateWarning ? (
+            <div className="mt-6 rounded-2xl border border-amber-400/35 bg-amber-500/10 p-5">
+              <p className="text-sm font-semibold text-amber-100">
+                A business like this may already be listed:
+              </p>
+              <div className="mt-4 space-y-3">
+                {possibleDuplicates.map((business) => (
+                  <div
+                    key={business.id}
+                    className="rounded-xl border border-amber-300/20 bg-panelAlt/60 px-4 py-3"
+                  >
+                    <p className="font-medium text-stone-100">{business.name}</p>
+                    <p className="mt-1 text-sm text-stone-400">
+                      {business.address || "Address not provided"}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                      <Link
+                        href={`/business/${business.id}`}
+                        className="font-semibold text-amber-100 transition hover:text-white"
+                      >
+                        View Listing
+                      </Link>
+                      <Link
+                        href={`/claim/${business.id}`}
+                        className="font-semibold text-accentSoft transition hover:text-accent"
+                      >
+                        Claim This Listing Instead
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {duplicateOverrideConfirmed ? (
+                <p className="mt-4 text-sm text-stone-200">
+                  Marked as different. You can continue with this submission.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {error ? (
             <p className="mt-4 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-rose-300">
               {error}
@@ -802,15 +873,25 @@ export function ContactPage() {
               </button>
             ) : (
               <button
-                type="submit"
+                type={showDuplicateWarning && !duplicateOverrideConfirmed ? "button" : "submit"}
+                onClick={
+                  showDuplicateWarning && !duplicateOverrideConfirmed
+                    ? () => {
+                        setDuplicateOverrideConfirmed(true);
+                        setError(null);
+                      }
+                    : undefined
+                }
                 disabled={submitting}
                 className="rounded-full border border-accent bg-accent px-8 py-3 text-sm font-medium text-white transition hover:bg-accentSoft disabled:opacity-50"
               >
-                {submitting
-                  ? "Sending..."
-                  : forcedReason
-                  ? "Submit business"
-                  : "Send message"}
+                {showDuplicateWarning && !duplicateOverrideConfirmed
+                  ? "No, This Is Different — Continue"
+                  : submitting
+                    ? "Sending..."
+                    : forcedReason
+                      ? "Submit Business"
+                      : "Send message"}
               </button>
             )}
           </div>

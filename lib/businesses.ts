@@ -412,6 +412,94 @@ export function createBusinessDuplicateKey(name: string, address: string) {
   return `${name.trim().toLowerCase()}::${address.trim().toLowerCase()}`;
 }
 
+function normalizeDuplicateBusinessName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[&]/g, " and ")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\bthe\b/g, " ")
+    .replace(/\b(llc|inc|incorporated|co|company|corp|corporation|ltd)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeDuplicateStreetAddress(address: string) {
+  const firstLine = address
+    .toLowerCase()
+    .split(",")[0]
+    ?.replace(/[^\w\s]/g, " ")
+    .replace(/\b(apt|apartment|suite|ste|unit)\b.*$/g, " ")
+    .replace(/\b(street|st|avenue|ave|road|rd|drive|dr|lane|ln|court|ct|place|pl|boulevard|blvd|way)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!firstLine) {
+    return "";
+  }
+
+  const parts = firstLine.split(" ").filter(Boolean);
+  const streetNumber = parts[0]?.match(/^\d+/)?.[0] ?? "";
+  const streetName = parts.slice(1).join(" ");
+
+  if (!streetNumber || !streetName) {
+    return "";
+  }
+
+  return `${streetNumber} ${streetName}`.trim();
+}
+
+export function findPossibleDuplicates(
+  businesses: Business[],
+  name: string,
+  address: string,
+  options?: { excludeBusinessId?: string }
+) {
+  const normalizedName = normalizeDuplicateBusinessName(name);
+  const normalizedAddress = normalizeDuplicateStreetAddress(address);
+
+  if (!normalizedName) {
+    return [];
+  }
+
+  return businesses
+    .filter((business) => business.id !== options?.excludeBusinessId)
+    .map((business) => {
+      const candidateName = normalizeDuplicateBusinessName(business.name);
+      const candidateAddress = normalizeDuplicateStreetAddress(business.address);
+      const exactNameMatch = candidateName === normalizedName;
+      const containsNameMatch =
+        candidateName.includes(normalizedName) || normalizedName.includes(candidateName);
+      const addressMatch =
+        Boolean(normalizedAddress) &&
+        Boolean(candidateAddress) &&
+        candidateAddress === normalizedAddress;
+
+      return {
+        business,
+        exactNameMatch,
+        containsNameMatch,
+        addressMatch,
+        score:
+          (exactNameMatch ? 3 : 0) +
+          (containsNameMatch ? 2 : 0) +
+          (addressMatch ? 2 : 0)
+      };
+    })
+    .filter(
+      ({ exactNameMatch, containsNameMatch, addressMatch }) =>
+        exactNameMatch || containsNameMatch || addressMatch
+    )
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+
+      return left.business.name.localeCompare(right.business.name);
+    })
+    .slice(0, 5)
+    .map(({ business }) => business);
+}
+
 export function normalizeBusinessClaimInvite(
   value: unknown,
   id: string

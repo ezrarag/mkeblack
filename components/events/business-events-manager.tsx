@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { useBusinessEvents } from "@/hooks/use-business-events";
+import { isEventPast } from "@/lib/events";
 import {
   deleteBusinessEvent,
   saveBusinessEvent,
@@ -63,8 +64,14 @@ function EventRow({
   onEdit: (event: BusinessEvent) => void;
   onDelete: (event: BusinessEvent) => void;
 }) {
+  const eventPast = isEventPast(event);
+
   return (
-    <div className="flex items-start gap-4 rounded-xl border border-line bg-panelAlt/60 p-4">
+    <div
+      className={`flex items-start gap-4 rounded-xl border bg-panelAlt/60 p-4 ${
+        eventPast ? "border-line/70 opacity-80" : "border-line"
+      }`}
+    >
       {event.imageUrl ? (
         <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg border border-line">
           <Image
@@ -106,6 +113,11 @@ function EventRow({
             {event.status}
           </span>
         </div>
+        {eventPast ? (
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
+            Ended
+          </p>
+        ) : null}
         <p className="mt-2 text-xs text-stone-400">
           {event.ticketTypes.length
             ? event.ticketTypes.map((ticket) => priceDisplay(ticket.priceCents)).join(" · ")

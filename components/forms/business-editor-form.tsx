@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { BusinessFormValues, DayKey } from "@/lib/types";
 import { formatPhone } from "@/lib/utils";
@@ -19,10 +20,16 @@ type BusinessEditorFormProps = {
   description: string;
   submitLabel: string;
   onSubmit: (values: BusinessFormValues) => Promise<void>;
+  onChange?: (values: BusinessFormValues) => void;
   onUploadPhotos?: (files: File[]) => Promise<void>;
   onRemovePhoto?: (photoUrl: string) => Promise<void>;
   saving?: boolean;
   uploading?: boolean;
+  duplicateCandidates?: Array<{
+    id: string;
+    name: string;
+    address: string;
+  }>;
   /** Show admin-only controls: ownerUid, active toggle, lat/lng, map preview */
   showAdminFields?: boolean;
   /** Show internal data-only fields: listing source badge, raw hoursText. Hidden for owners. */
@@ -58,10 +65,12 @@ export function BusinessEditorForm({
   description,
   submitLabel,
   onSubmit,
+  onChange,
   onUploadPhotos,
   onRemovePhoto,
   saving = false,
   uploading = false,
+  duplicateCandidates = [],
   showAdminFields = false,
   showInternalFields = true
 }: BusinessEditorFormProps) {
@@ -89,11 +98,21 @@ export function BusinessEditorForm({
     setGeocodeFeedback(null);
   }, [initialValues]);
 
+  function updateValues(
+    updater: (current: BusinessFormValues) => BusinessFormValues
+  ) {
+    setValues((current) => {
+      const next = updater(current);
+      onChange?.(next);
+      return next;
+    });
+  }
+
   function updateField<Key extends keyof BusinessFormValues>(
     field: Key,
     value: BusinessFormValues[Key]
   ) {
-    setValues((current) => ({
+    updateValues((current) => ({
       ...current,
       [field]: value
     }));
@@ -104,7 +123,7 @@ export function BusinessEditorForm({
     field: "open" | "close" | "closed",
     value: string | boolean
   ) {
-    setValues((current) => ({
+    updateValues((current) => ({
       ...current,
       hours: {
         ...current.hours,
@@ -117,7 +136,7 @@ export function BusinessEditorForm({
   }
 
   function toggleTag(slug: string) {
-    setValues((current) => ({
+    updateValues((current) => ({
       ...current,
       tags: current.tags.includes(slug)
         ? current.tags.filter((tag) => tag !== slug)
@@ -210,6 +229,44 @@ export function BusinessEditorForm({
         <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
           {description}
         </p>
+
+        {duplicateCandidates.length ? (
+          <div className="mt-6 rounded-2xl border border-amber-400/35 bg-amber-500/10 p-4">
+            <p className="text-sm font-semibold text-amber-100">
+              A business like this may already be listed.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-stone-200">
+              Review these listings before creating another one. You can still continue if this is an intentional second location.
+            </p>
+            <div className="mt-4 space-y-3">
+              {duplicateCandidates.map((business) => (
+                <div
+                  key={business.id}
+                  className="rounded-xl border border-amber-300/20 bg-panelAlt/60 px-4 py-3"
+                >
+                  <p className="font-medium text-stone-100">{business.name}</p>
+                  <p className="mt-1 text-sm text-stone-400">
+                    {business.address || "Address not provided"}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                    <Link
+                      href={`/business/${business.id}`}
+                      className="font-semibold text-amber-100 transition hover:text-white"
+                    >
+                      View Listing
+                    </Link>
+                    <Link
+                      href={`/claim/${business.id}`}
+                      className="font-semibold text-accentSoft transition hover:text-accent"
+                    >
+                      Claim This Listing Instead
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-8 grid gap-5 lg:grid-cols-2">
           <div>
