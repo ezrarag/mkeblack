@@ -347,7 +347,45 @@ export function BusinessMap({
 
           map.addSource(BUSINESSES_SOURCE_ID, {
             type: "geojson",
-            data: businessFeatureCollection(businessesRef.current)
+            data: businessFeatureCollection(businessesRef.current),
+            cluster: true,
+            clusterMaxZoom: 14,
+            clusterRadius: 48,
+            clusterProperties: {
+              business_count_sum: ["+", ["get", "businessCount"]]
+            }
+          });
+
+          map.addLayer({
+            id: "business-clusters",
+            type: "circle",
+            source: BUSINESSES_SOURCE_ID,
+            filter: ["has", "point_count"],
+            paint: {
+              "circle-color": "#EC2024",
+              "circle-radius": ["step", ["get", "point_count"], 18, 25, 24, 60, 32],
+              "circle-opacity": 0.92,
+              "circle-stroke-color": "#0b0b0b",
+              "circle-stroke-width": 2
+            }
+          });
+
+          map.addLayer({
+            id: "business-cluster-count",
+            type: "symbol",
+            source: BUSINESSES_SOURCE_ID,
+            filter: ["has", "point_count"],
+            layout: {
+              "text-field": [
+                "to-string",
+                ["coalesce", ["get", "business_count_sum"], ["get", "point_count"]]
+              ],
+              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+              "text-size": 12
+            },
+            paint: {
+              "text-color": "#ffffff"
+            }
           });
 
           map.addLayer({
@@ -377,6 +415,29 @@ export function BusinessMap({
             paint: {
               "text-color": "#ffffff"
             }
+          });
+
+          map.on("click", "business-clusters", (event) => {
+            const feature = event.features?.[0];
+            const clusterId = feature?.properties?.cluster_id;
+            const coordinates = feature?.geometry?.coordinates;
+            const source = map.getSource(BUSINESSES_SOURCE_ID);
+
+            if (
+              typeof clusterId !== "number" ||
+              !coordinates ||
+              !source?.getClusterExpansionZoom
+            ) {
+              return;
+            }
+
+            source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+              if (error) {
+                return;
+              }
+
+              map.flyTo({ center: coordinates, zoom });
+            });
           });
 
           map.on("click", "business-pins", (event) => {
@@ -417,6 +478,8 @@ export function BusinessMap({
 
           map.on("mouseenter", "business-pins", setPointer);
           map.on("mouseleave", "business-pins", clearPointer);
+          map.on("mouseenter", "business-clusters", setPointer);
+          map.on("mouseleave", "business-clusters", clearPointer);
           map.on("dragstart", markUserInteraction);
           map.on("zoomstart", markUserInteraction);
 
@@ -510,7 +573,7 @@ export function BusinessMap({
           "fill-opacity": 0.10
         }
       },
-      "business-pins"
+      "business-clusters"
     );
     map.addLayer(
       {
@@ -522,7 +585,7 @@ export function BusinessMap({
           "line-width": 2.5
         }
       },
-      "business-pins"
+      "business-clusters"
     );
 
     const bounds = getNeighborhoodBounds(selectedNeighborhoodFeature);
