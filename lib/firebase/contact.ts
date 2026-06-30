@@ -264,6 +264,15 @@ export async function approveBusinessListingSubmission(
     "contactSubmissions",
     submission.id
   );
+  const businessReference = firestoreModule.doc(db, "businesses", businessId);
+
+  await firestoreModule.setDoc(
+    businessReference,
+    {
+      moderationStatus: "approved"
+    },
+    { merge: true }
+  );
 
   await firestoreModule.setDoc(
     submissionReference,

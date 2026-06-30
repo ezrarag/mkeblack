@@ -6,6 +6,8 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useAllBusinesses } from "@/hooks/use-all-businesses";
 import {
+  getBusinessModerationStatusBadgeClass,
+  getBusinessModerationStatusLabel,
   getBusinessSourceBadgeClass,
   getBusinessSourceLabel,
   businessToFormValues
@@ -13,6 +15,7 @@ import {
 import { getBusinessCategoryLabels } from "@/lib/categories";
 import {
   deleteBusinesses,
+  revertBusinessToPending,
   saveBusiness,
   setBusinessesActive
 } from "@/lib/firebase/businesses";
@@ -34,6 +37,7 @@ export function BusinessManagementPage() {
   const [drafts, setDrafts] = useState<DraftMap>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [revertingId, setRevertingId] = useState<string | null>(null);
   const [bulkSaving, setBulkSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
@@ -60,7 +64,12 @@ export function BusinessManagementPage() {
         selectedSource === "all" || business.source === selectedSource;
       const matchesStatus =
         selectedStatus === "all" ||
-        (selectedStatus === "active" ? business.active : !business.active);
+        (selectedStatus === "active" && business.active) ||
+        (selectedStatus === "inactive" && !business.active) ||
+        (selectedStatus === "pending" &&
+          business.moderationStatus === "pending") ||
+        (selectedStatus === "approved" &&
+          business.moderationStatus === "approved");
 
       return matchesSearch && matchesCategory && matchesSource && matchesStatus;
     });
@@ -188,6 +197,28 @@ export function BusinessManagementPage() {
     }
   }
 
+  async function handleRevertToPending(businessId: string) {
+    const business = businesses.find((item) => item.id === businessId);
+
+    if (!business) {
+      return;
+    }
+
+    setRevertingId(businessId);
+    setFeedback(null);
+
+    try {
+      await revertBusinessToPending(businessId);
+      setFeedbackTone("success");
+      setFeedback(`${business.name} moved back to pending review.`);
+    } catch (revertError) {
+      setFeedbackTone("error");
+      setFeedback(formatFirebaseError(revertError));
+    } finally {
+      setRevertingId(null);
+    }
+  }
+
   return (
     <ProtectedRoute requireAdmin>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -294,6 +325,8 @@ export function BusinessManagementPage() {
                 <option value="all">All statuses</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
               </select>
             </div>
           </div>
@@ -370,6 +403,7 @@ export function BusinessManagementPage() {
                     <th className="px-4 py-3 font-medium text-stone-100">Phone</th>
                     <th className="px-4 py-3 font-medium text-stone-100">Website</th>
                     <th className="px-4 py-3 font-medium text-stone-100">Source</th>
+                    <th className="px-4 py-3 font-medium text-stone-100">Review</th>
                     <th className="px-4 py-3 font-medium text-stone-100">Active</th>
                     <th className="px-4 py-3 font-medium text-stone-100">Actions</th>
                   </tr>
@@ -486,6 +520,17 @@ export function BusinessManagementPage() {
                           </span>
                         </td>
                         <td className="px-4 py-4 align-top">
+                          <span
+                            className={`rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.18em] ${getBusinessModerationStatusBadgeClass(
+                              business.moderationStatus
+                            )}`}
+                          >
+                            {getBusinessModerationStatusLabel(
+                              business.moderationStatus
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 align-top">
                           <label className="flex items-center gap-3 text-sm text-stone-200">
                             <input
                               type="checkbox"
@@ -505,11 +550,29 @@ export function BusinessManagementPage() {
                             <button
                               type="button"
                               onClick={() => void handleSaveRow(business.id)}
-                              disabled={savingId === business.id}
+                              disabled={
+                                savingId === business.id ||
+                                revertingId === business.id
+                              }
                               className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accentSoft"
                             >
                               {savingId === business.id ? "Saving..." : "Save"}
                             </button>
+                            {business.moderationStatus !== "pending" ? (
+                              <button
+                                type="button"
+                                onClick={() => void handleRevertToPending(business.id)}
+                                disabled={
+                                  savingId === business.id ||
+                                  revertingId === business.id
+                                }
+                                className="rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-200 transition hover:bg-amber-400/15 disabled:opacity-50"
+                              >
+                                {revertingId === business.id
+                                  ? "Reverting..."
+                                  : "Revert to pending"}
+                              </button>
+                            ) : null}
                             <Link
                               href={`/admin/businesses/${business.id}`}
                               className="rounded-full border border-line px-4 py-2 text-sm text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"

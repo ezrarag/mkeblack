@@ -1,5 +1,6 @@
 import {
   Business,
+  BusinessModerationStatus,
   BusinessClaimInvite,
   BusinessFormValues,
   BusinessSource,
@@ -54,6 +55,10 @@ function normalizeGeocodingStatus(value: unknown) {
   }
 
   return null;
+}
+
+function normalizeModerationStatus(value: unknown): BusinessModerationStatus {
+  return value === "pending" ? "pending" : "approved";
 }
 
 /**
@@ -254,6 +259,20 @@ export function getBusinessSourceBadgeClass(source: BusinessSource) {
   }
 }
 
+export function getBusinessModerationStatusLabel(
+  status: BusinessModerationStatus
+) {
+  return status === "pending" ? "Pending" : "Approved";
+}
+
+export function getBusinessModerationStatusBadgeClass(
+  status: BusinessModerationStatus
+) {
+  return status === "pending"
+    ? "border border-amber-400/35 bg-amber-400/10 text-amber-200"
+    : "border border-success/35 bg-success/10 text-success";
+}
+
 export function normalizeBusinessSource(
   value: unknown,
   ownerUid: string | null
@@ -335,6 +354,7 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
       : [],
     ownerUid,
     active: booleanValue(record.active, true),
+    moderationStatus: normalizeModerationStatus(record.moderationStatus),
     hasTeamProfiles: booleanValue(record.hasTeamProfiles, false),
     source,
     importedAt: parseDateValue(record.importedAt),

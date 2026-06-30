@@ -413,6 +413,11 @@ export async function createBusiness(values: BusinessFormValues) {
   );
 
   await saveBusiness(businessReference.id, values);
+  await firestoreModule.setDoc(
+    businessReference,
+    { moderationStatus: "approved" },
+    { merge: true }
+  );
   return businessReference.id;
 }
 
@@ -498,6 +503,40 @@ export async function setBusinessesActive(
     await firestoreModule.setDoc(
       firestoreModule.doc(db, "businesses", businessId),
       { active },
+      { merge: true }
+    );
+  }
+}
+
+export async function revertBusinessToPending(businessId: string) {
+  const { db, firestoreModule } = await getFirestoreHelpers();
+  const businessReference = firestoreModule.doc(db, "businesses", businessId);
+
+  await firestoreModule.setDoc(
+    businessReference,
+    {
+      active: false,
+      moderationStatus: "pending"
+    },
+    { merge: true }
+  );
+
+  const submissionsSnapshot = await firestoreModule.getDocs(
+    firestoreModule.query(
+      firestoreModule.collection(db, "contactSubmissions"),
+      firestoreModule.where("approvedBusinessId", "==", businessId)
+    )
+  );
+
+  for (const submissionDocument of submissionsSnapshot.docs) {
+    await firestoreModule.setDoc(
+      submissionDocument.ref,
+      {
+        status: "pending",
+        approvedAt: null,
+        approvedBusinessId: null,
+        rejectedAt: null
+      },
       { merge: true }
     );
   }
@@ -604,6 +643,7 @@ export async function importBusinesses(
       photos: [],
       ownerUid: null,
       active: true,
+      moderationStatus: "approved",
       hasTeamProfiles: false,
       source: "import",
       importedAt: firestoreModule.serverTimestamp(),

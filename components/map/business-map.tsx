@@ -277,10 +277,21 @@ export function BusinessMap({
   const businessesRef = useRef(businesses);
   const userLocationRef = useRef(userLocation);
   const onBusinessSelectRef = useRef(onBusinessSelect);
+  const hasUserInteractedRef = useRef(false);
+  const skipNextInteractionRef = useRef(false);
+  const lastViewportSignatureRef = useRef<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [mapUnsupported, setMapUnsupported] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const businessData = useMemo(() => businessFeatureCollection(businesses), [businesses]);
+  const viewportSignature = useMemo(() => {
+    const visibleIds = businesses
+      .filter(hasMappableLocation)
+      .map((business) => business.id)
+      .sort();
+
+    return visibleIds.join("|");
+  }, [businesses]);
 
   useEffect(() => {
     businessesRef.current = businesses;
@@ -336,45 +347,7 @@ export function BusinessMap({
 
           map.addSource(BUSINESSES_SOURCE_ID, {
             type: "geojson",
-            data: businessFeatureCollection(businessesRef.current),
-            cluster: true,
-            clusterMaxZoom: 14,
-            clusterRadius: 48,
-            clusterProperties: {
-              business_count_sum: ["+", ["get", "businessCount"]]
-            }
-          });
-
-          map.addLayer({
-            id: "business-clusters",
-            type: "circle",
-            source: BUSINESSES_SOURCE_ID,
-            filter: ["has", "point_count"],
-            paint: {
-              "circle-color": "#EC2024",
-              "circle-radius": ["step", ["get", "point_count"], 18, 25, 24, 60, 32],
-              "circle-opacity": 0.92,
-              "circle-stroke-color": "#0b0b0b",
-              "circle-stroke-width": 2
-            }
-          });
-
-          map.addLayer({
-            id: "business-cluster-count",
-            type: "symbol",
-            source: BUSINESSES_SOURCE_ID,
-            filter: ["has", "point_count"],
-            layout: {
-              "text-field": [
-                "to-string",
-                ["coalesce", ["get", "business_count_sum"], ["get", "point_count"]]
-              ],
-              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-              "text-size": 12
-            },
-            paint: {
-              "text-color": "#ffffff"
-            }
+            data: businessFeatureCollection(businessesRef.current)
           });
 
           map.addLayer({
@@ -406,29 +379,6 @@ export function BusinessMap({
             }
           });
 
-          map.on("click", "business-clusters", (event) => {
-            const feature = event.features?.[0];
-            const clusterId = feature?.properties?.cluster_id;
-            const coordinates = feature?.geometry?.coordinates;
-            const source = map.getSource(BUSINESSES_SOURCE_ID);
-
-            if (
-              typeof clusterId !== "number" ||
-              !coordinates ||
-              !source?.getClusterExpansionZoom
-            ) {
-              return;
-            }
-
-            source.getClusterExpansionZoom(clusterId, (error, zoom) => {
-              if (error) {
-                return;
-              }
-
-              map.flyTo({ center: coordinates, zoom });
-            });
-          });
-
           map.on("click", "business-pins", (event) => {
             const feature = event.features?.[0];
             const businessIds = businessIdsFromFeature(feature?.properties);
@@ -456,10 +406,19 @@ export function BusinessMap({
           const clearPointer = () => {
             map.getCanvas().style.cursor = "";
           };
+          const markUserInteraction = () => {
+            if (skipNextInteractionRef.current) {
+              skipNextInteractionRef.current = false;
+              return;
+            }
+
+            hasUserInteractedRef.current = true;
+          };
+
           map.on("mouseenter", "business-pins", setPointer);
           map.on("mouseleave", "business-pins", clearPointer);
-          map.on("mouseenter", "business-clusters", setPointer);
-          map.on("mouseleave", "business-clusters", clearPointer);
+          map.on("dragstart", markUserInteraction);
+          map.on("zoomstart", markUserInteraction);
 
           setLoaded(true);
         });
@@ -488,27 +447,33 @@ export function BusinessMap({
     }
 
     source.setData(businessData);
+    if (lastViewportSignatureRef.current !== viewportSignature) {
+      hasUserInteractedRef.current = false;
+      lastViewportSignatureRef.current = viewportSignature;
+    }
 
     const coordinates = businesses
       .filter(hasMappableLocation)
       .map((business) => [business.location.lng, business.location.lat] as [number, number]);
 
-    if (coordinates.length === 1) {
+    if (coordinates.length === 1 && !hasUserInteractedRef.current) {
+      skipNextInteractionRef.current = true;
       map.flyTo({ center: coordinates[0], zoom: 14, essential: true });
     } else if (
       coordinates.length > 1 &&
       !selectedNeighborhoodFeature &&
-      !selectedBusinessId
+      !selectedBusinessId &&
+      !hasUserInteractedRef.current
     ) {
-      // Only auto-fit when no single business is actively selected — otherwise
-      // selecting a pin would re-frame the whole set and zoom the user out.
+      // Only auto-fit before the user starts exploring this result set.
       const bounds: [[number, number], [number, number]] = [
         [Math.min(...coordinates.map((point) => point[0])), Math.min(...coordinates.map((point) => point[1]))],
         [Math.max(...coordinates.map((point) => point[0])), Math.max(...coordinates.map((point) => point[1]))]
       ];
+      skipNextInteractionRef.current = true;
       map.fitBounds(bounds, { padding: 64, maxZoom: 13 });
     }
-  }, [businessData, businesses, loaded, selectedNeighborhoodFeature, selectedBusinessId]);
+  }, [businessData, businesses, loaded, selectedNeighborhoodFeature, selectedBusinessId, viewportSignature]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -545,7 +510,7 @@ export function BusinessMap({
           "fill-opacity": 0.10
         }
       },
-      "business-clusters"
+      "business-pins"
     );
     map.addLayer(
       {
@@ -557,11 +522,12 @@ export function BusinessMap({
           "line-width": 2.5
         }
       },
-      "business-clusters"
+      "business-pins"
     );
 
     const bounds = getNeighborhoodBounds(selectedNeighborhoodFeature);
     if (bounds) {
+      skipNextInteractionRef.current = true;
       map.fitBounds(bounds, { padding: 52, maxZoom: 14 });
     }
   }, [loaded, selectedNeighborhoodFeature]);
@@ -630,8 +596,11 @@ export function BusinessMap({
 
     // Pan to the selected business without forcing a zoom level — this keeps
     // nearby businesses in view instead of snapping to a fixed zoom.
+    skipNextInteractionRef.current = true;
+    hasUserInteractedRef.current = true;
     map.flyTo({
       center: [business.location.lng, business.location.lat],
+      duration: 800,
       essential: true
     });
     popupRef.current

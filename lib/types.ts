@@ -20,6 +20,7 @@ export type BusinessHours = Record<DayKey, DailyHours>;
 
 export type BusinessSource = "import" | "manual" | "self-submitted";
 export type HoursSource = "manual" | "google_places" | "imported_text";
+export type BusinessModerationStatus = "approved" | "pending";
 
 export type ClaimInviteStatus = "not_invited" | "pending" | "claimed";
 
@@ -523,6 +524,7 @@ export type Business = {
   photos: string[];
   ownerUid: string | null;
   active: boolean;
+  moderationStatus: BusinessModerationStatus;
   hasTeamProfiles: boolean;
   source: BusinessSource;
   importedAt: Date | null;
