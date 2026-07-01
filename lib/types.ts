@@ -21,6 +21,13 @@ export type BusinessHours = Record<DayKey, DailyHours>;
 export type BusinessSource = "import" | "manual" | "self-submitted";
 export type HoursSource = "manual" | "google_places" | "imported_text";
 export type BusinessModerationStatus = "approved" | "pending";
+export type BusinessAnalyticsEventType = "profile_view" | "link_click";
+export type BusinessAnalyticsDimension =
+  | "region"
+  | "referral_source"
+  | "audience_age"
+  | "audience_interest"
+  | "link_target";
 
 export type ClaimInviteStatus = "not_invited" | "pending" | "claimed";
 
@@ -524,6 +531,11 @@ export type Business = {
   photos: string[];
   ownerUid: string | null;
   active: boolean;
+  analyticsSummary: {
+    totalProfileViews: number;
+    totalLinkClicks: number;
+    lastActivityAt: Date | null;
+  };
   moderationStatus: BusinessModerationStatus;
   hasTeamProfiles: boolean;
   source: BusinessSource;
@@ -556,6 +568,16 @@ export type Business = {
   solidarityMemberExpiry: Date | null;
   solidarityMembershipSource: "stripe" | "manual" | "comp";
   solidarityMembershipNotes: string;
+};
+
+export type BusinessAnalyticsBucket = {
+  id: string;
+  periodKey: string;
+  eventType: BusinessAnalyticsEventType;
+  dimension: BusinessAnalyticsDimension;
+  bucket: string;
+  totalCount: number;
+  updatedAt: Date | null;
 };
 
 export type YelpReviewExcerpt = {

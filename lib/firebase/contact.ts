@@ -269,7 +269,12 @@ export async function approveBusinessListingSubmission(
   await firestoreModule.setDoc(
     businessReference,
     {
-      moderationStatus: "approved"
+      moderationStatus: "approved",
+      analyticsSummary: {
+        totalProfileViews: 0,
+        totalLinkClicks: 0,
+        lastActivityAt: null
+      }
     },
     { merge: true }
   );

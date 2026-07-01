@@ -61,6 +61,16 @@ function normalizeModerationStatus(value: unknown): BusinessModerationStatus {
   return value === "pending" ? "pending" : "approved";
 }
 
+function normalizeAnalyticsSummary(value: unknown) {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    totalProfileViews: numberValue(record.totalProfileViews, 0),
+    totalLinkClicks: numberValue(record.totalLinkClicks, 0),
+    lastActivityAt: parseDateValue(record.lastActivityAt)
+  };
+}
+
 /**
  * Some imported records still carry the raw Wix export format, where
  * category arrives as a JSON-array string e.g. '["Food & Drink"]' or
@@ -354,6 +364,7 @@ export function normalizeBusinessRecord(value: unknown, id: string): Business {
       : [],
     ownerUid,
     active: booleanValue(record.active, true),
+    analyticsSummary: normalizeAnalyticsSummary(record.analyticsSummary),
     moderationStatus: normalizeModerationStatus(record.moderationStatus),
     hasTeamProfiles: booleanValue(record.hasTeamProfiles, false),
     source,

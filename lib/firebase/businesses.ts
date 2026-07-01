@@ -415,7 +415,14 @@ export async function createBusiness(values: BusinessFormValues) {
   await saveBusiness(businessReference.id, values);
   await firestoreModule.setDoc(
     businessReference,
-    { moderationStatus: "approved" },
+    {
+      moderationStatus: "approved",
+      analyticsSummary: {
+        totalProfileViews: 0,
+        totalLinkClicks: 0,
+        lastActivityAt: null
+      }
+    },
     { merge: true }
   );
   return businessReference.id;
@@ -643,6 +650,11 @@ export async function importBusinesses(
       photos: [],
       ownerUid: null,
       active: true,
+      analyticsSummary: {
+        totalProfileViews: 0,
+        totalLinkClicks: 0,
+        lastActivityAt: null
+      },
       moderationStatus: "approved",
       hasTeamProfiles: false,
       source: "import",

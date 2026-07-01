@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { BusinessGallery } from "@/components/business/business-gallery";
 import { BusinessTeamSection } from "@/components/business/business-team-section";
 import { YelpHighlightsPanel } from "@/components/business/yelp-highlights-panel";
@@ -70,6 +70,20 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
   const [reportFeedback, setReportFeedback] = useState<string | null>(null);
   const [flagSubmitting, setFlagSubmitting] = useState(false);
   const [flagFeedback, setFlagFeedback] = useState<string | null>(null);
+  const trackedViewRef = useRef<string | null>(null);
+
+  function trackAnalytics(payload: Record<string, unknown>) {
+    void fetch("/api/analytics", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload),
+      keepalive: true
+    }).catch(() => {
+      // Analytics failures should never block the page experience.
+    });
+  }
 
   // Track this view: localStorage always, Firebase if signed in
   useEffect(() => {
@@ -78,7 +92,19 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
     if (user) {
       void persistRecentView(user.uid, business);
     }
-  }, [business, user]);
+    if (trackedViewRef.current === business.id) {
+      return;
+    }
+
+    trackedViewRef.current = business.id;
+    trackAnalytics({
+      businessId: business.id,
+      eventType: "profile_view",
+      regionBucket: profile?.neighborhood ?? null,
+      referralSource: profile?.referralSource ?? null,
+      interestBuckets: profile?.interests ?? []
+    });
+  }, [business, profile?.interests, profile?.neighborhood, profile?.referralSource, user]);
 
   if (loading) {
     return (
@@ -189,6 +215,25 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
     }
   }
 
+  function handleTrackedLinkClick(link: {
+    label: string;
+    href: string;
+    external?: boolean;
+  }) {
+    if (!business) {
+      return;
+    }
+
+    trackAnalytics({
+      businessId: business.id,
+      eventType: "link_click",
+      linkTarget: link.label,
+      regionBucket: profile?.neighborhood ?? null,
+      referralSource: profile?.referralSource ?? null,
+      interestBuckets: profile?.interests ?? []
+    });
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
@@ -246,6 +291,7 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => handleTrackedLinkClick(link)}
                     className="rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
                   >
                     {link.label}
@@ -254,6 +300,7 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                   <a
                     key={`${link.label}-${link.href}`}
                     href={link.href}
+                    onClick={() => handleTrackedLinkClick(link)}
                     className="rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
                   >
                     {link.label}
@@ -317,6 +364,13 @@ export function BusinessProfilePage({ businessId }: BusinessProfilePageProps) {
                 href={business.instagramReelUrl}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() =>
+                  handleTrackedLinkClick({
+                    href: business.instagramReelUrl,
+                    label: "Featured reel",
+                    external: true
+                  })
+                }
                 className="mt-5 inline-flex rounded-full border border-accent/35 bg-accent px-5 py-3 text-sm font-medium text-white transition hover:bg-accentSoft"
               >
                 Watch on Instagram
