@@ -750,6 +750,7 @@ export function BusinessEditorForm({
                   photos: values.photos,
                   ownerUid: values.ownerUid || null,
                   active: values.active,
+                  moderationStatus: "approved",
                   hasTeamProfiles: false,
                   source: values.source,
                   importedAt: null,
