@@ -361,7 +361,7 @@ export function normalizeHomepageModule(
 ): HomepageModule {
   const record = isRecord(value) ? value : {};
   const type = isHomepageModuleType(record.type) ? record.type : "custom";
-  const title = stringValue(record.title).trim() || HOMEPAGE_MODULE_LABELS[type];
+  const title = stringValue(record.title).trim();
   const visible = booleanValue(record.visible, true);
   const order = numberValue(record.order, 0);
 

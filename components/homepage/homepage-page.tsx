@@ -529,9 +529,11 @@ function renderHomepageModule(
 
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-                {module.title || HOMEPAGE_MODULE_LABELS.hero}
-              </p>
+              {module.title ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+                  {module.title}
+                </p>
+              ) : null}
               <h1 className="mt-5 font-display text-5xl font-black leading-tight text-ink sm:text-6xl lg:text-7xl">
                 {module.content.headline || "Shape a live homepage from Firestore."}
               </h1>
@@ -571,9 +573,11 @@ function renderHomepageModule(
           <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-                  {module.title || HOMEPAGE_MODULE_LABELS.featured_articles}
-                </p>
+                {module.title ? (
+                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                    {module.title}
+                  </p>
+                ) : null}
                 {module.content.description ? (
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-300">
                     {module.content.description}
@@ -632,9 +636,11 @@ function renderHomepageModule(
         <section id="membership" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="grid gap-8 rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-                {module.title || HOMEPAGE_MODULE_LABELS.membership_cta}
-              </p>
+              {module.title ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                  {module.title}
+                </p>
+              ) : null}
               {module.content.description ? (
                 <p className="mt-5 max-w-2xl text-base leading-8 text-stone-200">
                   {module.content.description}
@@ -675,9 +681,11 @@ function renderHomepageModule(
         <section id="discounts" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-                {module.title || HOMEPAGE_MODULE_LABELS.member_discounts}
-              </p>
+              {module.title ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                  {module.title}
+                </p>
+              ) : null}
               {module.content.description ? (
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-300">
                   {module.content.description}
@@ -732,9 +740,11 @@ function renderHomepageModule(
             ) : null}
 
             <div className={module.content.imageUrl ? "" : "lg:col-span-2"}>
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-                {module.title || HOMEPAGE_MODULE_LABELS.editorial}
-              </p>
+              {module.title ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                  {module.title}
+                </p>
+              ) : null}
               <div className="mt-5">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -838,9 +848,11 @@ function renderHomepageModule(
           <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-                  {module.title || HOMEPAGE_MODULE_LABELS.marketplace}
-                </p>
+                {module.title ? (
+                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+                    {module.title}
+                  </p>
+                ) : null}
                 {module.content.description ? (
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-300">
                     {module.content.description}
