@@ -13,7 +13,6 @@ import { useHomepageModules } from "@/hooks/use-homepage-modules";
 import { useLatestArticles } from "@/hooks/use-latest-articles";
 import { useMemberDiscounts } from "@/hooks/use-member-discounts";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
-import { HOMEPAGE_MODULE_LABELS } from "@/lib/homepage";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import {
   ArticleSummary,
@@ -273,10 +272,7 @@ function LiveSiteContentParitySection() {
       <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-              From the current MKE Black site
-            </p>
-            <h2 className="mt-4 font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
+            <h2 className="font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
               Business, events, culture, and advancement in Milwaukee.
             </h2>
             <p className="mt-5 text-sm leading-7 text-stone-300">

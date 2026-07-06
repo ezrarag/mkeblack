@@ -125,6 +125,7 @@ export function BusinessMarketplaceManager({
   const [form, setForm] = useState<MarketplaceListingFormValues>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
   const [feedback, setFeedback] = useState<{
     msg: string;
     tone: "success" | "error";
@@ -163,6 +164,7 @@ export function BusinessMarketplaceManager({
   function openNew() {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setPriceInput("");
     setFeedback(null);
     setFormOpen(true);
   }
@@ -179,6 +181,9 @@ export function BusinessMarketplaceManager({
       checkoutMode: listing.checkoutMode,
       orderUrl: listing.orderUrl
     });
+    setPriceInput(
+      listing.priceCents === 0 ? "" : (listing.priceCents / 100).toFixed(2)
+    );
     setFeedback(null);
     setFormOpen(true);
   }
@@ -188,6 +193,22 @@ export function BusinessMarketplaceManager({
     value: MarketplaceListingFormValues[K]
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handlePriceChange(rawValue: string) {
+    if (!/^\d*([.]\d{0,2})?$/.test(rawValue)) {
+      return;
+    }
+
+    setPriceInput(rawValue);
+
+    if (!rawValue) {
+      updateField("priceCents", 0);
+      return;
+    }
+
+    const dollars = Number(rawValue);
+    updateField("priceCents", Number.isFinite(dollars) ? Math.round(dollars * 100) : 0);
   }
 
   async function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
@@ -342,11 +363,13 @@ export function BusinessMarketplaceManager({
                   type="number"
                   min="0"
                   step="0.01"
-                  value={form.priceCents === 0 ? "" : (form.priceCents / 100).toFixed(2)}
-                  onChange={(e) => {
-                    const dollars = parseFloat(e.target.value) || 0;
-                    updateField("priceCents", Math.round(dollars * 100));
-                  }}
+                  value={priceInput}
+                  onChange={(e) => handlePriceChange(e.target.value)}
+                  onBlur={() =>
+                    setPriceInput(
+                      form.priceCents === 0 ? "" : (form.priceCents / 100).toFixed(2)
+                    )
+                  }
                   placeholder="0.00"
                   className="w-full rounded-xl border border-line bg-canvas/60 py-2.5 pl-7 pr-4 text-sm text-ink placeholder:text-stone-600 focus:border-accent/60 focus:outline-none"
                 />

@@ -608,6 +608,19 @@ export function normalizeArticleSummary(
   const record = isRecord(value) ? value : {};
   const slug = stringValue(record.slug).trim();
   const explicitHref = stringValue(record.href || record.url || record.externalUrl).trim();
+  const source = stringValue(record.source).trim();
+  const fallbackExternalHref =
+    source === "migrated_wix" && slug
+      ? `https://www.mkeblack.org/post/${slug}`
+      : "";
+  const normalizedExplicitHref =
+    explicitHref && !explicitHref.includes("/") && !explicitHref.includes(".")
+      ? source === "migrated_wix"
+        ? `https://www.mkeblack.org/post/${explicitHref}`
+        : normalizeHref(explicitHref)
+      : explicitHref
+        ? normalizeHref(explicitHref)
+        : "";
 
   return {
     id,
@@ -620,7 +633,7 @@ export function normalizeArticleSummary(
           record.description ||
           record.deck
       ).trim(),
-    href: explicitHref ? normalizeHref(explicitHref) : slug ? `/articles/${slug}` : "",
+    href: normalizedExplicitHref || fallbackExternalHref,
     imageUrl: stringValue(
       record.imageUrl ||
         record.coverImageUrl ||
