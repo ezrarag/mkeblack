@@ -5,6 +5,7 @@ import { useState } from "react";
 
 type EditState = {
   category: string;
+  checkoutMode: "external" | "native";
   orderUrl: string;
 };
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -32,6 +33,7 @@ function ListingAdminRow({
 }) {
   const [edit, setEdit] = useState<EditState>({
     category: listing.category,
+    checkoutMode: listing.checkoutMode,
     orderUrl: listing.orderUrl
   });
   const [dirty, setDirty] = useState(false);
@@ -113,6 +115,22 @@ function ListingAdminRow({
                 {c}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
+            Checkout
+          </label>
+          <select
+            value={edit.checkoutMode}
+            onChange={(e) =>
+              updateEdit("checkoutMode", e.target.value as EditState["checkoutMode"])
+            }
+            className="mt-1 rounded-lg border border-line bg-canvas/60 px-2.5 py-1.5 text-xs text-ink focus:border-accent/60 focus:outline-none"
+          >
+            <option value="external">External</option>
+            <option value="native">Native</option>
           </select>
         </div>
 
@@ -210,6 +228,7 @@ function AdminMarketplaceContent() {
     try {
       await adminUpdateListing(id, {
         category: edits.category,
+        checkoutMode: edits.checkoutMode,
         orderUrl: edits.orderUrl
       });
       setFeedback({ msg: "Changes saved.", tone: "success" });

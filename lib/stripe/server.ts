@@ -34,3 +34,14 @@ export function getBaseUrl() {
 export function getMKEBlackStripeAccountId(): string | undefined {
   return process.env.STRIPE_MKE_BLACK_ACCOUNT_ID || undefined;
 }
+
+export function getPlatformFeeRate() {
+  const rawValue = process.env.PLATFORM_FEE_RATE ?? "0.05";
+  const parsedValue = Number(rawValue);
+
+  if (!Number.isFinite(parsedValue) || parsedValue < 0 || parsedValue >= 1) {
+    throw new Error("PLATFORM_FEE_RATE must be a decimal between 0 and 1.");
+  }
+
+  return parsedValue;
+}

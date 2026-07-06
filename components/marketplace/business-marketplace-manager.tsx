@@ -29,6 +29,7 @@ const EMPTY_FORM: MarketplaceListingFormValues = {
   photoUrl: "",
   category: "Other",
   available: true,
+  checkoutMode: "external",
   orderUrl: ""
 };
 
@@ -175,6 +176,7 @@ export function BusinessMarketplaceManager({
       photoUrl: listing.photoUrl,
       category: listing.category,
       available: listing.available,
+      checkoutMode: listing.checkoutMode,
       orderUrl: listing.orderUrl
     });
     setFeedback(null);
@@ -372,6 +374,49 @@ export function BusinessMarketplaceManager({
           {/* Order URL */}
           <div>
             <label className="block text-xs font-medium text-stone-400">
+              Checkout mode
+            </label>
+            <div className="mt-1.5 grid gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-canvas/40 px-4 py-3">
+                <input
+                  type="radio"
+                  name="checkoutMode"
+                  checked={form.checkoutMode === "external"}
+                  onChange={() => updateField("checkoutMode", "external")}
+                  className="mt-1 accent-accent"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-stone-200">
+                    External fulfillment
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-stone-500">
+                    Send people to your own order page, delivery app, or website.
+                  </span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-canvas/40 px-4 py-3">
+                <input
+                  type="radio"
+                  name="checkoutMode"
+                  checked={form.checkoutMode === "native"}
+                  onChange={() => updateField("checkoutMode", "native")}
+                  className="mt-1 accent-accent"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-stone-200">
+                    Buy on MKE Black
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-stone-500">
+                    Use Stripe Checkout on-platform for simple paid listings.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {form.checkoutMode === "external" ? (
+          <div>
+            <label className="block text-xs font-medium text-stone-400">
               Order / purchase URL{" "}
               <span className="text-stone-600">
                 (leave blank to link to your business profile)
@@ -385,6 +430,12 @@ export function BusinessMarketplaceManager({
               className="mt-1.5 w-full rounded-xl border border-line bg-canvas/60 px-4 py-2.5 text-sm text-ink placeholder:text-stone-600 focus:border-accent/60 focus:outline-none"
             />
           </div>
+          ) : (
+            <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-stone-200">
+              Stripe Checkout will be used for this listing. Payout reconciliation
+              is tracked in the revenue share ledger.
+            </div>
+          )}
 
           {/* Photo */}
           <div>

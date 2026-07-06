@@ -8,6 +8,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEditorForm } from "@/components/forms/business-editor-form";
 import { BusinessTeamManager } from "@/components/forms/business-team-manager";
 import { BusinessMarketplaceManager } from "@/components/marketplace/business-marketplace-manager";
+import { RevenueSharePanel } from "@/components/dashboard/revenue-share-panel";
 import { MessagesPanel } from "@/components/messages/messages-panel";
 import { BusinessEventsManager } from "@/components/events/business-events-manager";
 import { BusinessEmailClaimSuggestion } from "@/components/dashboard/business-email-claim-suggestion";
@@ -24,8 +25,21 @@ import {
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { BusinessFormValues } from "@/lib/types";
 
-type DashboardTab = "listing" | "team" | "marketplace" | "messages" | "events";
-const DASHBOARD_TABS: DashboardTab[] = ["listing", "team", "marketplace", "messages", "events"];
+type DashboardTab =
+  | "listing"
+  | "team"
+  | "marketplace"
+  | "revenue"
+  | "messages"
+  | "events";
+const DASHBOARD_TABS: DashboardTab[] = [
+  "listing",
+  "team",
+  "marketplace",
+  "revenue",
+  "messages",
+  "events"
+];
 
 function isValidDashboardTab(value: string | null): value is DashboardTab {
   return !!value && (DASHBOARD_TABS as string[]).includes(value);
@@ -278,6 +292,8 @@ export function DashboardPageContent() {
                     ? "Team"
                     : tab === "marketplace"
                     ? "Marketplace"
+                    : tab === "revenue"
+                    ? "Revenue Share"
                     : tab === "messages"
                     ? "Messages"
                     : "Events"}
@@ -307,6 +323,8 @@ export function DashboardPageContent() {
                 businessName={business.name}
                 isSolidarityMember={business.solidarityMember}
               />
+            ) : activeTab === "revenue" ? (
+              <RevenueSharePanel businessId={business.id} />
             ) : activeTab === "messages" ? (
               business.solidarityMember ? (
                 <MessagesPanel

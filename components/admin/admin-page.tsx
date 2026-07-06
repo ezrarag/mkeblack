@@ -219,6 +219,12 @@ export function AdminPageContent({ initialMode }: AdminPageContentProps) {
                     Import spreadsheet
                   </Link>
                   <Link
+                    href="/admin/revenue-share"
+                    className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
+                  >
+                    Revenue share
+                  </Link>
+                  <Link
                     href="/admin/homepage"
                     className="inline-flex rounded-full border border-accent/35 bg-accent/10 px-5 py-3 text-sm font-medium text-accentSoft transition hover:bg-accent/15"
                   >

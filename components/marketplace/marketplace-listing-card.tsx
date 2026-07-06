@@ -29,6 +29,7 @@ export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps)
   const { user } = useAuth();
   const { isSaved, loading } = useIsSavedMarketplaceListing(user?.uid ?? null, listing.id);
   const [saving, setSaving] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
   const orderHref =
     listing.orderUrl ||
     `/business/${listing.businessId}`;
@@ -47,6 +48,40 @@ export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps)
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function startCheckout() {
+    if (checkingOut) {
+      return;
+    }
+
+    setCheckingOut(true);
+
+    try {
+      const response = await fetch("/api/marketplace/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          listingId: listing.id,
+          customerUid: user?.uid ?? null,
+          customerEmail: user?.email ?? ""
+        })
+      });
+      const payload = (await response.json()) as { error?: string; url?: string };
+
+      if (!response.ok || !payload.url) {
+        throw new Error(payload.error ?? "Unable to start checkout.");
+      }
+
+      window.location.href = payload.url;
+    } catch (error) {
+      window.alert(
+        error instanceof Error ? error.message : "Unable to start checkout."
+      );
+      setCheckingOut(false);
     }
   }
 
@@ -140,7 +175,16 @@ export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps)
               </Link>
             )}
 
-            {orderIsExternal ? (
+            {listing.checkoutMode === "native" && listing.priceCents > 0 ? (
+              <button
+                type="button"
+                onClick={() => void startCheckout()}
+                disabled={checkingOut}
+                className="rounded-full border border-accent bg-accent px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-accentSoft disabled:opacity-60"
+              >
+                {checkingOut ? "Opening..." : "Buy now"}
+              </button>
+            ) : orderIsExternal ? (
               <a
                 href={orderHref}
                 target="_blank"

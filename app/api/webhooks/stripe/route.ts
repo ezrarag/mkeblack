@@ -9,6 +9,55 @@ function getId(value: string | { id: string } | null) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  if (session.metadata?.kind === "marketplace_order") {
+    const orderId = session.metadata.orderId || session.client_reference_id;
+
+    if (!orderId) {
+      throw new Error("Stripe checkout session is missing marketplace orderId metadata.");
+    }
+
+    const saleAmountCents = Number(session.metadata.saleAmountCents ?? "0");
+    const platformFeeCents = Number(session.metadata.platformFeeCents ?? "0");
+    const netToBusinessCents = Number(session.metadata.netToBusinessCents ?? "0");
+    const db = getFirebaseAdminDb();
+
+    await db.collection("marketplace_orders").doc(orderId).set(
+      {
+        status: "paid",
+        paymentSource: "stripe",
+        paymentReference: session.id,
+        stripeCheckoutSessionId: session.id,
+        stripeCustomerId: getId(session.customer),
+        stripePaymentStatus: session.payment_status,
+        customerEmail:
+          session.customer_details?.email ??
+          session.customer_email ??
+          "",
+        paidAt: FieldValue.serverTimestamp()
+      },
+      { merge: true }
+    );
+
+    await db.collection("revenue_share_ledger").doc(orderId).set(
+      {
+        id: orderId,
+        orderId,
+        businessId: session.metadata.businessId ?? "",
+        businessName: session.metadata.businessName ?? "",
+        saleAmountCents: Number.isFinite(saleAmountCents) ? saleAmountCents : 0,
+        platformFeeCents: Number.isFinite(platformFeeCents) ? platformFeeCents : 0,
+        netToBusinessCents: Number.isFinite(netToBusinessCents)
+          ? netToBusinessCents
+          : 0,
+        status: "pending_payout",
+        createdAt: FieldValue.serverTimestamp(),
+        paidOutAt: null
+      },
+      { merge: true }
+    );
+    return;
+  }
+
   if (session.metadata?.kind === "event_ticket") {
     const orderId = session.metadata.orderId || session.client_reference_id;
 

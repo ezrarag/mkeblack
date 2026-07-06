@@ -4,7 +4,12 @@ import {
   loadFirebaseFirestoreModule,
   loadFirebaseStorageModule
 } from "@/lib/firebase/client";
-import { MarketplaceListing, MarketplaceListingFormValues } from "@/lib/types";
+import {
+  MarketplaceListing,
+  MarketplaceListingFormValues,
+  MarketplaceOrder,
+  RevenueShareLedgerEntry
+} from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
 
 type FirestoreRecord = Record<string, unknown>;
@@ -78,9 +83,59 @@ export function normalizeMarketplaceListing(
     category: stringValue(record.category, "Other").trim(),
     available: booleanValue(record.available, true),
     featured: booleanValue(record.featured, false),
+    checkoutMode: record.checkoutMode === "native" ? "native" : "external",
     orderUrl: stringValue(record.orderUrl).trim(),
     createdAt: parseDateValue(record.createdAt),
     updatedAt: parseDateValue(record.updatedAt)
+  };
+}
+
+export function normalizeMarketplaceOrder(
+  value: unknown,
+  id: string
+): MarketplaceOrder {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    id,
+    listingId: stringValue(record.listingId).trim(),
+    listingName: stringValue(record.listingName).trim(),
+    businessId: stringValue(record.businessId).trim(),
+    businessName: stringValue(record.businessName).trim(),
+    customerUid: stringValue(record.customerUid).trim() || null,
+    customerEmail: stringValue(record.customerEmail).trim(),
+    amountCents: numberValue(record.amountCents, 0),
+    platformFeeCents: numberValue(record.platformFeeCents, 0),
+    netToBusinessCents: numberValue(record.netToBusinessCents, 0),
+    stripeCheckoutSessionId: stringValue(record.stripeCheckoutSessionId).trim(),
+    stripeCustomerId: stringValue(record.stripeCustomerId).trim(),
+    stripePaymentStatus: stringValue(record.stripePaymentStatus).trim(),
+    status:
+      record.status === "paid" || record.status === "cancelled"
+        ? record.status
+        : "pending",
+    createdAt: parseDateValue(record.createdAt),
+    paidAt: parseDateValue(record.paidAt)
+  };
+}
+
+export function normalizeRevenueShareLedgerEntry(
+  value: unknown,
+  id: string
+): RevenueShareLedgerEntry {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    id,
+    orderId: stringValue(record.orderId).trim() || id,
+    businessId: stringValue(record.businessId).trim(),
+    businessName: stringValue(record.businessName).trim(),
+    saleAmountCents: numberValue(record.saleAmountCents, 0),
+    platformFeeCents: numberValue(record.platformFeeCents, 0),
+    netToBusinessCents: numberValue(record.netToBusinessCents, 0),
+    status: record.status === "paid_out" ? "paid_out" : "pending_payout",
+    createdAt: parseDateValue(record.createdAt),
+    paidOutAt: parseDateValue(record.paidOutAt)
   };
 }
 
@@ -121,6 +176,7 @@ export async function saveMarketplaceListing(
     photoUrl: values.photoUrl.trim(),
     category: values.category.trim() || "Other",
     available: Boolean(values.available),
+    checkoutMode: values.checkoutMode,
     orderUrl: normalizeUrl(values.orderUrl.trim()),
     updatedAt: now
   };
@@ -166,6 +222,7 @@ export async function adminUpdateListing(
   updates: {
     category?: string;
     orderUrl?: string;
+    checkoutMode?: "external" | "native";
     featured?: boolean;
     available?: boolean;
   }

@@ -138,6 +138,8 @@ export const MARKETPLACE_LISTING_CATEGORIES = [
 export type MarketplaceListingCategory =
   (typeof MARKETPLACE_LISTING_CATEGORIES)[number];
 
+export type MarketplaceCheckoutMode = "external" | "native";
+
 export type MarketplaceListing = {
   id: string;
   businessId: string;
@@ -152,6 +154,7 @@ export type MarketplaceListing = {
   category: string;
   available: boolean;
   featured: boolean;
+  checkoutMode: MarketplaceCheckoutMode;
   /** External purchase/order URL; if empty falls back to business profile */
   orderUrl: string;
   createdAt: Date | null;
@@ -297,18 +300,44 @@ export type MarketplaceListingFormValues = {
   photoUrl: string;
   category: string;
   available: boolean;
+  checkoutMode: MarketplaceCheckoutMode;
   orderUrl: string;
 };
 
-/** Phase 1 stub — no payments processed yet */
+export type MarketplaceOrderStatus = "pending" | "paid" | "cancelled";
+
 export type MarketplaceOrder = {
   id: string;
   listingId: string;
+  listingName: string;
   businessId: string;
+  businessName: string;
   customerUid: string | null;
   customerEmail: string;
-  status: "pending";
+  amountCents: number;
+  platformFeeCents: number;
+  netToBusinessCents: number;
+  stripeCheckoutSessionId: string;
+  stripeCustomerId: string;
+  stripePaymentStatus: string;
+  status: MarketplaceOrderStatus;
   createdAt: Date | null;
+  paidAt: Date | null;
+};
+
+export type RevenueShareLedgerStatus = "pending_payout" | "paid_out";
+
+export type RevenueShareLedgerEntry = {
+  id: string;
+  orderId: string;
+  businessId: string;
+  businessName: string;
+  saleAmountCents: number;
+  platformFeeCents: number;
+  netToBusinessCents: number;
+  status: RevenueShareLedgerStatus;
+  createdAt: Date | null;
+  paidOutAt: Date | null;
 };
 
 // ── Events ───────────────────────────────────────────────────────────────────
