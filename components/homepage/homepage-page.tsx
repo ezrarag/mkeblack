@@ -22,13 +22,6 @@ import {
 } from "@/lib/types";
 import { isExternalHref } from "@/lib/utils";
 
-type LiveSiteFeature = {
-  title: string;
-  description: string;
-  href: string;
-  cta: string;
-};
-
 const submitBusinessHref = "/contact?reason=submit_business";
 
 function normalizeSubmitBusinessHref(link: { label: string; href: string }) {
@@ -44,30 +37,6 @@ function normalizeSubmitBusinessHref(link: { label: string; href: string }) {
 
   return href;
 }
-
-const liveStoryLinks: LiveSiteFeature[] = [
-  {
-    title: "Gift Cards from Milwaukee Black Owned Businesses",
-    description:
-      "A quick path to local gifts for birthdays, holidays, thank-yous, and other moments when a Milwaukee business should be part of the celebration.",
-    href: "/news-articles",
-    cta: "Read gift guide"
-  },
-  {
-    title: "10 Black Owned Vegan Eats in Milwaukee",
-    description:
-      "A food guide for plant-based meals, snacks, and desserts from Black-owned restaurants and makers across the Milwaukee area.",
-    href: "/directory?tag=vegan-options",
-    cta: "Find vegan options"
-  },
-  {
-    title: "Discover the Near West Side",
-    description:
-      "A neighborhood spotlight connecting visitors to businesses, food, culture, and community stops west of downtown Milwaukee.",
-    href: "/directory?neighborhood=Near%20West%20Side",
-    cta: "Explore the area"
-  }
-];
 
 const legacyMemberDiscountImages = [
   "https://static.wixstatic.com/media/9f0f22_c512893b3b994d6cb5fb3c9e4db759e8~mv2.jpg/v1/crop/x_0,y_931,w_1170,h_743/fill/w_456,h_286,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(4).jpg",
@@ -104,64 +73,6 @@ function SmartLink({
     <Link href={href} className={className}>
       {children}
     </Link>
-  );
-}
-
-function LiveSiteContentParitySection() {
-  return (
-    <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <h2 className="font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
-              Business, events, culture, and advancement in Milwaukee.
-            </h2>
-            <p className="mt-5 text-sm leading-7 text-stone-300">
-              These legacy homepage pathways keep the current MKE Black content
-              model available while the new directory, marketplace, memberships,
-              and owner tools continue to grow.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/directory"
-                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft"
-              >
-                Search business directory
-              </Link>
-              <Link
-                href={submitBusinessHref}
-                className="rounded-full border border-line bg-white/5 px-5 py-3 text-sm font-semibold text-stone-200 transition hover:border-accent/40 hover:text-ink"
-              >
-                Submit your business
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            {liveStoryLinks.map((story) => (
-              <Link
-                key={story.title}
-                href={story.href}
-                className="group rounded-2xl border border-line bg-panelAlt/70 p-5 transition hover:border-accent/40 hover:bg-panelAlt"
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-success">
-                  Featured guide
-                </p>
-                <h3 className="mt-3 font-display text-lg font-bold leading-snug text-ink">
-                  {story.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-stone-400">
-                  {story.description}
-                </p>
-                <p className="mt-4 text-sm font-semibold text-accent transition group-hover:text-accentSoft">
-                  {story.cta} →
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -755,11 +666,7 @@ export function HomepagePage() {
   }
 
   if (!modules.length) {
-    return (
-      <div className="pb-16">
-        <LiveSiteContentParitySection />
-      </div>
-    );
+    return <div className="pb-16" />;
   }
 
   return (
@@ -785,7 +692,6 @@ export function HomepagePage() {
           )}
         </motion.div>
       ))}
-      <LiveSiteContentParitySection />
     </div>
   );
 }
