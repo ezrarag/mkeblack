@@ -609,23 +609,24 @@ export function normalizeArticleSummary(
   const slug = stringValue(record.slug).trim();
   const explicitHref = stringValue(record.href || record.url || record.externalUrl).trim();
   const source = stringValue(record.source).trim();
-  const fallbackExternalHref =
-    source === "migrated_wix" && slug
-      ? `https://www.mkeblack.org/post/${slug}`
-      : "";
+  const hasContent = Boolean(stringValue(record.body || record.content).trim());
   const normalizedExplicitHref =
     explicitHref && !explicitHref.includes("/") && !explicitHref.includes(".")
-      ? source === "migrated_wix"
-        ? `https://www.mkeblack.org/post/${explicitHref}`
-        : normalizeHref(explicitHref)
+      ? normalizeHref(explicitHref)
       : explicitHref
         ? normalizeHref(explicitHref)
         : "";
+  const sourceHref =
+    normalizedExplicitHref.startsWith("/articles/")
+      ? ""
+      : normalizedExplicitHref;
+  const internalHref = slug ? `/articles/${slug}` : "";
 
   return {
     id,
     title:
       stringValue(record.title || record.headline).trim() || "Untitled article",
+    slug,
     excerpt:
       stringValue(
         record.excerpt ||
@@ -633,7 +634,8 @@ export function normalizeArticleSummary(
           record.description ||
           record.deck
       ).trim(),
-    href: normalizedExplicitHref || fallbackExternalHref,
+    href: internalHref || normalizedExplicitHref,
+    sourceHref,
     imageUrl: stringValue(
       record.imageUrl ||
         record.coverImageUrl ||
@@ -642,7 +644,11 @@ export function normalizeArticleSummary(
     ).trim(),
     publishedAt: parseDateValue(
       record.publishedAt || record.createdAt || record.updatedAt
-    )
+    ),
+    author: stringValue(record.author).trim() || "MKE Black",
+    readTime: stringValue(record.readTime).trim(),
+    source,
+    hasContent
   };
 }
 

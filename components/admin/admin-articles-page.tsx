@@ -14,6 +14,7 @@ type Article = {
   title: string;
   slug: string;
   excerpt: string;
+  body: string;
   author: string;
   imageUrl: string;
   href: string;
@@ -28,6 +29,7 @@ function blankArticle(): Omit<Article, "id"> {
     title: "",
     slug: "",
     excerpt: "",
+    body: "",
     author: "MKE Black",
     imageUrl: "",
     href: "",
@@ -96,6 +98,7 @@ export function AdminArticlesPage() {
           title: d.title ?? "",
           slug: d.slug ?? "",
           excerpt: d.excerpt ?? "",
+          body: d.body ?? d.content ?? "",
           author: d.author ?? "MKE Black",
           imageUrl: d.imageUrl ?? "",
           href: d.href ?? "",
@@ -137,6 +140,7 @@ export function AdminArticlesPage() {
       title: article.title,
       slug: article.slug,
       excerpt: article.excerpt,
+      body: article.body,
       author: article.author,
       imageUrl: article.imageUrl,
       href: article.href,
@@ -380,6 +384,11 @@ export function AdminArticlesPage() {
                       {article.excerpt.slice(0, 100)}
                       {article.excerpt.length > 100 ? "…" : ""}
                     </p>
+                    {article.body ? (
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-accent">
+                        Native content saved
+                      </p>
+                    ) : null}
                   </div>
 
                   {/* Actions */}
@@ -397,17 +406,26 @@ export function AdminArticlesPage() {
                       {article.published ? "Published" : "Draft"}
                     </button>
 
-                    {/* External link */}
-                    {article.href && (
+                    {article.slug ? (
+                      <a
+                        href={`/articles/${article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border border-line px-3 py-1.5 text-xs text-stone-400 hover:text-accentSoft transition"
+                      >
+                        Open article
+                      </a>
+                    ) : null}
+                    {article.href ? (
                       <a
                         href={article.href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded-full border border-line px-3 py-1.5 text-xs text-stone-400 hover:text-accentSoft transition"
                       >
-                        View ↗
+                        Source ↗
                       </a>
-                    )}
+                    ) : null}
 
                     {/* Edit */}
                     <button
@@ -448,10 +466,10 @@ export function AdminArticlesPage() {
           </p>
           <p className="mt-3">
             Articles marked <span className="text-stone-300">Wix</span> were
-            migrated from mkeblack.org and link to the original Wix page. You
-            can update the{" "}
-            <span className="text-stone-300">Link URL</span> to point to an
-            internal page once native article pages are built.
+            migrated from mkeblack.org. Add markdown to{" "}
+            <span className="text-stone-300">Body content</span> to preserve
+            the full article in Firebase; the public article page will then use
+            native stored content instead of relying on the original source.
           </p>
         </div>
       </section>
@@ -531,6 +549,25 @@ export function AdminArticlesPage() {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs uppercase tracking-[0.2em] text-muted mb-2">
+                  Body content
+                </label>
+                <textarea
+                  value={form.body}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, body: e.target.value }))
+                  }
+                  rows={12}
+                  placeholder="Write or paste the full article in markdown."
+                  className="w-full rounded-2xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-accent/50 focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-stone-600">
+                  Stored in Firebase and rendered on the native /articles/[slug]
+                  page.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs uppercase tracking-[0.2em] text-muted mb-2">
@@ -598,7 +635,7 @@ export function AdminArticlesPage() {
 
               <div>
                 <label className="block text-xs uppercase tracking-[0.2em] text-muted mb-2">
-                  Link URL (where &quot;Read more&quot; goes)
+                  Original/source URL
                 </label>
                 <input
                   value={form.href}
@@ -609,8 +646,9 @@ export function AdminArticlesPage() {
                   className="w-full rounded-2xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-accent/50 focus:outline-none"
                 />
                 <p className="mt-1 text-xs text-stone-600">
-                  Set to the original Wix URL for migrated articles. Change to
-                  /articles/slug when native article pages are built.
+                  Optional. Keep the legacy source link here for reference or
+                  archive recovery. Public article cards now open the native
+                  internal article page when a slug exists.
                 </p>
               </div>
 

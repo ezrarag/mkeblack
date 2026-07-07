@@ -497,10 +497,32 @@ export type MemberDiscount = {
 export type ArticleSummary = {
   id: string;
   title: string;
+  slug: string;
   excerpt: string;
   href: string;
+  sourceHref: string;
   imageUrl: string;
   publishedAt: Date | null;
+  author: string;
+  readTime: string;
+  source: string;
+  hasContent: boolean;
+};
+
+export type PublicArticle = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  body: string;
+  href: string;
+  sourceHref: string;
+  imageUrl: string;
+  publishedAt: Date | null;
+  author: string;
+  readTime: string;
+  source: string;
+  hasContent: boolean;
 };
 
 export type DirectoryHeroConfig = {
