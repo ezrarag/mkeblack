@@ -175,6 +175,8 @@ export function SiteHeader() {
       { href: "/admin/businesses", label: "Business manager" },
       { href: "/admin/categories", label: "Categories" },
       { href: "/admin/marketplace", label: "Marketplace" },
+      { href: "/admin/events", label: "Events" },
+      { href: "/admin/pages", label: "Page content" },
       { href: "/admin/members", label: "Solidarity Circle" },
       { href: "/admin/visitors", label: "Visitors" },
       { href: "/admin/claims", label: "Pending claims" },

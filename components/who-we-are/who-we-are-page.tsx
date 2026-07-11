@@ -3,6 +3,13 @@
 import Image from "next/image";
 import { useState } from "react";
 import { teamMembers, type TeamMember } from "@/lib/data/team";
+import { usePageHeroContent } from "@/hooks/use-page-hero-content";
+
+export const WHO_WE_ARE_HERO_DEFAULTS = {
+  eyebrow: "Who We Are",
+  headline: "The People Behind MKE Black",
+  description: "A dedicated team of community builders, advocates, and leaders driving Black economic empowerment in Milwaukee and beyond. Tap any card to read their full bio."
+};
 
 // ── Initials helper ──────────────────────────────────────────────────────────
 
@@ -133,6 +140,7 @@ function GroupSection({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function WhoWeArePage() {
+  const hero = usePageHeroContent("who_we_are_page", WHO_WE_ARE_HERO_DEFAULTS);
   const staff    = teamMembers.filter((m) => m.group === "staff");
   const board    = teamMembers.filter((m) => m.group === "board");
   const advisory = teamMembers.filter((m) => m.group === "advisory");
@@ -143,15 +151,13 @@ export function WhoWeArePage() {
       <section className="bg-mesh-dark">
         <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-accent">
-            Who We Are
+            {hero.eyebrow}
           </p>
           <h1 className="mt-4 font-display text-5xl font-black leading-tight text-ink sm:text-6xl">
-            The People Behind MKE Black
+            {hero.headline}
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
-            A dedicated team of community builders, advocates, and leaders driving
-            Black economic empowerment in Milwaukee and beyond. Tap any card to
-            read their full bio.
+            {hero.description}
           </p>
         </div>
       </section>

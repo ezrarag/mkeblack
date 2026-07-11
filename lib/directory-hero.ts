@@ -63,6 +63,9 @@ export function normalizeDirectoryHeroConfig(
   return {
     id,
     heroImages,
+    eyebrow: typeof record.eyebrow === "string" && record.eyebrow.trim() ? record.eyebrow.trim() : "Milwaukee Directory",
+    headline: typeof record.headline === "string" && record.headline.trim() ? record.headline.trim() : "Browse Black Owned Businesses by Business Hours & Days Open",
+    description: typeof record.description === "string" && record.description.trim() ? record.description.trim() : "MKE Black makes weekly-hours discovery front and center so residents can quickly see where to eat, shop, book, and support the city's Black business community.",
     updatedAt: parseDateValue(record.updatedAt)
   };
 }

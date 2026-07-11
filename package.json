@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "audit:business-locations": "node scripts/audit-business-locations.js",
+    "audit:business-categories": "node scripts/audit-business-categories.js",
+    "fix:business-categories": "node scripts/audit-business-categories.js --fix",
     "lint": "next lint"
   },
   "dependencies": {

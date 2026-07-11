@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { StatePanel } from "@/components/ui/state-panel";
 import { useBusinessCategories } from "@/hooks/use-business-categories";
@@ -14,6 +14,8 @@ import {
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { createBusinessCategoryId } from "@/lib/categories";
 import { BusinessCategoryOption } from "@/lib/types";
+import { getFirebaseDb, loadFirebaseFirestoreModule } from "@/lib/firebase/client";
+import { normalizeCategoryValue } from "@/lib/businesses";
 
 type DraftCategory = {
   label: string;
@@ -41,6 +43,8 @@ function CategoryManagementContent() {
   const [targetCategoryId, setTargetCategoryId] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
+  const [orphanedCategories, setOrphanedCategories] = useState<Array<{ label: string; usageCount: number }>>([]);
+  const [auditing, setAuditing] = useState(true);
 
   const sortedCategories = useMemo(
     () => [...categories].sort((left, right) => left.label.localeCompare(right.label)),
@@ -48,6 +52,49 @@ function CategoryManagementContent() {
   );
   const activeCategories = sortedCategories.filter((category) => category.active);
   const computedNewSlug = newSlug || createBusinessCategoryId(newLabel);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function audit() {
+      try {
+        const [firestoreModule, db] = await Promise.all([loadFirebaseFirestoreModule(), getFirebaseDb()]);
+        if (!db) return;
+        const snapshot = await firestoreModule.getDocs(firestoreModule.collection(db, "businesses"));
+        const knownLabels = new Set(categories.map((category) => category.label.trim()));
+        const usage = new Map<string, number>();
+        snapshot.docs.forEach((document) => {
+          const value = document.data().category;
+          const label = typeof value === "string" ? normalizeCategoryValue(value) : "";
+          if (label && !knownLabels.has(label)) usage.set(label, (usage.get(label) ?? 0) + 1);
+        });
+        if (!cancelled) setOrphanedCategories([...usage].map(([label, usageCount]) => ({ label, usageCount })).sort((a, b) => a.label.localeCompare(b.label)));
+      } catch (auditError) {
+        if (!cancelled) {
+          setFeedbackTone("error");
+          setFeedback(`Category audit failed: ${formatFirebaseError(auditError)}`);
+        }
+      } finally {
+        if (!cancelled) setAuditing(false);
+      }
+    }
+    if (!loading) void audit();
+    return () => { cancelled = true; };
+  }, [categories, loading]);
+
+  async function handleAddOrphanedCategories() {
+    setSaving(true);
+    setFeedback(null);
+    try {
+      for (const category of orphanedCategories) await addBusinessCategory({ label: category.label });
+      setFeedbackTone("success");
+      setFeedback(`Added ${orphanedCategories.length} missing categor${orphanedCategories.length === 1 ? "y" : "ies"} to the manager.`);
+    } catch (addError) {
+      setFeedbackTone("error");
+      setFeedback(formatFirebaseError(addError));
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function updateDraft(
     category: BusinessCategoryOption,
@@ -212,6 +259,20 @@ function CategoryManagementContent() {
           }`}
         >
           {feedback}
+        </div>
+      ) : null}
+
+      {!auditing && orphanedCategories.length ? (
+        <div className="mt-6 rounded-2xl border border-amber-400/35 bg-amber-400/10 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="font-semibold text-stone-100">Categories used by businesses but missing from the manager</p>
+              <p className="mt-2 text-sm text-stone-300">{orphanedCategories.map((category) => `${category.label} (${category.usageCount})`).join(", ")}</p>
+            </div>
+            <button type="button" onClick={() => void handleAddOrphanedCategories()} disabled={saving} className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+              Add all to manager
+            </button>
+          </div>
         </div>
       ) : null}
 

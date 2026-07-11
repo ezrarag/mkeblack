@@ -78,7 +78,7 @@ function normalizeAnalyticsSummary(value: unknown) {
  * to a single, plain category label so the directory's category list
  * doesn't show duplicate/garbled entries alongside the real labels.
  */
-function normalizeCategoryValue(raw: string): string {
+export function normalizeCategoryValue(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return "";
   if (!trimmed.startsWith("[")) return trimmed;

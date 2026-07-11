@@ -1,6 +1,5 @@
 import {
-  DIRECTORY_HERO_CONFIG_ID,
-  normalizeDirectoryHeroConfig
+  DIRECTORY_HERO_CONFIG_ID
 } from "@/lib/directory-hero";
 import {
   getFirebaseDb,
@@ -41,7 +40,7 @@ async function getStorageHelpers() {
 }
 
 export async function saveDirectoryHeroConfig(
-  config: Pick<DirectoryHeroConfig, "heroImages">
+  config: Pick<DirectoryHeroConfig, "heroImages"> | Pick<DirectoryHeroConfig, "eyebrow" | "headline" | "description">
 ) {
   const { db, firestoreModule } = await getFirestoreHelpers();
 
@@ -49,7 +48,7 @@ export async function saveDirectoryHeroConfig(
     firestoreModule.doc(db, "site_config", DIRECTORY_HERO_CONFIG_ID),
     {
       id: DIRECTORY_HERO_CONFIG_ID,
-      heroImages: normalizeDirectoryHeroConfig(config).heroImages,
+      ...config,
       updatedAt: firestoreModule.serverTimestamp()
     },
     { merge: true }
@@ -65,4 +64,3 @@ export async function uploadDirectoryHeroImage(file: File) {
   const snapshot = await storageModule.uploadBytes(storageRef, file);
   return storageModule.getDownloadURL(snapshot.ref);
 }
-

@@ -528,7 +528,16 @@ export type PublicArticle = {
 export type DirectoryHeroConfig = {
   id: string;
   heroImages: string[];
+  eyebrow: string;
+  headline: string;
+  description: string;
   updatedAt: Date | null;
+};
+
+export type PageHeroContent = {
+  eyebrow: string;
+  headline: string;
+  description: string;
 };
 
 export type BusinessCategory =

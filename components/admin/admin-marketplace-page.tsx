@@ -11,7 +11,10 @@ type EditState = {
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
-import { adminUpdateListing } from "@/lib/firebase/marketplace";
+import {
+  adminUpdateListing,
+  deleteMarketplaceListing
+} from "@/lib/firebase/marketplace";
 import { formatFirebaseError } from "@/lib/firebase-errors";
 import { MARKETPLACE_LISTING_CATEGORIES, MarketplaceListing } from "@/lib/types";
 
@@ -24,12 +27,16 @@ function ListingAdminRow({
   listing,
   onToggleFeatured,
   onToggleAvailable,
-  onSaveEdits
+  onSaveEdits,
+  onDelete,
+  deleting
 }: {
   listing: MarketplaceListing;
   onToggleFeatured: (id: string, val: boolean) => void;
   onToggleAvailable: (id: string, val: boolean) => void;
   onSaveEdits: (id: string, edits: EditState) => void;
+  onDelete: (listing: MarketplaceListing) => void;
+  deleting: boolean;
 }) {
   const [edit, setEdit] = useState<EditState>({
     category: listing.category,
@@ -96,6 +103,14 @@ function ListingAdminRow({
           >
             View ↗
           </Link>
+          <button
+            type="button"
+            onClick={() => onDelete(listing)}
+            disabled={deleting}
+            className="rounded-full border border-danger/40 bg-danger/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
+          >
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
         </div>
       </div>
 
@@ -186,6 +201,7 @@ function AdminMarketplaceContent() {
     "all" | "live" | "hidden"
   >("all");
   const [filterFeatured, setFilterFeatured] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const visible = listings.filter((l) => {
     if (
@@ -237,6 +253,24 @@ function AdminMarketplaceContent() {
     }
   }
 
+  async function handleDelete(listing: MarketplaceListing) {
+    const confirmed = window.confirm(
+      `Permanently delete “${listing.name}” from the marketplace? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(listing.id);
+    setFeedback(null);
+    try {
+      await deleteMarketplaceListing(listing.id, listing.photoUrl);
+      setFeedback({ msg: `“${listing.name}” was deleted.`, tone: "success" });
+    } catch (err) {
+      setFeedback({ msg: formatFirebaseError(err), tone: "error" });
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const liveCount = listings.filter((l) => l.available).length;
   const featuredCount = listings.filter((l) => l.featured).length;
 
@@ -254,7 +288,7 @@ function AdminMarketplaceContent() {
           <div className="mt-5 flex flex-wrap gap-3">
             {[
               { label: "Total listings", value: listings.length },
-              { label: "Live", value: liveCount },
+              { label: "Active listings", value: liveCount },
               { label: "Featured", value: featuredCount }
             ].map(({ label, value }) => (
               <div
@@ -347,6 +381,8 @@ function AdminMarketplaceContent() {
                 onToggleFeatured={handleToggleFeatured}
                 onToggleAvailable={handleToggleAvailable}
                 onSaveEdits={handleSaveEdits}
+                onDelete={handleDelete}
+                deleting={deletingId === listing.id}
               />
             ))
           )}
