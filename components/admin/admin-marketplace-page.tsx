@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { AdminConfirmDialog, AdminFeedback } from "@/components/admin/admin-action-ui";
 
 type EditState = {
   category: string;
@@ -29,7 +30,8 @@ function ListingAdminRow({
   onToggleAvailable,
   onSaveEdits,
   onDelete,
-  deleting
+  deleting,
+  updating
 }: {
   listing: MarketplaceListing;
   onToggleFeatured: (id: string, val: boolean) => void;
@@ -37,6 +39,7 @@ function ListingAdminRow({
   onSaveEdits: (id: string, edits: EditState) => void;
   onDelete: (listing: MarketplaceListing) => void;
   deleting: boolean;
+  updating: boolean;
 }) {
   const [edit, setEdit] = useState<EditState>({
     category: listing.category,
@@ -67,27 +70,29 @@ function ListingAdminRow({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           {/* Available toggle */}
           <button
             type="button"
+            disabled={updating || deleting}
             onClick={() =>
               onToggleAvailable(listing.id, !listing.available)
             }
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            className={`min-h-11 rounded-full px-4 py-2 text-xs font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
               listing.available
                 ? "border border-success/40 bg-success/10 text-success hover:bg-success/20"
                 : "border border-line bg-panelAlt text-stone-500 hover:border-success/30 hover:text-success"
             }`}
           >
-            {listing.available ? "● Live" : "○ Hidden"}
+            {updating ? "Updating…" : listing.available ? "● Live" : "○ Hidden"}
           </button>
 
           {/* Featured toggle */}
           <button
             type="button"
+            disabled={updating || deleting}
             onClick={() => onToggleFeatured(listing.id, !listing.featured)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            className={`min-h-11 rounded-full px-4 py-2 text-xs font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
               listing.featured
                 ? "border border-accent/50 bg-accent/10 text-accent hover:bg-accent/20"
                 : "border border-line bg-panelAlt text-stone-500 hover:border-accent/30 hover:text-accentSoft"
@@ -99,15 +104,15 @@ function ListingAdminRow({
           {/* View */}
           <Link
             href={`/marketplace`}
-            className="rounded-full border border-line px-3 py-1.5 text-xs text-stone-400 transition hover:border-accent/30 hover:text-ink"
+            className="inline-flex min-h-11 items-center rounded-full border border-line px-4 py-2 text-xs text-stone-400 transition hover:border-accent/30 hover:text-ink"
           >
             View ↗
           </Link>
           <button
             type="button"
             onClick={() => onDelete(listing)}
-            disabled={deleting}
-            className="rounded-full border border-danger/40 bg-danger/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
+            disabled={deleting || updating}
+            className="min-h-11 rounded-full border border-danger/40 bg-danger/10 px-4 py-2 text-xs font-semibold text-rose-300 transition hover:bg-danger/20 disabled:opacity-50"
           >
             {deleting ? "Deleting…" : "Delete"}
           </button>
@@ -115,15 +120,16 @@ function ListingAdminRow({
       </div>
 
       {/* Editable fields */}
-      <div className="mt-3 flex flex-wrap items-end gap-3">
-        <div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[auto_auto_minmax(12rem,1fr)_auto] lg:items-end">
+        <div className="min-w-0">
           <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
             Category
           </label>
           <select
+            disabled={updating || deleting}
             value={edit.category}
             onChange={(e) => updateEdit("category", e.target.value)}
-            className="mt-1 rounded-lg border border-line bg-canvas/60 px-2.5 py-1.5 text-xs text-ink focus:border-accent/60 focus:outline-none"
+            className="mt-1 min-h-11 w-full rounded-lg border border-line bg-canvas/60 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
           >
             {MARKETPLACE_LISTING_CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -133,44 +139,47 @@ function ListingAdminRow({
           </select>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
             Checkout
           </label>
           <select
+            disabled={updating || deleting}
             value={edit.checkoutMode}
             onChange={(e) =>
               updateEdit("checkoutMode", e.target.value as EditState["checkoutMode"])
             }
-            className="mt-1 rounded-lg border border-line bg-canvas/60 px-2.5 py-1.5 text-xs text-ink focus:border-accent/60 focus:outline-none"
+            className="mt-1 min-h-11 w-full rounded-lg border border-line bg-canvas/60 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
           >
             <option value="external">External</option>
             <option value="native">Native</option>
           </select>
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 sm:col-span-2 lg:col-span-1">
           <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
             Order URL
           </label>
           <input
+            disabled={updating || deleting}
             value={edit.orderUrl}
             onChange={(e) => updateEdit("orderUrl", e.target.value)}
             placeholder="https://…"
-            className="mt-1 w-full rounded-lg border border-line bg-canvas/60 px-2.5 py-1.5 text-xs text-ink placeholder:text-stone-600 focus:border-accent/60 focus:outline-none"
+            className="mt-1 min-h-11 w-full rounded-lg border border-line bg-canvas/60 px-3 py-2 text-sm text-ink placeholder:text-stone-600 focus:border-accent/60 focus:outline-none"
           />
         </div>
 
         {dirty ? (
           <button
             type="button"
+            disabled={updating || deleting}
             onClick={() => {
               onSaveEdits(listing.id, edit);
               setDirty(false);
             }}
-            className="rounded-lg border border-accent bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent hover:text-white"
+            className="min-h-11 rounded-lg border border-accent bg-accent/10 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent hover:text-white sm:justify-self-start lg:justify-self-auto"
           >
-            Save
+            {updating ? "Saving…" : "Save"}
           </button>
         ) : null}
       </div>
@@ -202,6 +211,8 @@ function AdminMarketplaceContent() {
   >("all");
   const [filterFeatured, setFilterFeatured] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<MarketplaceListing | null>(null);
 
   const visible = listings.filter((l) => {
     if (
@@ -217,6 +228,7 @@ function AdminMarketplaceContent() {
   });
 
   async function handleToggleFeatured(id: string, featured: boolean) {
+    setUpdatingId(id);
     try {
       await adminUpdateListing(id, { featured });
       setFeedback({
@@ -225,10 +237,13 @@ function AdminMarketplaceContent() {
       });
     } catch (err) {
       setFeedback({ msg: formatFirebaseError(err), tone: "error" });
+    } finally {
+      setUpdatingId(null);
     }
   }
 
   async function handleToggleAvailable(id: string, available: boolean) {
+    setUpdatingId(id);
     try {
       await adminUpdateListing(id, { available });
       setFeedback({
@@ -237,10 +252,13 @@ function AdminMarketplaceContent() {
       });
     } catch (err) {
       setFeedback({ msg: formatFirebaseError(err), tone: "error" });
+    } finally {
+      setUpdatingId(null);
     }
   }
 
   async function handleSaveEdits(id: string, edits: EditState) {
+    setUpdatingId(id);
     try {
       await adminUpdateListing(id, {
         category: edits.category,
@@ -250,15 +268,14 @@ function AdminMarketplaceContent() {
       setFeedback({ msg: "Changes saved.", tone: "success" });
     } catch (err) {
       setFeedback({ msg: formatFirebaseError(err), tone: "error" });
+    } finally {
+      setUpdatingId(null);
     }
   }
 
-  async function handleDelete(listing: MarketplaceListing) {
-    const confirmed = window.confirm(
-      `Permanently delete “${listing.name}” from the marketplace? This cannot be undone.`
-    );
-    if (!confirmed) return;
-
+  async function confirmDelete() {
+    const listing = pendingDelete;
+    if (!listing) return;
     setDeletingId(listing.id);
     setFeedback(null);
     try {
@@ -268,8 +285,13 @@ function AdminMarketplaceContent() {
       setFeedback({ msg: formatFirebaseError(err), tone: "error" });
     } finally {
       setDeletingId(null);
+      setPendingDelete(null);
     }
   }
+
+  const cancelDelete = useCallback(() => {
+    if (!deletingId) setPendingDelete(null);
+  }, [deletingId]);
 
   const liveCount = listings.filter((l) => l.available).length;
   const featuredCount = listings.filter((l) => l.featured).length;
@@ -307,26 +329,16 @@ function AdminMarketplaceContent() {
         </div>
 
         {/* Feedback */}
-        {feedback ? (
-          <div
-            className={`mt-4 rounded-xl px-4 py-3 text-sm ${
-              feedback.tone === "success"
-                ? "border border-success/35 bg-success/10 text-stone-100"
-                : "border border-danger/35 bg-danger/10 text-rose-300"
-            }`}
-          >
-            {feedback.msg}
-          </div>
-        ) : null}
+        {feedback ? <AdminFeedback message={feedback.msg} tone={feedback.tone} /> : null}
 
         {/* Filters */}
-        <div className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-panel/70 px-5 py-4">
+        <div className="mt-6 grid gap-3 rounded-2xl border border-line bg-panel/70 px-5 py-4 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_auto_auto_auto] lg:items-center">
           <input
             type="search"
             placeholder="Search name or business…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 rounded-xl border border-line bg-canvas/60 px-3 py-2 text-sm text-ink placeholder:text-stone-600 focus:border-accent/60 focus:outline-none"
+            className="min-h-11 w-full rounded-xl border border-line bg-canvas/60 px-3 py-2 text-sm text-ink placeholder:text-stone-600 focus:border-accent/60 focus:outline-none"
           />
 
           <select
@@ -334,14 +346,14 @@ function AdminMarketplaceContent() {
             onChange={(e) =>
               setFilterAvailable(e.target.value as "all" | "live" | "hidden")
             }
-            className="rounded-xl border border-line bg-canvas/60 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
+            className="min-h-11 w-full rounded-xl border border-line bg-canvas/60 px-3 py-2 text-sm text-ink focus:border-accent/60 focus:outline-none"
           >
             <option value="all">All status</option>
             <option value="live">Live only</option>
             <option value="hidden">Hidden only</option>
           </select>
 
-          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-line bg-canvas/60 px-3 py-2 text-sm text-stone-300">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-line bg-canvas/60 px-3 py-2 text-sm text-stone-300">
             <input
               type="checkbox"
               checked={filterFeatured}
@@ -351,7 +363,7 @@ function AdminMarketplaceContent() {
             Featured
           </label>
 
-          <p className="ml-auto text-xs text-stone-500">
+          <p className="text-xs text-stone-500 lg:ml-auto">
             {visible.length} / {listings.length}
           </p>
         </div>
@@ -381,12 +393,21 @@ function AdminMarketplaceContent() {
                 onToggleFeatured={handleToggleFeatured}
                 onToggleAvailable={handleToggleAvailable}
                 onSaveEdits={handleSaveEdits}
-                onDelete={handleDelete}
+                onDelete={setPendingDelete}
                 deleting={deletingId === listing.id}
+                updating={updatingId === listing.id}
               />
             ))
           )}
         </div>
+        <AdminConfirmDialog
+          open={Boolean(pendingDelete)}
+          title={`Delete “${pendingDelete?.name ?? "listing"}”?`}
+          description="This permanently removes the marketplace listing and its image. This action cannot be undone."
+          busy={Boolean(deletingId)}
+          onCancel={cancelDelete}
+          onConfirm={() => void confirmDelete()}
+        />
     </section>
   );
 }

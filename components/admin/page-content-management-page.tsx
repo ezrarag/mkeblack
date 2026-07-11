@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminFeedback } from "@/components/admin/admin-action-ui";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { WHO_WE_ARE_HERO_DEFAULTS } from "@/components/who-we-are/who-we-are-page";
 import { useDirectoryHeroConfig } from "@/hooks/use-directory-hero-config";
@@ -12,7 +13,7 @@ import { PageHeroContent } from "@/lib/types";
 function HeroEditor({ title, pagePath, configId, content }: { title: string; pagePath: string; configId: string; content: PageHeroContent }) {
   const [draft, setDraft] = useState(content);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ message: string; tone: "success" | "error" } | null>(null);
   useEffect(() => setDraft(content), [content]);
 
   async function save() {
@@ -20,9 +21,9 @@ function HeroEditor({ title, pagePath, configId, content }: { title: string; pag
     setFeedback(null);
     try {
       await savePageHeroContent(configId, draft);
-      setFeedback("Saved. The public page has been updated.");
+      setFeedback({ message: "Saved. The public page has been updated.", tone: "success" });
     } catch (error) {
-      setFeedback(formatFirebaseError(error));
+      setFeedback({ message: formatFirebaseError(error), tone: "error" });
     } finally { setSaving(false); }
   }
 
@@ -30,11 +31,11 @@ function HeroEditor({ title, pagePath, configId, content }: { title: string; pag
     <div className="rounded-2xl border border-line bg-panel/80 p-5">
       <div className="flex items-center justify-between gap-4"><div><h2 className="font-display text-2xl font-bold text-ink">{title}</h2><p className="text-xs text-muted">{pagePath} hero</p></div></div>
       <div className="mt-5 grid gap-4">
-        <label className="text-xs uppercase tracking-[0.2em] text-muted">Eyebrow<input className="mt-2" value={draft.eyebrow} onChange={(event) => setDraft({ ...draft, eyebrow: event.target.value })} /></label>
-        <label className="text-xs uppercase tracking-[0.2em] text-muted">Headline<input className="mt-2" value={draft.headline} onChange={(event) => setDraft({ ...draft, headline: event.target.value })} /></label>
-        <label className="text-xs uppercase tracking-[0.2em] text-muted">Subtitle / description<textarea className="mt-2 min-h-32" value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /></label>
-        <div><button type="button" onClick={() => void save()} disabled={saving || !draft.headline.trim()} className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Save content"}</button></div>
-        {feedback ? <p className="text-sm text-stone-300">{feedback}</p> : null}
+        <label className="text-xs uppercase tracking-[0.2em] text-muted">Eyebrow<input className="mt-2 min-h-11" value={draft.eyebrow} onChange={(event) => setDraft({ ...draft, eyebrow: event.target.value })} /></label>
+        <label className="text-xs uppercase tracking-[0.2em] text-muted">Headline<input className="mt-2 min-h-11" value={draft.headline} onChange={(event) => setDraft({ ...draft, headline: event.target.value })} /></label>
+        <label className="text-xs uppercase tracking-[0.2em] text-muted">Subtitle / description<textarea className="mt-2 min-h-32 resize-y" value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /></label>
+        <div><button type="button" onClick={() => void save()} disabled={saving || !draft.headline.trim()} className="min-h-11 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Save content"}</button></div>
+        {feedback ? <AdminFeedback message={feedback.message} tone={feedback.tone} /> : null}
       </div>
     </div>
   );

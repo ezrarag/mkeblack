@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { AdminConfirmDialog, AdminFeedback } from "@/components/admin/admin-action-ui";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
 import { BusinessEventsManager } from "@/components/events/business-events-manager";
@@ -19,12 +20,14 @@ function AdminEventsContent() {
   const [selectedBusinessId, setSelectedBusinessId] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ message: string; error: boolean } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<BusinessEvent | null>(null);
   const selectedBusiness = eligibleBusinesses.find((business) => business.id === selectedBusinessId);
   const publishedCount = events.filter((event) => event.status === "published").length;
   const upcomingCount = events.filter((event) => event.status === "published" && !isEventPast(event)).length;
 
-  async function handleDelete(event: BusinessEvent) {
-    if (!window.confirm(`Permanently delete “${event.title}”? This cannot be undone.`)) return;
+  async function confirmDelete() {
+    const event = pendingDelete;
+    if (!event) return;
     setDeletingId(event.id);
     setFeedback(null);
     try {
@@ -34,8 +37,13 @@ function AdminEventsContent() {
       setFeedback({ message: formatFirebaseError(deleteError), error: true });
     } finally {
       setDeletingId(null);
+      setPendingDelete(null);
     }
   }
+
+  const cancelDelete = useCallback(() => {
+    if (!deletingId) setPendingDelete(null);
+  }, [deletingId]);
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -52,11 +60,11 @@ function AdminEventsContent() {
         </div>
       </div>
 
-      {feedback ? <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${feedback.error ? "border-danger/35 bg-danger/10 text-rose-300" : "border-success/35 bg-success/10 text-stone-100"}`}>{feedback.message}</div> : null}
+      {feedback ? <AdminFeedback message={feedback.message} tone={feedback.error ? "error" : "success"} /> : null}
 
       <div className="mt-6 rounded-2xl border border-line bg-panel/80 p-5">
         <label className="block text-xs uppercase tracking-[0.2em] text-muted">Create or edit events for a business</label>
-        <select className="mt-3" value={selectedBusinessId} onChange={(event) => setSelectedBusinessId(event.target.value)}>
+        <select className="mt-3 min-h-11 w-full" value={selectedBusinessId} onChange={(event) => setSelectedBusinessId(event.target.value)}>
           <option value="">Choose a Solidarity Circle business</option>
           {eligibleBusinesses.map((business) => <option key={business.id} value={business.id}>{business.name}</option>)}
         </select>
@@ -66,11 +74,19 @@ function AdminEventsContent() {
       <div className="mt-6 space-y-3">
         {loading ? <div className="h-36 animate-pulse rounded-2xl border border-line bg-panel/60" /> : error ? <div className="rounded-xl border border-danger/35 bg-danger/10 p-4 text-rose-300">{error}</div> : events.length ? events.map((event) => (
           <div key={event.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-panelAlt/60 p-4">
-            <div><p className="font-semibold text-stone-100">{event.title}</p><p className="mt-1 text-xs text-stone-400">{event.businessName} · {event.status} · {event.startsAt?.toLocaleString() ?? "Date not set"}</p></div>
-            <button type="button" onClick={() => void handleDelete(event)} disabled={deletingId === event.id} className="rounded-full border border-danger/40 bg-danger/10 px-4 py-2 text-sm font-semibold text-rose-300 disabled:opacity-50">{deletingId === event.id ? "Deleting…" : "Delete"}</button>
+            <div className="min-w-0"><p className="font-semibold text-stone-100">{event.title}</p><p className="mt-1 break-words text-xs text-stone-400">{event.businessName} · {event.status} · {event.startsAt?.toLocaleString() ?? "Date not set"}</p></div>
+            <button type="button" onClick={() => setPendingDelete(event)} disabled={Boolean(deletingId)} className="min-h-11 rounded-full border border-danger/40 bg-danger/10 px-5 py-2 text-sm font-semibold text-rose-300 transition hover:bg-danger/20 disabled:opacity-50">Delete</button>
           </div>
         )) : <div className="rounded-2xl border border-dashed border-line p-8 text-center text-stone-400">No events yet.</div>}
       </div>
+      <AdminConfirmDialog
+        open={Boolean(pendingDelete)}
+        title={`Delete “${pendingDelete?.title ?? "event"}”?`}
+        description="This permanently removes the event and its image. This action cannot be undone."
+        busy={Boolean(deletingId)}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
+      />
     </section>
   );
 }
