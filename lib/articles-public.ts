@@ -39,6 +39,25 @@ function normalizeSourceHref(value: string) {
   return value;
 }
 
+function articleIsPublished(data: Record<string, unknown>) {
+  if (typeof data.published === "boolean") return data.published;
+  if (typeof data.status === "string") return data.status === "published";
+  return true;
+}
+
+function slugCandidates(value: string) {
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    // Next normally decodes route params, but a malformed legacy URL should
+    // still get an exact-match lookup instead of crashing the page.
+  }
+
+  const cleaned = decoded.trim().replace(/^\/+|\/+$/g, "");
+  return Array.from(new Set([cleaned, cleaned.toLowerCase()].filter(Boolean)));
+}
+
 function publicArticleFromDoc(doc: FirestoreDoc): PublicArticle {
   const data = doc.data() ?? {};
   const slug = text(data.slug);
@@ -70,19 +89,36 @@ function publicArticleFromDoc(doc: FirestoreDoc): PublicArticle {
 }
 
 export async function getPublicArticleBySlug(slug: string) {
-  const normalizedSlug = slug.trim();
-
-  if (!normalizedSlug) {
+  const candidates = slugCandidates(slug);
+  if (!candidates.length) {
     return null;
   }
 
-  const snapshot = await getFirebaseAdminDb()
-    .collection("articles")
-    .where("slug", "==", normalizedSlug)
-    .where("published", "==", true)
-    .limit(1)
-    .get();
+  const db = getFirebaseAdminDb();
 
-  const articleDoc = snapshot.docs[0];
-  return articleDoc ? publicArticleFromDoc(articleDoc) : null;
+  for (const candidate of candidates) {
+    const snapshot = await db
+      .collection("articles")
+      .where("slug", "==", candidate)
+      .limit(1)
+      .get();
+
+    const articleDoc = snapshot.docs[0];
+    const articleData = articleDoc?.data();
+    if (articleDoc && articleData && articleIsPublished(articleData)) {
+      return publicArticleFromDoc(articleDoc);
+    }
+  }
+
+  // Some migrated Wix records used a stable document id before a slug field
+  // was backfilled. Supporting that id keeps old inbound links working.
+  for (const candidate of candidates) {
+    const articleDoc = await db.collection("articles").doc(candidate).get();
+    const articleData = articleDoc.data();
+    if (articleDoc.exists && articleData && articleIsPublished(articleData)) {
+      return publicArticleFromDoc(articleDoc);
+    }
+  }
+
+  return null;
 }

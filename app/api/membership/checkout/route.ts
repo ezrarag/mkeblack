@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getFirebaseAdminDb } from "@/lib/firebase/admin";
-import { getBaseUrl, getMKEBlackStripeAccountId, getStripe } from "@/lib/stripe/server";
+import {
+  getBaseUrl,
+  getReadyStripeDestinationAccountId,
+  getStripe
+} from "@/lib/stripe/server";
 
 type CheckoutKind = "membership" | "donation";
 type MembershipPlan = "monthly" | "quarterly" | "yearly";
@@ -96,34 +100,12 @@ export async function POST(req: NextRequest) {
     const baseUrl = getBaseUrl();
 
     // MKE Black's Stripe account — payments transfer here after RAG's platform fee
-    const mkeBlackAccountId = getMKEBlackStripeAccountId();
+    // Rick's connected account is intentionally optional until onboarding is
+    // complete. Checkout can run on the platform account in the meantime.
+    const mkeBlackAccountId = await getReadyStripeDestinationAccountId();
 
     const memberRef =
       kind === "membership" ? db.collection("members").doc() : null;
-
-    if (memberRef) {
-      await memberRef.set({
-        name,
-        email,
-        paymentReference: "",
-        paymentSource: "stripe",
-        status: "pending",
-        membershipPlan,
-        uid: uid || null,
-        businessId: null,
-        pendingSubmissionId: pendingSubmissionId || null,
-        pendingBusinessName: pendingBusinessName || null,
-        notes: pendingSubmissionId
-          ? `Stripe checkout started for pending business submission ${pendingSubmissionId}.`
-          : "Stripe checkout started.",
-        benefitIds: [],
-        joinedAt: FieldValue.serverTimestamp(),
-        expiresAt: null,
-        stripeCheckoutSessionId: "",
-        stripeCustomerId: "",
-        stripeSubscriptionId: ""
-      });
-    }
 
     const plan = membershipPlanConfig[membershipPlan];
 
@@ -197,9 +179,26 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     if (memberRef) {
-      await memberRef.update({
+      await memberRef.set({
+        name,
+        email,
+        paymentReference: session.id,
+        paymentSource: "stripe",
+        status: "pending",
+        membershipPlan,
+        uid: uid || null,
+        businessId: null,
+        pendingSubmissionId: pendingSubmissionId || null,
+        pendingBusinessName: pendingBusinessName || null,
+        notes: pendingSubmissionId
+          ? `Stripe checkout started for pending business submission ${pendingSubmissionId}.`
+          : "Stripe checkout started.",
+        benefitIds: [],
+        joinedAt: FieldValue.serverTimestamp(),
+        expiresAt: null,
         stripeCheckoutSessionId: session.id,
-        paymentReference: session.id
+        stripeCustomerId: "",
+        stripeSubscriptionId: ""
       });
 
       if (pendingSubmissionId) {
@@ -218,8 +217,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Unable to start checkout.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Unable to create membership checkout", err);
+    return NextResponse.json(
+      { error: "Payment checkout is temporarily unavailable. Please try again shortly." },
+      { status: 500 }
+    );
   }
 }

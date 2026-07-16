@@ -35,6 +35,21 @@ export function getMKEBlackStripeAccountId(): string | undefined {
   return process.env.STRIPE_MKE_BLACK_ACCOUNT_ID || undefined;
 }
 
+export async function getReadyStripeDestinationAccountId() {
+  const accountId = getMKEBlackStripeAccountId();
+  if (!accountId) return undefined;
+
+  try {
+    const account = await getStripe().accounts.retrieve(accountId);
+    const transfersReady = account.capabilities?.transfers === "active";
+
+    return account.details_submitted && transfersReady ? accountId : undefined;
+  } catch (error) {
+    console.error("Unable to verify the Stripe connected account", error);
+    return undefined;
+  }
+}
+
 export function getPlatformFeeRate() {
   const rawValue = process.env.PLATFORM_FEE_RATE ?? "0.05";
   const parsedValue = Number(rawValue);

@@ -59,11 +59,15 @@ const donationAmounts = [5, 25, 50, 100] as const;
 type CheckoutKind = "membership" | "donation";
 type MembershipPlanId = (typeof membershipPlans)[number]["id"];
 
-export function MembershipPage() {
+export function MembershipPage({
+  initialKind = "membership"
+}: {
+  initialKind?: CheckoutKind;
+}) {
   const { user } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [checkoutKind, setCheckoutKind] = useState<CheckoutKind>("membership");
+  const [checkoutKind, setCheckoutKind] = useState<CheckoutKind>(initialKind);
   const [selectedPlan, setSelectedPlan] = useState<MembershipPlanId>("monthly");
   const [selectedDonation, setSelectedDonation] = useState<number>(25);
   const [customDonation, setCustomDonation] = useState("");

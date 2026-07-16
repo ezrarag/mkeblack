@@ -37,8 +37,8 @@ const exploreLinks: NavLink[] = [
 ];
 
 const supportLinks: NavLink[] = [
-  { href: "/membership#join", label: "Join Solidarity Circle" },
-  { href: "/membership#donate", label: "Make a donation" },
+  { href: "/membership", label: "Join Solidarity Circle" },
+  { href: "/donate", label: "Make a donation" },
   { href: "/membership#benefits", label: "Member benefits" }
 ];
 
