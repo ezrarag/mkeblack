@@ -37,9 +37,12 @@ const exploreLinks: NavLink[] = [
 ];
 
 const supportLinks: NavLink[] = [
-  { href: "/membership", label: "Join Solidarity Circle" },
-  { href: "/donate", label: "Make a donation" },
-  { href: "/membership#benefits", label: "Member benefits" }
+  // `?route=` tells the shared membership/donate page which transactional
+  // path the visitor picked, so it can isolate that flow instead of showing
+  // a generic toggle the user has to re-select.
+  { href: "/membership?route=solidarity", label: "Join Solidarity Circle" },
+  { href: "/donate?route=onetime", label: "Make a donation" },
+  { href: "/membership?route=solidarity#benefits", label: "Member benefits" }
 ];
 
 function HeaderLink({ href, label, external }: NavLink) {
@@ -253,7 +256,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-charcoal/95 backdrop-blur-xl">
       <div ref={menuRef} className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex min-w-0 items-center gap-3">
+        <Link href="/" className="group flex min-w-0 shrink items-center gap-3">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-accent/30 ring-offset-1 ring-offset-charcoal">
             <Image
               src="/header-mark.avif"
@@ -265,16 +268,23 @@ export function SiteHeader() {
             />
           </div>
           <div className="min-w-0">
-            <p className="font-display text-xl font-black tracking-tight text-ink transition group-hover:text-accent">
+            <p className="truncate font-display text-xl font-black tracking-tight text-ink transition group-hover:text-accent">
               MKE Black
             </p>
-            <p className="hidden text-[10px] uppercase tracking-[0.22em] text-muted lg:block">
+            <p className="hidden truncate text-[10px] uppercase tracking-[0.22em] text-muted lg:block">
               Milwaukee Black Business Directory
             </p>
           </div>
         </Link>
 
-        <nav className="flex flex-1 items-center justify-end gap-2">
+        {/*
+          Breakpoint note: the full desktop nav (3 links + 2 dropdowns) needs
+          more room than the old `md` (768px) threshold gave it, which caused
+          overlap/cramping roughly 760-1000px. The compact "Menu" dropdown now
+          covers that whole range and the full row only appears at `lg`
+          (1024px), where it has space to breathe.
+        */}
+        <nav className="flex flex-1 shrink-0 items-center justify-end gap-2">
           <HeaderDropdown
             label="Menu"
             open={mobileMenuOpen}
@@ -287,10 +297,10 @@ export function SiteHeader() {
               setSetupGuideOpen(false);
             }}
             links={[...primaryLinks, ...exploreLinks, ...supportLinks]}
-            className="md:hidden"
+            className="shrink-0 lg:hidden"
           />
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden shrink-0 items-center gap-2 lg:flex">
             {primaryLinks.map((link) => (
               <HeaderLink key={link.href} {...link} />
             ))}
@@ -325,6 +335,7 @@ export function SiteHeader() {
           </div>
 
           <SetupGuideTrigger
+            className="shrink-0"
             onClick={() => {
               setSetupGuideOpen(true);
               setMenuOpen(false);
@@ -336,11 +347,11 @@ export function SiteHeader() {
           />
 
           {loading ? (
-            <span className="rounded-full border border-line px-4 py-2 text-sm text-muted">…</span>
+            <span className="shrink-0 rounded-full border border-line px-4 py-2 text-sm text-muted">…</span>
           ) : user ? (
             <>
             <NotificationBell uid={user.uid} />
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 aria-haspopup="menu"
@@ -418,7 +429,7 @@ export function SiteHeader() {
             </div>
             </>
           ) : (
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 aria-haspopup="menu"

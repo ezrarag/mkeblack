@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/components/providers/auth-provider";
 
 const benefits = [
@@ -65,9 +67,27 @@ export function MembershipPage({
   initialKind?: CheckoutKind;
 }) {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+
+  // `?route=solidarity` / `?route=onetime` is the source of truth for which
+  // transactional path a user landed on (e.g. from the "Solidarity Circle"
+  // vs "Donations" nav entries, or an external link/campaign). When present,
+  // it takes priority over the page-level `initialKind` default and over the
+  // legacy `#join` / `#donate` hash so the intended path can't get lost.
+  const routeParam = searchParams.get("route");
+  const lockedKind: CheckoutKind | null =
+    routeParam === "solidarity"
+      ? "membership"
+      : routeParam === "onetime"
+        ? "donation"
+        : null;
+  const isRouteLocked = lockedKind !== null;
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [checkoutKind, setCheckoutKind] = useState<CheckoutKind>(initialKind);
+  const [checkoutKind, setCheckoutKind] = useState<CheckoutKind>(
+    lockedKind ?? initialKind
+  );
   const [selectedPlan, setSelectedPlan] = useState<MembershipPlanId>("monthly");
   const [selectedDonation, setSelectedDonation] = useState<number>(25);
   const [customDonation, setCustomDonation] = useState("");
@@ -77,7 +97,21 @@ export function MembershipPage({
   const donationAmount =
     customDonation.trim() === "" ? selectedDonation : Number(customDonation);
 
+  // Keep checkoutKind pinned if the route param changes client-side
+  // (e.g. clicking a "Solidarity Circle" link while already on this page).
   useEffect(() => {
+    if (lockedKind) {
+      setCheckoutKind(lockedKind);
+    }
+  }, [lockedKind]);
+
+  useEffect(() => {
+    if (isRouteLocked) {
+      // A query-param route owns the transactional path here; don't let a
+      // stale hash (e.g. from a bookmarked link) override it.
+      return;
+    }
+
     function syncHash() {
       if (window.location.hash === "#donate") {
         setCheckoutKind("donation");
@@ -89,7 +123,12 @@ export function MembershipPage({
     syncHash();
     window.addEventListener("hashchange", syncHash);
     return () => window.removeEventListener("hashchange", syncHash);
-  }, []);
+  }, [isRouteLocked]);
+
+  const activeBenefitsPanel = useMemo(
+    () => checkoutKind === "membership",
+    [checkoutKind]
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -160,35 +199,73 @@ export function MembershipPage({
 
       <section id="join" className="mx-auto max-w-5xl scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-line bg-panel/80 p-6 shadow-glow sm:p-8">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {(["membership", "donation"] as const).map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                onClick={() => {
-                  setCheckoutKind(kind);
-                  setError(null);
-                }}
-                className={`rounded-2xl border p-5 text-left transition ${
-                  checkoutKind === kind
-                    ? "border-accent bg-accent/10"
-                    : "border-line bg-panelAlt/70 hover:border-accent/35"
-                }`}
-              >
+          {isRouteLocked ? (
+            // A specific transactional path was requested (via ?route=), so
+            // the other option is isolated out of view instead of being
+            // shown as an easy-to-misclick toggle. This is what keeps the
+            // "Donations" entry point limited to the one-time gift intake
+            // screen, and the "Solidarity Circle" entry point limited to the
+            // recurring membership flow.
+            <div className="flex items-start justify-between gap-4 rounded-2xl border border-accent bg-accent/10 p-5">
+              <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
-                  {kind === "membership" ? "Join" : "Donate"}
+                  {checkoutKind === "membership" ? "Join" : "Donate"}
                 </p>
                 <p className="mt-3 font-display text-2xl font-black text-ink">
-                  {kind === "membership" ? "Solidarity Circle" : "One-time gift"}
+                  {checkoutKind === "membership"
+                    ? "Solidarity Circle"
+                    : "One-time gift"}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-stone-400">
-                  {kind === "membership"
+                  {checkoutKind === "membership"
                     ? "Recurring membership with access to member benefits."
                     : "Support the mission without starting a membership."}
                 </p>
-              </button>
-            ))}
-          </div>
+              </div>
+              <Link
+                href={
+                  checkoutKind === "membership"
+                    ? "/donate?route=onetime"
+                    : "/membership?route=solidarity"
+                }
+                className="shrink-0 whitespace-nowrap rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-accentSoft"
+              >
+                {checkoutKind === "membership"
+                  ? "Make a one-time gift instead"
+                  : "Join Solidarity Circle instead"}
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(["membership", "donation"] as const).map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  onClick={() => {
+                    setCheckoutKind(kind);
+                    setError(null);
+                  }}
+                  className={`rounded-2xl border p-5 text-left transition ${
+                    checkoutKind === kind
+                      ? "border-accent bg-accent/10"
+                      : "border-line bg-panelAlt/70 hover:border-accent/35"
+                  }`}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
+                    {kind === "membership" ? "Join" : "Donate"}
+                  </p>
+                  <p className="mt-3 font-display text-2xl font-black text-ink">
+                    {kind === "membership" ? "Solidarity Circle" : "One-time gift"}
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-stone-400">
+                    {kind === "membership"
+                      ? "Recurring membership with access to member benefits."
+                      : "Support the mission without starting a membership."}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
 
           {checkoutKind === "membership" ? (
             <div className="mt-8">
@@ -304,10 +381,22 @@ export function MembershipPage({
         </div>
       </section>
 
-      <section id="benefits" className="mx-auto max-w-5xl scroll-mt-24 px-4 pb-16 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
-          Member benefits
-        </p>
+      <section
+        id="benefits"
+        className={`mx-auto max-w-5xl scroll-mt-24 rounded-[2rem] px-4 pb-16 pt-8 transition sm:px-6 lg:px-8 ${
+          activeBenefitsPanel ? "ring-2 ring-accent/60" : ""
+        }`}
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-accent">
+            Member benefits
+          </p>
+          {activeBenefitsPanel ? (
+            <span className="rounded-full border border-accent bg-accent/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+              Included with your Solidarity Circle plan
+            </span>
+          ) : null}
+        </div>
         <h2 className="mt-4 font-display text-3xl font-black leading-tight text-ink">
           What you get as a member.
         </h2>
@@ -316,7 +405,11 @@ export function MembershipPage({
           {benefits.map((benefit) => (
             <div
               key={benefit.title}
-              className="rounded-2xl border border-line bg-panel/80 p-7"
+              className={`rounded-2xl border p-7 transition ${
+                activeBenefitsPanel
+                  ? "border-accent/50 bg-accent/5"
+                  : "border-line bg-panel/80"
+              }`}
             >
               <p className="text-3xl">{benefit.icon}</p>
               <p className="mt-4 font-display text-lg font-bold text-ink">

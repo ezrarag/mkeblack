@@ -88,37 +88,62 @@ function publicArticleFromDoc(doc: FirestoreDoc): PublicArticle {
   };
 }
 
-export async function getPublicArticleBySlug(slug: string) {
+/**
+ * Returns:
+ * - a PublicArticle when the slug resolves to a published article doc
+ * - `null` when Firestore was reachable and the slug genuinely doesn't
+ *   exist (the caller should render a real 404 in this case)
+ * - `undefined` when the lookup itself failed (Admin SDK / network error).
+ *   Legacy article links are exactly the ones most likely to hit this
+ *   during the archive backfill window, so callers should treat this as a
+ *   "temporarily unavailable" state rather than a hard 404 or an unhandled
+ *   exception that crashes the page.
+ */
+export async function getPublicArticleBySlug(
+  slug: string
+): Promise<PublicArticle | null | undefined> {
   const candidates = slugCandidates(slug);
   if (!candidates.length) {
     return null;
   }
 
-  const db = getFirebaseAdminDb();
-
-  for (const candidate of candidates) {
-    const snapshot = await db
-      .collection("articles")
-      .where("slug", "==", candidate)
-      .limit(1)
-      .get();
-
-    const articleDoc = snapshot.docs[0];
-    const articleData = articleDoc?.data();
-    if (articleDoc && articleData && articleIsPublished(articleData)) {
-      return publicArticleFromDoc(articleDoc);
-    }
+  let db: ReturnType<typeof getFirebaseAdminDb>;
+  try {
+    db = getFirebaseAdminDb();
+  } catch (error) {
+    console.error("[articles-public] Failed to init Firebase Admin", error);
+    return undefined;
   }
 
-  // Some migrated Wix records used a stable document id before a slug field
-  // was backfilled. Supporting that id keeps old inbound links working.
-  for (const candidate of candidates) {
-    const articleDoc = await db.collection("articles").doc(candidate).get();
-    const articleData = articleDoc.data();
-    if (articleDoc.exists && articleData && articleIsPublished(articleData)) {
-      return publicArticleFromDoc(articleDoc);
-    }
-  }
+  try {
+    for (const candidate of candidates) {
+      const snapshot = await db
+        .collection("articles")
+        .where("slug", "==", candidate)
+        .limit(1)
+        .get();
 
-  return null;
+      const articleDoc = snapshot.docs[0];
+      const articleData = articleDoc?.data();
+      if (articleDoc && articleData && articleIsPublished(articleData)) {
+        return publicArticleFromDoc(articleDoc);
+      }
+    }
+
+    // Some migrated Wix records used a stable document id before a slug
+    // field was backfilled. Supporting that id keeps old inbound links
+    // (including ones only reachable via the legacy archive) working.
+    for (const candidate of candidates) {
+      const articleDoc = await db.collection("articles").doc(candidate).get();
+      const articleData = articleDoc.data();
+      if (articleDoc.exists && articleData && articleIsPublished(articleData)) {
+        return publicArticleFromDoc(articleDoc);
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`[articles-public] Lookup failed for slug "${slug}"`, error);
+    return undefined;
+  }
 }

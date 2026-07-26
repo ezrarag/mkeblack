@@ -177,21 +177,26 @@ export function SetupGuideTrigger({
       aria-label="Open setup guide"
       onClick={onClick}
       className={cn(
-        "relative inline-flex h-10 items-center gap-2 rounded-full border border-line bg-panelAlt/70 px-3 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition hover:border-accent/45 hover:bg-accent/10 hover:text-accent",
+        // shrink-0 + whitespace-nowrap on the button and its children stop
+        // this control from being squeezed by neighboring flex items on
+        // narrow viewports. Previously the "Setup" text span had no
+        // protection and would compress/wrap away to nothing under pressure,
+        // leaving only the two fixed-size circular indicator spans visible.
+        "relative inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-line bg-panelAlt/70 px-3 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition hover:border-accent/45 hover:bg-accent/10 hover:text-accent",
         className
       )}
     >
-      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-line bg-canvas">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-line bg-canvas">
         <span
           className={cn(
-            "h-2.5 w-2.5 rounded-full border border-accent transition",
+            "h-2.5 w-2.5 shrink-0 rounded-full border border-accent transition",
             resolvedTheme === "dark" ? "bg-accent" : "bg-transparent"
           )}
         />
       </span>
-      <span>Setup</span>
+      <span className="shrink-0 whitespace-nowrap">Setup</span>
       {setupGuideNeedsAttention ? (
-        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border border-charcoal bg-accent" />
+        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 shrink-0 rounded-full border border-charcoal bg-accent" />
       ) : null}
     </button>
   );

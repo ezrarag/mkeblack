@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { MembershipPage } from "@/components/membership/membership-page";
 
 export const metadata = {
@@ -6,5 +7,11 @@ export const metadata = {
 };
 
 export default function Membership() {
-  return <MembershipPage />;
+  // Suspense boundary required because MembershipPage reads `?route=` via
+  // useSearchParams (Next.js requirement for CSR bailout on search params).
+  return (
+    <Suspense fallback={null}>
+      <MembershipPage />
+    </Suspense>
+  );
 }

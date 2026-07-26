@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicArticleBySlug } from "@/lib/articles-public";
+import { ArticleBodyFallback } from "@/components/news/article-body-fallback";
 
 type ArticlePageProps = {
   params: {
@@ -26,6 +27,12 @@ export async function generateMetadata({
 }: ArticlePageProps): Promise<Metadata> {
   const article = await getPublicArticleBySlug(params.slug);
 
+  if (article === undefined) {
+    return {
+      title: "MKE Black Archive | MKE Black"
+    };
+  }
+
   if (!article) {
     return {
       title: "Article Not Found | MKE Black"
@@ -40,6 +47,28 @@ export async function generateMetadata({
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const article = await getPublicArticleBySlug(params.slug);
+
+  // `undefined` = the lookup itself failed (Admin SDK/network error) — that
+  // is not the same as the slug genuinely not existing, so it should never
+  // hard 404. Render the same graceful archive UI with an "unavailable"
+  // message instead of letting the page throw.
+  if (article === undefined) {
+    return (
+      <main>
+        <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+          <Link
+            href="/news-articles"
+            className="text-xs font-semibold uppercase tracking-[0.24em] text-accent transition hover:text-accentSoft"
+          >
+            Back to News & Articles
+          </Link>
+          <div className="mt-8">
+            <ArticleBodyFallback variant="unavailable" />
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (!article) {
     notFound();
@@ -92,22 +121,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </article>
         ) : (
-          <article className="rounded-[2rem] border border-line bg-panel/85 p-6 shadow-glow sm:p-8">
-            <p className="text-sm leading-7 text-stone-300">
-              This article has been preserved in the MKE Black archive, but the
-              full body has not been backfilled into Firebase yet.
-            </p>
-            {article.sourceHref ? (
-              <a
-                href={article.sourceHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-5 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold text-stone-300 transition hover:border-accent/40 hover:text-accentSoft"
-              >
-                Open original source
-              </a>
-            ) : null}
-          </article>
+          <ArticleBodyFallback
+            variant="missing-body"
+            sourceHref={article.sourceHref || undefined}
+          />
         )}
       </section>
     </main>

@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mkeblack.org/schemas/professional-directory/v1",
+  "title": "Professional Business Directory — `professionals` collection document",
+  "description": "Enterprise schema for a single document in the production Firestore `professionals` collection. This is a distinct data asset from `businesses` — it models paid professional-service listings (educators, real estate specialists, etc.), not the general Black-owned business directory. Website-backend scope only; no mobile-app/external-consumer fields are populated in this version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "uid",
+    "businessName",
+    "verifiedStatus",
+    "category",
+    "contactEmail",
+    "tierLevel",
+    "subscriptionActive",
+    "stripeCustomerId",
+    "stripeConnectAccountId",
+    "referralPercentage",
+    "visitorCount",
+    "interactionLog",
+    "externalSync",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "uid": {
+      "type": "string",
+      "description": "Firebase Auth UID of the professional who owns this listing. Immutable after creation; security rules key off this field."
+    },
+    "businessName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Public-facing display name of the professional/practice."
+    },
+    "verifiedStatus": {
+      "type": "boolean",
+      "description": "Set exclusively by admin review. Gates public read access — unauthenticated users only ever see documents where this is true."
+    },
+    "category": {
+      "type": "string",
+      "description": "Service category slug, e.g. 'educator', 'real_estate_specialist'. Kept as a free-form string in v1; consider promoting to a controlled `professional_categories` collection (mirroring the existing `business_tags` pattern) once the category list stabilizes.",
+      "examples": ["educator", "real_estate_specialist", "financial_advisor", "legal_services"]
+    },
+    "contactEmail": {
+      "type": "string",
+      "format": "email",
+      "description": "Public contact address shown on the verified profile."
+    },
+
+    "tierLevel": {
+      "type": "string",
+      "enum": ["basic_50_mo", "hourly_retainer"],
+      "description": "'basic_50_mo': flat $50/month entry tier (web presence + CMS tools). 'hourly_retainer': dynamic/advanced pricing for professionals operating beyond standard hours — actual rate terms live in Stripe (Price/Product), not duplicated here, to avoid drift between Firestore and the billing source of truth."
+    },
+    "subscriptionActive": {
+      "type": "boolean",
+      "description": "System-managed only. Toggled exclusively by the Stripe webhook controller (see app/api/webhooks/stripe-professionals/route.ts) in response to customer.subscription.updated / invoice.payment_succeeded / invoice.payment_failed. Never client-writable — enforced in firestore.rules via a field-level lockdown on top of the uid+subscriptionActive gate."
+    },
+    "stripeCustomerId": {
+      "type": "string",
+      "pattern": "^cus_",
+      "description": "Stripe Customer ID for billing. This is the join key the webhook controller uses to find the matching professionals doc for incoming subscription/invoice events."
+    },
+    "stripeConnectAccountId": {
+      "type": "string",
+      "pattern": "^acct_",
+      "description": "Stripe Connect account ID the professional's net payout routes to (destination charge target)."
+    },
+    "referralPercentage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Decimal commission (e.g. 0.10 = 10%) routed back to MKE Black's core platform/referral wallet on top of Stripe's own platform fee, for having driven the professional's user acquisition. Applied in lib/stripe/professionals.ts."
+    },
+
+    "visitorCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cumulative profile view count. Incremented server-side; not client-writable."
+    },
+    "interactionLog": {
+      "type": "array",
+      "description": "Structured click-analytics payload. Append-only from the client (via a narrow, validated Cloud Function/API route — not raw Firestore writes) to prevent tampering with billing-adjacent trust signals.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "target", "occurredAt"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["external_link", "phone_dialer", "share"],
+            "description": "external_link: outbound link click. phone_dialer: tel: link tap. share: share-sheet trigger."
+          },
+          "target": {
+            "type": "string",
+            "description": "Opaque identifier for what was interacted with (URL, formatted phone number, share destination). Avoid storing additional PII here."
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Firestore Timestamp on write; ISO 8601 string in this schema doc for portability."
+          }
+        }
+      }
+    },
+
+    "externalSync": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "description": "RESERVED, INTENTIONALLY EMPTY in this session. Placeholder map for a future mobile-app / external-consumer read integration. Do not populate or add properties here yet — that is a separate, later task once the app's concrete data contract is defined. Keeping this field present now (as an empty object) means that future integration is additive-only and requires no breaking migration of existing documents."
+    },
+
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Firestore server timestamp at document creation."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Firestore server timestamp, updated on every write."
+    }
+  },
+
+  "examples": [
+    {
+      "uid": "REDACTED_FIREBASE_UID",
+      "businessName": "Example Tax & Advisory",
+      "verifiedStatus": true,
+      "category": "financial_advisor",
+      "contactEmail": "hello@example.com",
+      "tierLevel": "basic_50_mo",
+      "subscriptionActive": true,
+      "stripeCustomerId": "cus_REDACTED",
+      "stripeConnectAccountId": "acct_REDACTED",
+      "referralPercentage": 0.1,
+      "visitorCount": 128,
+      "interactionLog": [
+        { "type": "phone_dialer", "target": "+1-414-555-0100", "occurredAt": "2026-07-20T15:04:00Z" },
+        { "type": "external_link", "target": "https://example.com/booking", "occurredAt": "2026-07-21T10:12:00Z" }
+      ],
+      "externalSync": {},
+      "createdAt": "2026-06-01T00:00:00Z",
+      "updatedAt": "2026-07-21T10:12:00Z"
+    }
+  ]
+}
