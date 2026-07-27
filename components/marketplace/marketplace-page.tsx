@@ -1,12 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  AdminConfirmDialog,
+  AdminFeedback
+} from "@/components/admin/admin-action-ui";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
 import { MarketplaceListingCard } from "@/components/marketplace/marketplace-listing-card";
+import { useAuth } from "@/components/providers/auth-provider";
 import { StatePanel } from "@/components/ui/state-panel";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
-import { MARKETPLACE_LISTING_CATEGORIES } from "@/lib/types";
+import { formatFirebaseError } from "@/lib/firebase-errors";
+import { deleteMarketplaceListing } from "@/lib/firebase/marketplace";
+import {
+  MARKETPLACE_LISTING_CATEGORIES,
+  MarketplaceListing
+} from "@/lib/types";
 
 type PriceRange = "any" | "free" | "under25" | "25to100" | "over100";
 
@@ -29,6 +39,7 @@ function matchesPriceRange(priceCents: number, range: PriceRange): boolean {
 }
 
 export function MarketplacePage() {
+  const { hasAdminAccess } = useAuth();
   const { listings, loading, error } = useMarketplaceListings({
     availableOnly: true
   });
@@ -37,9 +48,21 @@ export function MarketplacePage() {
   const [priceRange, setPriceRange] = useState<PriceRange>("any");
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [businessSearch, setBusinessSearch] = useState("");
+  const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<
+    Set<string>
+  >(() => new Set());
+  const [pendingDelete, setPendingDelete] = useState<MarketplaceListing | null>(
+    null
+  );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteFeedback, setDeleteFeedback] = useState<{
+    message: string;
+    tone: "success" | "error";
+  } | null>(null);
 
   const filtered = useMemo(() => {
     return listings.filter((l) => {
+      if (optimisticallyRemovedIds.has(l.id)) return false;
       if (category !== "all" && l.category !== category) return false;
       if (!matchesPriceRange(l.priceCents, priceRange)) return false;
       if (featuredOnly && !l.featured) return false;
@@ -52,7 +75,53 @@ export function MarketplacePage() {
         return false;
       return true;
     });
-  }, [listings, category, priceRange, featuredOnly, businessSearch]);
+  }, [
+    listings,
+    category,
+    priceRange,
+    featuredOnly,
+    businessSearch,
+    optimisticallyRemovedIds
+  ]);
+
+  const cancelDelete = useCallback(() => {
+    if (!deletingId) setPendingDelete(null);
+  }, [deletingId]);
+
+  async function confirmDelete() {
+    const listing = pendingDelete;
+    if (!listing || !hasAdminAccess) return;
+
+    setDeletingId(listing.id);
+    setPendingDelete(null);
+    setDeleteFeedback(null);
+    setOptimisticallyRemovedIds((current) => {
+      const next = new Set(current);
+      next.add(listing.id);
+      return next;
+    });
+
+    try {
+      await deleteMarketplaceListing(listing.id, listing.photoUrl);
+      setDeleteFeedback({
+        message: `“${listing.name}” was deleted.`,
+        tone: "success"
+      });
+    } catch (deleteError) {
+      // Roll the optimistic removal back so the admin can retry.
+      setOptimisticallyRemovedIds((current) => {
+        const next = new Set(current);
+        next.delete(listing.id);
+        return next;
+      });
+      setDeleteFeedback({
+        message: formatFirebaseError(deleteError),
+        tone: "error"
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (!isFirebaseConfigured) {
     return (
@@ -80,6 +149,13 @@ export function MarketplacePage() {
           Click &ldquo;Order&rdquo; to purchase directly from the business.
         </p>
       </div>
+
+      {deleteFeedback ? (
+        <AdminFeedback
+          message={deleteFeedback.message}
+          tone={deleteFeedback.tone}
+        />
+      ) : null}
 
       {/* ── Filters ── */}
       <div className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-panel/70 px-5 py-4">
@@ -204,10 +280,25 @@ export function MarketplacePage() {
       ) : (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((listing) => (
-            <MarketplaceListingCard key={listing.id} listing={listing} />
+            <MarketplaceListingCard
+              key={listing.id}
+              listing={listing}
+              showAdminDelete={hasAdminAccess}
+              deleting={deletingId === listing.id}
+              onRequestDelete={setPendingDelete}
+            />
           ))}
         </div>
       )}
+
+      <AdminConfirmDialog
+        open={Boolean(pendingDelete)}
+        title={`Delete “${pendingDelete?.name ?? "listing"}”?`}
+        description="This permanently removes the marketplace listing. Its image will also be removed when storage permissions allow it. This action cannot be undone."
+        busy={Boolean(deletingId)}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }

@@ -23,9 +23,17 @@ function formatPrice(priceCents: number): string {
 
 type MarketplaceListingCardProps = {
   listing: MarketplaceListing;
+  showAdminDelete?: boolean;
+  deleting?: boolean;
+  onRequestDelete?: (listing: MarketplaceListing) => void;
 };
 
-export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps) {
+export function MarketplaceListingCard({
+  listing,
+  showAdminDelete = false,
+  deleting = false,
+  onRequestDelete
+}: MarketplaceListingCardProps) {
   const { user } = useAuth();
   const { isSaved, loading } = useIsSavedMarketplaceListing(user?.uid ?? null, listing.id);
   const [saving, setSaving] = useState(false);
@@ -203,6 +211,19 @@ export function MarketplaceListingCard({ listing }: MarketplaceListingCardProps)
             )}
           </div>
         </div>
+
+        {showAdminDelete ? (
+          <div className="mt-3 border-t border-danger/20 pt-3">
+            <button
+              type="button"
+              onClick={() => onRequestDelete?.(listing)}
+              disabled={deleting}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-danger/45 bg-danger/10 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-danger/20 focus:outline-none focus:ring-2 focus:ring-danger/50 disabled:cursor-wait disabled:opacity-60"
+            >
+              {deleting ? "Deleting…" : "Delete listing"}
+            </button>
+          </div>
+        ) : null}
       </div>
     </article>
   );

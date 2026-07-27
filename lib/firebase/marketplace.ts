@@ -198,10 +198,16 @@ export async function deleteMarketplaceListing(
   listingId: string,
   photoUrl: string
 ) {
-  const [{ db, firestoreModule }, storage] = await Promise.all([
-    getFirestoreHelpers(),
-    getFirebaseStorage()
-  ]);
+  const { db, firestoreModule } = await getFirestoreHelpers();
+
+  // Delete the authoritative document first. If Firestore rules reject the
+  // admin, the listing and its image remain intact and the UI can safely roll
+  // back its optimistic removal.
+  await firestoreModule.deleteDoc(
+    firestoreModule.doc(db, "marketplace_listings", listingId)
+  );
+
+  const storage = await getFirebaseStorage();
 
   if (storage && photoUrl) {
     try {
@@ -211,10 +217,6 @@ export async function deleteMarketplaceListing(
       // Best-effort cleanup — proceed regardless
     }
   }
-
-  await firestoreModule.deleteDoc(
-    firestoreModule.doc(db, "marketplace_listings", listingId)
-  );
 }
 
 export async function adminUpdateListing(

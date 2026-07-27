@@ -11,7 +11,13 @@ service cloud.firestore {
         request.auth.token.admin == true ||
         (
           exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+          (
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+            (
+              'capabilities' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.capabilities.hasAny(['admin'])
+            )
+          )
         )
       );
     }
@@ -279,8 +285,8 @@ service cloud.firestore {
                       && request.resource.data.businessId == resource.data.businessId
                       && request.resource.data.businessSolidarity == true
                     );
-      allow delete: if isAdmin()
-                    || ownsBusinessById(resource.data.businessId);
+      // Marketplace listing hard deletes are restricted to administrators.
+      allow delete: if isAdmin();
     }
 
     // ── Visitor ↔ Business messaging ─────────────────────────────────────────
