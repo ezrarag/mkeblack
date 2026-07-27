@@ -3,9 +3,14 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getFirebaseAdminDb } from "@/lib/firebase/admin";
 import {
   getBaseUrl,
+  getPlatformFeeRate,
   getReadyStripeDestinationAccountId,
   getStripe
 } from "@/lib/stripe/server";
+import {
+  createSolidarityCheckoutSession,
+  StripeDestinationUnavailableError
+} from "@/lib/stripe/solidarity-checkout";
 
 type CheckoutKind = "membership" | "donation";
 type MembershipPlan = "monthly" | "quarterly" | "yearly";
@@ -99,9 +104,8 @@ export async function POST(req: NextRequest) {
     const db = getFirebaseAdminDb();
     const baseUrl = getBaseUrl();
 
-    // MKE Black's Stripe account — payments transfer here after RAG's platform fee
-    // Rick's connected account is intentionally optional until onboarding is
-    // complete. Checkout can run on the platform account in the meantime.
+    // MKE Black's connected account. Solidarity subscriptions fail closed if
+    // this account is not fully ready; they must never become platform-only.
     const mkeBlackAccountId = await getReadyStripeDestinationAccountId();
 
     const memberRef =
@@ -154,29 +158,25 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/membership?checkout=cancelled`
     };
 
-    // Add Stripe Connect destination charge when Rick's account ID is configured.
-    // This routes settled funds to MKE Black's connected account automatically.
-    // For subscriptions, on_behalf_of + transfer_data live under subscription_data;
-    // for one-time payments they live under payment_intent_data.
-    if (mkeBlackAccountId) {
-      if (kind === "membership") {
-        sessionParams.subscription_data = {
-          on_behalf_of: mkeBlackAccountId,
-          transfer_data: {
-            destination: mkeBlackAccountId
-          }
-        };
-      } else {
-        sessionParams.payment_intent_data = {
-          on_behalf_of: mkeBlackAccountId,
-          transfer_data: {
-            destination: mkeBlackAccountId
-          }
-        };
-      }
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionParams);
+    const session =
+      kind === "membership"
+        ? await createSolidarityCheckoutSession({
+            stripe,
+            destinationAccountId: mkeBlackAccountId,
+            platformFeeRate: getPlatformFeeRate(),
+            sessionParams
+          })
+        : await stripe.checkout.sessions.create({
+            ...sessionParams,
+            payment_intent_data: mkeBlackAccountId
+              ? {
+                  on_behalf_of: mkeBlackAccountId,
+                  transfer_data: {
+                    destination: mkeBlackAccountId
+                  }
+                }
+              : undefined
+          });
 
     if (memberRef) {
       await memberRef.set({
@@ -218,6 +218,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error("Unable to create membership checkout", err);
+    if (err instanceof StripeDestinationUnavailableError) {
+      return NextResponse.json(
+        {
+          error:
+            "Payments are temporarily unavailable while we connect MKE Black's payment account. Please try again shortly."
+        },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       { error: "Payment checkout is temporarily unavailable. Please try again shortly." },
       { status: 500 }

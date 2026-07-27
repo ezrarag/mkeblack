@@ -35,15 +35,23 @@ export function getMKEBlackStripeAccountId(): string | undefined {
   return process.env.STRIPE_MKE_BLACK_ACCOUNT_ID || undefined;
 }
 
+export function isStripeDestinationAccountReady(
+  account: Pick<Stripe.Account, "details_submitted" | "capabilities">
+) {
+  return (
+    account.details_submitted === true &&
+    account.capabilities?.transfers === "active" &&
+    account.capabilities?.card_payments === "active"
+  );
+}
+
 export async function getReadyStripeDestinationAccountId() {
   const accountId = getMKEBlackStripeAccountId();
   if (!accountId) return undefined;
 
   try {
     const account = await getStripe().accounts.retrieve(accountId);
-    const transfersReady = account.capabilities?.transfers === "active";
-
-    return account.details_submitted && transfersReady ? accountId : undefined;
+    return isStripeDestinationAccountReady(account) ? accountId : undefined;
   } catch (error) {
     console.error("Unable to verify the Stripe connected account", error);
     return undefined;

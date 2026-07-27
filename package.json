@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:stripe": "tsx --test tests/solidarity-checkout.test.ts",
     "audit:business-locations": "node scripts/audit-business-locations.js",
     "audit:business-categories": "node scripts/audit-business-categories.js",
     "fix:business-categories": "node scripts/audit-business-categories.js --fix",
@@ -37,6 +38,7 @@
     "mammoth": "^1.12.0",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.7",
+    "tsx": "^4.23.1",
     "typescript": "^5.5.4"
   }
 }
