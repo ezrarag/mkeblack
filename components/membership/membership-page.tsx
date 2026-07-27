@@ -206,8 +206,8 @@ export function MembershipPage({
             // "Donations" entry point limited to the one-time gift intake
             // screen, and the "Solidarity Circle" entry point limited to the
             // recurring membership flow.
-            <div className="flex items-start justify-between gap-4 rounded-2xl border border-accent bg-accent/10 p-5">
-              <div>
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-accent bg-accent/10 p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
                   {checkoutKind === "membership" ? "Join" : "Donate"}
                 </p>
@@ -222,18 +222,26 @@ export function MembershipPage({
                     : "Support the mission without starting a membership."}
                 </p>
               </div>
-              <Link
-                href={
-                  checkoutKind === "membership"
-                    ? "/donate?route=onetime"
-                    : "/membership?route=solidarity"
-                }
-                className="shrink-0 whitespace-nowrap rounded-full border border-line bg-panelAlt/70 px-4 py-2 text-xs font-semibold text-stone-300 transition hover:border-accent/40 hover:text-accentSoft"
-              >
-                {checkoutKind === "membership"
-                  ? "Make a one-time gift instead"
-                  : "Join Solidarity Circle instead"}
-              </Link>
+
+              <div className="flex flex-col gap-3 rounded-2xl border border-line bg-canvas/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-medium text-stone-300">
+                  {checkoutKind === "membership"
+                    ? "Prefer to support MKE Black without a recurring membership?"
+                    : "Want recurring benefits while supporting MKE Black?"}
+                </p>
+                <Link
+                  href={
+                    checkoutKind === "membership"
+                      ? "/donate?route=onetime"
+                      : "/membership?route=solidarity"
+                  }
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accentSoft focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 focus:ring-offset-canvas"
+                >
+                  {checkoutKind === "membership"
+                    ? "Make a one-time gift instead"
+                    : "Join Solidarity Circle instead"}
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
