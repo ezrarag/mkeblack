@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test:stripe": "tsx --test tests/solidarity-checkout.test.ts",
+    "test:articles": "node --test tests/article-backfill.test.js",
     "audit:business-locations": "node scripts/audit-business-locations.js",
     "audit:business-categories": "node scripts/audit-business-categories.js",
     "fix:business-categories": "node scripts/audit-business-categories.js --fix",
