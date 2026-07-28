@@ -101,15 +101,17 @@ export async function POST(req: NextRequest) {
 
   try {
     const stripe = getStripe();
-    const db = getFirebaseAdminDb();
     const baseUrl = getBaseUrl();
 
     // MKE Black's connected account. Solidarity subscriptions fail closed if
     // this account is not fully ready; they must never become platform-only.
     const mkeBlackAccountId = await getReadyStripeDestinationAccountId();
 
-    const memberRef =
-      kind === "membership" ? db.collection("members").doc() : null;
+    // Donations do not create membership records. Keep Firebase initialization
+    // out of that path so a database credential/configuration issue cannot
+    // prevent an otherwise valid one-time Stripe checkout.
+    const db = kind === "membership" ? getFirebaseAdminDb() : null;
+    const memberRef = db?.collection("members").doc() ?? null;
 
     const plan = membershipPlanConfig[membershipPlan];
 
@@ -201,7 +203,7 @@ export async function POST(req: NextRequest) {
         stripeSubscriptionId: ""
       });
 
-      if (pendingSubmissionId) {
+      if (pendingSubmissionId && db) {
         await db.collection("contactSubmissions").doc(pendingSubmissionId).set(
           {
             solidarityCheckoutStarted: true,
