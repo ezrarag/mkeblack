@@ -287,6 +287,7 @@ export function SiteHeader() {
         <nav className="flex flex-1 shrink-0 items-center justify-end gap-2">
           <HeaderDropdown
             label="Menu"
+            align="left"
             open={mobileMenuOpen}
             onToggle={() => {
               setMobileMenuOpen((current) => !current);
