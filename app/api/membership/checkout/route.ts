@@ -162,11 +162,11 @@ export async function POST(req: NextRequest) {
         font_family: "montserrat",
         icon: {
           type: "url",
-          url: `${baseUrl}/header-mark.avif`
+          url: `${baseUrl}/header-mark.png`
         },
         logo: {
           type: "url",
-          url: `${baseUrl}/header-mark.avif`
+          url: `${baseUrl}/header-mark.png`
         }
       },
       custom_text: {
