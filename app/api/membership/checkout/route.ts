@@ -122,7 +122,11 @@ export async function POST(req: NextRequest) {
             price_data: {
               currency: "usd",
               unit_amount: plan.amount,
-              product_data: { name: plan.label },
+              product_data: {
+                name: plan.label,
+                description:
+                  "Support MKE Black's directory, events, and work to grow Black community wealth in Milwaukee."
+              },
               recurring: {
                 interval: plan.interval,
                 interval_count: plan.intervalCount
@@ -134,7 +138,11 @@ export async function POST(req: NextRequest) {
             price_data: {
               currency: "usd",
               unit_amount: donationAmountCents,
-              product_data: { name: "MKE Black community donation" }
+              product_data: {
+                name: "MKE Black community donation",
+                description:
+                  "A one-time gift supporting Milwaukee's Black business community."
+              }
             }
           };
 
@@ -142,9 +150,37 @@ export async function POST(req: NextRequest) {
     // This routes the payment to MKE Black's bank account automatically
     const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode: kind === "membership" ? "subscription" : "payment",
+      submit_type: kind === "membership" ? "subscribe" : "donate",
       line_items: [lineItem],
       customer_email: email || undefined,
       client_reference_id: memberRef?.id,
+      branding_settings: {
+        display_name: "MKE Black",
+        background_color: "#F6F7F2",
+        button_color: "#EC2024",
+        border_style: "rounded",
+        font_family: "montserrat",
+        icon: {
+          type: "url",
+          url: `${baseUrl}/header-mark.avif`
+        },
+        logo: {
+          type: "url",
+          url: `${baseUrl}/header-mark.avif`
+        }
+      },
+      custom_text: {
+        submit: {
+          message:
+            kind === "membership"
+              ? "Your recurring membership sustains MKE Black's directory, events, and community programs. You can manage or cancel your subscription through MKE Black."
+              : "Your one-time gift directly supports MKE Black's directory, events, and community programs. Thank you for investing in Milwaukee's Black business community."
+        },
+        after_submit: {
+          message:
+            "After checkout, you'll return to MKE Black for confirmation and next steps."
+        }
+      },
       metadata: {
         kind,
         memberId: memberRef?.id ?? "",
