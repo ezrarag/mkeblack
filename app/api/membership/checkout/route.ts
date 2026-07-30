@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const stripe = getStripe();
-    const baseUrl = getBaseUrl();
+    const baseUrl = getBaseUrl(req.nextUrl.origin);
 
     // MKE Black's connected account. Solidarity subscriptions fail closed if
     // this account is not fully ready; they must never become platform-only.

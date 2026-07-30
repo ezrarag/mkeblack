@@ -16,9 +16,36 @@ export function getStripe() {
   return stripe;
 }
 
-export function getBaseUrl() {
+export function getBaseUrl(requestOrigin?: string) {
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configuredSiteUrl) return configuredSiteUrl.replace(/\/$/, "");
+
+  if (requestOrigin) {
+    try {
+      const url = new URL(requestOrigin);
+      const isPublicMkeBlackHost =
+        url.hostname === "mkeblack.org" || url.hostname === "www.mkeblack.org";
+      const isLocalHost =
+        url.hostname === "localhost" || url.hostname === "127.0.0.1";
+      const isPreviewHost =
+        process.env.VERCEL_ENV !== "production" &&
+        url.hostname.endsWith(".vercel.app");
+
+      if (isPublicMkeBlackHost || isLocalHost || isPreviewHost) {
+        return url.origin.replace(/\/$/, "");
+      }
+    } catch {
+      // Continue to a trusted environment fallback for malformed origins.
+    }
+  }
+
+  // Production Checkout must never redirect customers to a protected,
+  // deployment-specific Vercel URL.
+  if (process.env.VERCEL_ENV === "production") {
+    return "https://www.mkeblack.org";
+  }
+
   return (
-    process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.VERCEL_URL?.replace(/^/, "https://") ??
     "http://localhost:3000"
   ).replace(/\/$/, "");

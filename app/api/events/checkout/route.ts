@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
     }
 
     const stripe = getStripe();
-    const baseUrl = getBaseUrl();
+    const baseUrl = getBaseUrl(req.nextUrl.origin);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [

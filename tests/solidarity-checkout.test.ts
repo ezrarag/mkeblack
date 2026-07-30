@@ -5,7 +5,10 @@ import {
   createSolidarityCheckoutSession,
   StripeDestinationUnavailableError
 } from "../lib/stripe/solidarity-checkout";
-import { isStripeDestinationAccountReady } from "../lib/stripe/server";
+import {
+  getBaseUrl,
+  isStripeDestinationAccountReady
+} from "../lib/stripe/server";
 
 const destinationAccountId = "acct_mke_black_test";
 
@@ -114,5 +117,38 @@ test("destination readiness requires details, transfers, and card payments", () 
     }
   ]) {
     assert.equal(isStripeDestinationAccountReady(account), false);
+  }
+});
+
+test("production checkout redirects use the public MKE Black domain", () => {
+  const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const originalVercelEnv = process.env.VERCEL_ENV;
+
+  delete process.env.NEXT_PUBLIC_SITE_URL;
+  process.env.VERCEL_ENV = "production";
+
+  try {
+    assert.equal(
+      getBaseUrl("https://www.mkeblack.org"),
+      "https://www.mkeblack.org"
+    );
+    assert.equal(
+      getBaseUrl(
+        "https://mkeblack-n4c8sy7c6-ezras-projects-a5d28798.vercel.app"
+      ),
+      "https://www.mkeblack.org"
+    );
+  } finally {
+    if (originalSiteUrl === undefined) {
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+    }
+
+    if (originalVercelEnv === undefined) {
+      delete process.env.VERCEL_ENV;
+    } else {
+      process.env.VERCEL_ENV = originalVercelEnv;
+    }
   }
 });
