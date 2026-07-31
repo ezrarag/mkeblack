@@ -58,6 +58,14 @@ function getDonationAmountCents(value: unknown) {
     : 2500;
 }
 
+function getMembershipPriceId(plan: MembershipPlan) {
+  return {
+    monthly: process.env.STRIPE_MEMBERSHIP_MONTHLY_PRICE_ID,
+    quarterly: process.env.STRIPE_MEMBERSHIP_QUARTERLY_PRICE_ID,
+    yearly: process.env.STRIPE_MEMBERSHIP_YEARLY_PRICE_ID
+  }[plan];
+}
+
 export async function POST(req: NextRequest) {
   let body: {
     kind?: CheckoutKind;
@@ -114,25 +122,41 @@ export async function POST(req: NextRequest) {
     const memberRef = db?.collection("members").doc() ?? null;
 
     const plan = membershipPlanConfig[membershipPlan];
+    const membershipPriceId = getMembershipPriceId(membershipPlan);
+
+    if (
+      kind === "membership" &&
+      process.env.VERCEL_ENV === "production" &&
+      !membershipPriceId
+    ) {
+      throw new Error(
+        `Stripe price is not configured for the ${membershipPlan} membership plan.`
+      );
+    }
 
     const lineItem =
       kind === "membership"
-        ? {
-            quantity: 1,
-            price_data: {
-              currency: "usd",
-              unit_amount: plan.amount,
-              product_data: {
-                name: plan.label,
-                description:
-                  "Support MKE Black's directory, events, and work to grow Black community wealth in Milwaukee."
-              },
-              recurring: {
-                interval: plan.interval,
-                interval_count: plan.intervalCount
+        ? membershipPriceId
+          ? {
+              quantity: 1,
+              price: membershipPriceId
+            }
+          : {
+              quantity: 1,
+              price_data: {
+                currency: "usd",
+                unit_amount: plan.amount,
+                product_data: {
+                  name: plan.label,
+                  description:
+                    "Support MKE Black's directory, events, and work to grow Black community wealth in Milwaukee."
+                },
+                recurring: {
+                  interval: plan.interval,
+                  interval_count: plan.intervalCount
+                }
               }
             }
-          }
         : {
             quantity: 1,
             price_data: {
