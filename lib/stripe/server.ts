@@ -85,13 +85,26 @@ export async function getReadyStripeDestinationAccountId() {
   }
 }
 
-export function getPlatformFeeRate() {
-  const rawValue = process.env.PLATFORM_FEE_RATE ?? "0.05";
+function parsePlatformFeeRate(rawValue: string, variableName: string) {
   const parsedValue = Number(rawValue);
 
   if (!Number.isFinite(parsedValue) || parsedValue < 0 || parsedValue >= 1) {
-    throw new Error("PLATFORM_FEE_RATE must be a decimal between 0 and 1.");
+    throw new Error(`${variableName} must be a decimal between 0 and 1.`);
   }
 
   return parsedValue;
+}
+
+export function getPlatformFeeRate() {
+  return parsePlatformFeeRate(
+    process.env.PLATFORM_FEE_RATE ?? "0.05",
+    "PLATFORM_FEE_RATE"
+  );
+}
+
+export function getDonationPlatformFeeRate() {
+  return parsePlatformFeeRate(
+    process.env.DONATION_PLATFORM_FEE_RATE ?? "0.025",
+    "DONATION_PLATFORM_FEE_RATE"
+  );
 }

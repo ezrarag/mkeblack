@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type Stripe from "stripe";
 import {
+  createDonationCheckoutSession,
   createSolidarityCheckoutSession,
   StripeDestinationUnavailableError
 } from "../lib/stripe/solidarity-checkout";
@@ -87,6 +88,76 @@ test("Solidarity checkout fails closed without creating a Stripe session", async
       destinationAccountId: undefined,
       platformFeeRate: 0.05,
       sessionParams: baseSessionParams()
+    }),
+    StripeDestinationUnavailableError
+  );
+  assert.equal(createCalls, 0);
+});
+
+test("donation checkout routes to MKE Black with the configured platform fee", async () => {
+  const calls: Stripe.Checkout.SessionCreateParams[] = [];
+  const stripe = {
+    checkout: {
+      sessions: {
+        async create(params: Stripe.Checkout.SessionCreateParams) {
+          calls.push(params);
+          return {
+            id: "cs_test_donation",
+            object: "checkout.session",
+            url: "https://checkout.stripe.test/donation"
+          } as Stripe.Checkout.Session;
+        }
+      }
+    }
+  };
+
+  await createDonationCheckoutSession({
+    stripe,
+    destinationAccountId,
+    platformFeeRate: 0.025,
+    donationAmountCents: 2500,
+    sessionParams: {
+      ...baseSessionParams(),
+      mode: "payment"
+    }
+  });
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].mode, "payment");
+  assert.equal(
+    calls[0].payment_intent_data?.on_behalf_of,
+    destinationAccountId
+  );
+  assert.equal(calls[0].payment_intent_data?.application_fee_amount, 63);
+  assert.equal(
+    calls[0].payment_intent_data?.transfer_data?.destination,
+    destinationAccountId
+  );
+});
+
+test("donation checkout fails closed without creating a Stripe session", async () => {
+  let createCalls = 0;
+  const stripe = {
+    checkout: {
+      sessions: {
+        async create() {
+          createCalls += 1;
+          throw new Error("sessions.create must not be called");
+        }
+      }
+    }
+  };
+
+  await assert.rejects(
+    createDonationCheckoutSession({
+      stripe,
+      destinationAccountId: undefined,
+      platformFeeRate: 0.025,
+      donationAmountCents: 2500,
+      sessionParams: {
+        ...baseSessionParams(),
+        mode: "payment"
+      }
     }),
     StripeDestinationUnavailableError
   );

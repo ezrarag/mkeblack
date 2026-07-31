@@ -3,11 +3,13 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getFirebaseAdminDb } from "@/lib/firebase/admin";
 import {
   getBaseUrl,
+  getDonationPlatformFeeRate,
   getPlatformFeeRate,
   getReadyStripeDestinationAccountId,
   getStripe
 } from "@/lib/stripe/server";
 import {
+  createDonationCheckoutSession,
   createSolidarityCheckoutSession,
   StripeDestinationUnavailableError
 } from "@/lib/stripe/solidarity-checkout";
@@ -228,16 +230,12 @@ export async function POST(req: NextRequest) {
             platformFeeRate: getPlatformFeeRate(),
             sessionParams
           })
-        : await stripe.checkout.sessions.create({
-            ...sessionParams,
-            payment_intent_data: mkeBlackAccountId
-              ? {
-                  on_behalf_of: mkeBlackAccountId,
-                  transfer_data: {
-                    destination: mkeBlackAccountId
-                  }
-                }
-              : undefined
+        : await createDonationCheckoutSession({
+            stripe,
+            destinationAccountId: mkeBlackAccountId,
+            platformFeeRate: getDonationPlatformFeeRate(),
+            donationAmountCents,
+            sessionParams
           });
 
     if (memberRef) {

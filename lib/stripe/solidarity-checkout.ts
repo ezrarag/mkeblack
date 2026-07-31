@@ -45,3 +45,36 @@ export async function createSolidarityCheckoutSession({
     }
   });
 }
+
+export async function createDonationCheckoutSession({
+  stripe,
+  destinationAccountId,
+  platformFeeRate,
+  donationAmountCents,
+  sessionParams
+}: {
+  stripe: CheckoutSessionCreator;
+  destinationAccountId: string | null | undefined;
+  platformFeeRate: number;
+  donationAmountCents: number;
+  sessionParams: Stripe.Checkout.SessionCreateParams;
+}) {
+  if (!destinationAccountId) {
+    throw new StripeDestinationUnavailableError();
+  }
+
+  return stripe.checkout.sessions.create({
+    ...sessionParams,
+    mode: "payment",
+    payment_intent_data: {
+      ...sessionParams.payment_intent_data,
+      on_behalf_of: destinationAccountId,
+      application_fee_amount: Math.round(
+        donationAmountCents * platformFeeRate
+      ),
+      transfer_data: {
+        destination: destinationAccountId
+      }
+    }
+  });
+}
