@@ -32,13 +32,18 @@ function baseSessionParams(): Stripe.Checkout.SessionCreateParams {
   };
 }
 
-test("Solidarity checkout creates a destination subscription with the configured split", async () => {
+test("Solidarity checkout creates a direct subscription on MKE Black with the configured split", async () => {
   const calls: Stripe.Checkout.SessionCreateParams[] = [];
+  const options: Stripe.RequestOptions[] = [];
   const stripe = {
     checkout: {
       sessions: {
-        async create(params: Stripe.Checkout.SessionCreateParams) {
+        async create(
+          params: Stripe.Checkout.SessionCreateParams,
+          requestOptions?: Stripe.RequestOptions
+        ) {
           calls.push(params);
+          options.push(requestOptions ?? {});
           return {
             id: "cs_test_solidarity",
             object: "checkout.session",
@@ -58,15 +63,10 @@ test("Solidarity checkout creates a destination subscription with the configured
 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].mode, "subscription");
-  assert.equal(
-    calls[0].subscription_data?.on_behalf_of,
-    destinationAccountId
-  );
-  assert.equal(
-    calls[0].subscription_data?.transfer_data?.destination,
-    destinationAccountId
-  );
+  assert.equal(calls[0].subscription_data?.on_behalf_of, undefined);
+  assert.equal(calls[0].subscription_data?.transfer_data, undefined);
   assert.equal(calls[0].subscription_data?.application_fee_percent, 5);
+  assert.equal(options[0].stripeAccount, destinationAccountId);
 });
 
 test("Solidarity checkout fails closed without creating a Stripe session", async () => {
@@ -94,13 +94,18 @@ test("Solidarity checkout fails closed without creating a Stripe session", async
   assert.equal(createCalls, 0);
 });
 
-test("donation checkout routes to MKE Black with the configured platform fee", async () => {
+test("donation checkout creates a direct payment on MKE Black with the configured platform fee", async () => {
   const calls: Stripe.Checkout.SessionCreateParams[] = [];
+  const options: Stripe.RequestOptions[] = [];
   const stripe = {
     checkout: {
       sessions: {
-        async create(params: Stripe.Checkout.SessionCreateParams) {
+        async create(
+          params: Stripe.Checkout.SessionCreateParams,
+          requestOptions?: Stripe.RequestOptions
+        ) {
           calls.push(params);
+          options.push(requestOptions ?? {});
           return {
             id: "cs_test_donation",
             object: "checkout.session",
@@ -124,15 +129,10 @@ test("donation checkout routes to MKE Black with the configured platform fee", a
 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].mode, "payment");
-  assert.equal(
-    calls[0].payment_intent_data?.on_behalf_of,
-    destinationAccountId
-  );
+  assert.equal(calls[0].payment_intent_data?.on_behalf_of, undefined);
   assert.equal(calls[0].payment_intent_data?.application_fee_amount, 63);
-  assert.equal(
-    calls[0].payment_intent_data?.transfer_data?.destination,
-    destinationAccountId
-  );
+  assert.equal(calls[0].payment_intent_data?.transfer_data, undefined);
+  assert.equal(options[0].stripeAccount, destinationAccountId);
 });
 
 test("donation checkout fails closed without creating a Stripe session", async () => {

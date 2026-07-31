@@ -11,7 +11,8 @@ type CheckoutSessionCreator = {
   checkout: {
     sessions: {
       create(
-        params: Stripe.Checkout.SessionCreateParams
+        params: Stripe.Checkout.SessionCreateParams,
+        options?: Stripe.RequestOptions
       ): Promise<Stripe.Checkout.Session>;
     };
   };
@@ -37,12 +38,10 @@ export async function createSolidarityCheckoutSession({
     mode: "subscription",
     subscription_data: {
       ...sessionParams.subscription_data,
-      on_behalf_of: destinationAccountId,
-      application_fee_percent: platformFeeRate * 100,
-      transfer_data: {
-        destination: destinationAccountId
-      }
+      application_fee_percent: platformFeeRate * 100
     }
+  }, {
+    stripeAccount: destinationAccountId
   });
 }
 
@@ -68,13 +67,9 @@ export async function createDonationCheckoutSession({
     mode: "payment",
     payment_intent_data: {
       ...sessionParams.payment_intent_data,
-      on_behalf_of: destinationAccountId,
-      application_fee_amount: Math.round(
-        donationAmountCents * platformFeeRate
-      ),
-      transfer_data: {
-        destination: destinationAccountId
-      }
+      application_fee_amount: Math.round(donationAmountCents * platformFeeRate)
     }
+  }, {
+    stripeAccount: destinationAccountId
   });
 }

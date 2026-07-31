@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
 import { getFirebaseAdminDb } from "@/lib/firebase/admin";
-import { getStripe } from "@/lib/stripe/server";
+import {
+  getMKEBlackStripeAccountId,
+  getStripe
+} from "@/lib/stripe/server";
 
 function getId(value: string | { id: string } | null) {
   return typeof value === "string" ? value : value?.id ?? "";
@@ -101,6 +104,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripeCheckoutSessionId: session.id,
       stripeCustomerId: getId(session.customer),
       stripeSubscriptionId: getId(session.subscription),
+      stripeAccountId: getMKEBlackStripeAccountId() ?? "",
       stripePaymentStatus: session.payment_status,
       activatedAt: FieldValue.serverTimestamp(),
       joinedAt: FieldValue.serverTimestamp(),
@@ -123,9 +127,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 export async function POST(req: NextRequest) {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_CONNECT_WEBHOOK_SECRET
+  ].filter((value): value is string => Boolean(value));
 
-  if (!webhookSecret) {
+  if (!webhookSecrets.length) {
     return NextResponse.json(
       { error: "Stripe webhook is not configured." },
       { status: 500 }
@@ -142,17 +149,39 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let event: Stripe.Event;
+  let event: Stripe.Event | null = null;
 
   try {
     const rawBody = await req.text();
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    for (const webhookSecret of webhookSecrets) {
+      try {
+        event = stripe.webhooks.constructEvent(
+          rawBody,
+          signature,
+          webhookSecret
+        );
+        break;
+      } catch {
+        // The platform and connected-account endpoints have separate secrets.
+      }
+    }
+
+    if (!event) {
+      throw new Error("Webhook signature did not match a configured endpoint.");
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Invalid Stripe webhook.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
   try {
+    if (
+      event.account &&
+      event.account !== getMKEBlackStripeAccountId()
+    ) {
+      return NextResponse.json({ received: true, ignored: true });
+    }
+
     if (event.type === "checkout.session.completed") {
       await handleCheckoutCompleted(event.data.object);
     }

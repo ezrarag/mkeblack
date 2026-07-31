@@ -113,8 +113,8 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     const baseUrl = getBaseUrl(req.nextUrl.origin);
 
-    // MKE Black's connected account. Solidarity subscriptions fail closed if
-    // this account is not fully ready; they must never become platform-only.
+    // MKE Black's connected account. Memberships and donations are created as
+    // direct charges on this account and fail closed if it is not ready.
     const mkeBlackAccountId = await getReadyStripeDestinationAccountId();
 
     // Donations do not create membership records. Keep Firebase initialization
@@ -172,8 +172,8 @@ export async function POST(req: NextRequest) {
             }
           };
 
-    // Build session params — add transfer_data when Rick's account is configured
-    // This routes the payment to MKE Black's bank account automatically
+    // Shared Checkout presentation and metadata. The helper creates this
+    // Session directly on MKE Black's connected Stripe account.
     const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode: kind === "membership" ? "subscription" : "payment",
       submit_type: kind === "membership" ? "subscribe" : "donate",
