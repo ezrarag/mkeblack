@@ -121,6 +121,18 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // Email Extension queue. Only admins may enqueue outbound messages.
+    match /mail/{messageId} {
+      allow create: if isAdmin();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Server-created idempotency records for directory approval alerts.
+    match /admin_notification_events/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // ── Contact submissions ─────────────────────────────────────────────────
     match /contactSubmissions/{submissionId} {
       allow create: if validContactSubmitterUid() && validContactSubmissionStatus();
@@ -132,49 +144,6 @@ service cloud.firestore {
     match /articles/{articleId} {
       allow read: if resource.data.published == true || isAdmin();
       allow write: if isAdmin();
-    }
-
-    // ── Professional Business Directory (paid, distinct from `businesses`) ──
-    // Website-only scope for now — no external/app read patterns here yet.
-    match /professionals/{professionalId} {
-      // Public, unauthenticated read is allowed ONLY for verified profiles.
-      // Admins can always read (verification queue, support, etc).
-      allow read: if resource.data.verifiedStatus == true || isAdmin();
-
-      // Profiles are provisioned server-side (Firebase Admin SDK, which
-      // bypasses these rules entirely) as part of the Stripe checkout/signup
-      // flow — see app/api/webhooks/stripe-professionals/route.ts. A brand
-      // new profile can't satisfy "subscriptionActive == true" yet, so
-      // client-side create is intentionally not opened up here; only admins
-      // can create a doc directly through the client SDK.
-      allow create: if isAdmin();
-
-      // A professional may only update their OWN document, and only while
-      // their subscription is active. On top of that base gate, billing and
-      // trust-signal fields are locked down from client writes entirely —
-      // those are system-managed exclusively by the webhook controller and
-      // admin review, never by the professional themselves. Without this
-      // extra lockdown, an active subscriber could otherwise rewrite their
-      // own `verifiedStatus`, `referralPercentage`, or Stripe IDs.
-      allow update: if isAdmin() || (
-        signedIn() &&
-        request.auth.uid == resource.data.uid &&
-        resource.data.subscriptionActive == true &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          "uid",
-          "subscriptionActive",
-          "stripeCustomerId",
-          "stripeConnectAccountId",
-          "tierLevel",
-          "referralPercentage",
-          "verifiedStatus",
-          "visitorCount",
-          "interactionLog"
-        ])
-      );
-
-      // Hard deletes are admin-only, full stop.
-      allow delete: if isAdmin();
     }
 
     // ── Members (Solidarity Circle) ──────────────────────────────────────────
@@ -258,10 +227,25 @@ service cloud.firestore {
 
     // ── Professionals directory ──────────────────────────────────────────────
     match /professionals/{professionalId} {
-      allow read: if resource.data.active == true || isAdmin();
-      allow create: if signedIn();
-      allow update: if isAdmin() ||
-        (signedIn() && request.auth.uid == resource.data.uid);
+      allow read: if (resource.data.active == true && resource.data.verified == true)
+                  || isAdmin()
+                  || (signedIn() && request.auth.uid == resource.data.uid);
+      allow create: if signedIn()
+                    && professionalId == request.auth.uid
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.verified == false
+                    && request.resource.data.tierLevel == "free"
+                    && request.resource.data.subscriptionActive == false;
+      allow update: if isAdmin() || (
+        signedIn()
+        && request.auth.uid == resource.data.uid
+        && request.resource.data.uid == resource.data.uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          "verified", "beamParticipant", "tierLevel", "subscriptionActive",
+          "stripeCustomerId", "stripeConnectAccountId", "referralPercentage",
+          "visitorCount", "interactionLog", "externalSync", "createdAt"
+        ])
+      );
       allow delete: if isAdmin();
     }
 
@@ -347,7 +331,7 @@ service cloud.firestore {
     // — an upsert pattern so resubmitting edits the existing review. Reviews
     // are public read (social proof). Authors may only edit their own content
     // fields; `status` (flagged/removed) is admin-controlled moderation.
-    function validNewReview() {
+    function validNewReview(reviewId) {
       return request.resource.data.authorUid == request.auth.uid
         && request.resource.data.businessId is string
         && exists(/databases/$(database)/documents/businesses/$(request.resource.data.businessId))
@@ -361,7 +345,7 @@ service cloud.firestore {
 
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if isAdmin() || (signedIn() && validNewReview());
+      allow create: if isAdmin() || (signedIn() && validNewReview(reviewId));
       // Authors may resubmit/edit their own content — never reassign
       // authorship or businessId, and never self-moderate `status`.
       allow update: if isAdmin()

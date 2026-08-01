@@ -275,9 +275,22 @@ export type NotificationType =
   | "group_post"
   | "group_mention"
   | "group_event"
-  | "group_member_joined";
+  | "group_member_joined"
+  | "admin_directory_submission"
+  | "admin_claim_verification"
+  | "admin_possible_duplicate";
 
 export type NotificationPrefs = Record<NotificationType, boolean>;
+
+export type AdminNotificationPrefs = {
+  inApp: boolean;
+  email: boolean;
+  sms: boolean;
+  phone: string;
+  directorySubmissions: boolean;
+  claimVerifications: boolean;
+  possibleDuplicates: boolean;
+};
 
 export type UserNotification = {
   id: string;
@@ -535,7 +548,21 @@ export type PublicArticle = {
  * integration can be added by populating fields inside that map without
  * a breaking schema migration — do not read/write it yet.
  */
-export type ProfessionalTierLevel = "basic_50_mo" | "hourly_retainer";
+export type ProfessionalTierLevel = "free" | "featured";
+
+export type ProfessionalAffiliation = {
+  id: string;
+  organizationName: string;
+  title: string;
+  description: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+  businessId: string | null;
+  organizationUrl: string;
+  source: "manual" | "linkedin_export";
+};
 
 export type ProfessionalInteractionEvent = {
   type: "external_link" | "phone_dialer" | "share";
@@ -548,34 +575,33 @@ export type ProfessionalInteractionEvent = {
 
 export type Professional = {
   id: string;
-
-  // ── Profile metadata ─────────────────────────────────────────────────
   uid: string;
-  businessName: string;
-  verifiedStatus: boolean;
-  category: string; // e.g. "educator", "real_estate_specialist"
+  name: string;
+  headline: string;
+  bio: string;
+  photoUrl: string;
+  location: string;
+  industries: string[];
+  skills: string[];
+  linkedinUrl: string;
+  websiteUrl: string;
+  instagramUrl: string;
   contactEmail: string;
-
-  // ── Billing & split payout tokens ────────────────────────────────────
+  showContactEmail: boolean;
+  openToWork: boolean;
+  openToCollaboration: boolean;
+  beamParticipant: boolean;
+  affiliations: ProfessionalAffiliation[];
+  active: boolean;
+  verified: boolean;
   tierLevel: ProfessionalTierLevel;
   subscriptionActive: boolean;
   stripeCustomerId: string;
   stripeConnectAccountId: string;
-  // Decimal 0-1 (e.g. 0.1 = 10%) — commission routed back to MKE Black on
-  // top of the platform's own application fee. See
-  // lib/stripe/professionals.ts for how this is applied to a Connect split.
   referralPercentage: number;
-
-  // ── Structured analytics payload ─────────────────────────────────────
   visitorCount: number;
   interactionLog: ProfessionalInteractionEvent[];
-
-  // ── Reserved for future mobile-app integration — DO NOT POPULATE YET ──
-  // Left as an empty object by design. A later, separate task will define
-  // its concrete shape once the app's read requirements exist; adding
-  // fields here later should be additive only and non-breaking.
   externalSync: Record<string, never>;
-
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -762,6 +788,7 @@ export type UserProfile = {
   interests?: string[];
   referralSource?: string | null;
   notificationPrefs?: Partial<NotificationPrefs>;
+  adminNotificationPrefs?: Partial<AdminNotificationPrefs>;
   authProviderIds?: string[];
   lastAuthProviderId?: string | null;
   lastLoginMethod?: string | null;

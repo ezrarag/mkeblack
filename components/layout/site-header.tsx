@@ -28,6 +28,7 @@ const primaryLinks: NavLink[] = [
 ];
 
 const exploreLinks: NavLink[] = [
+  { href: "/professionals", label: "Professionals" },
   { href: "/about", label: "About" },
   { href: "/what-we-do", label: "What We Do" },
   { href: "/who-we-are", label: "Who We Are" },
@@ -176,6 +177,7 @@ export function SiteHeader() {
       { href: "/admin/homepage", label: "Homepage editor" },
       { href: "/admin/articles", label: "Articles" },
       { href: "/admin/businesses", label: "Business manager" },
+      { href: "/admin/professionals", label: "Professionals" },
       { href: "/admin/categories", label: "Categories" },
       { href: "/admin/marketplace", label: "Marketplace" },
       { href: "/admin/events", label: "Events" },
@@ -190,6 +192,10 @@ export function SiteHeader() {
 
   if (hasBusinessAccess) {
     accountLinks.push({ href: "/dashboard", label: "My business dashboard" });
+  }
+
+  if (user) {
+    accountLinks.push({ href: "/professionals/new", label: "My professional profile" });
   }
 
   if (!accountLinks.length && isVisitor) {

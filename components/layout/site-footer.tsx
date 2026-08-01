@@ -33,6 +33,7 @@ function FooterNavLink({ href, label, external }: FooterLink) {
 const exploreLinks: FooterLink[] = [
   { href: "/", label: "Homepage" },
   { href: "/directory", label: "Business directory" },
+  { href: "/professionals", label: "Professional directory" },
   { href: "/marketplace", label: "Marketplace" },
   { href: "/about", label: "About MKE Black" },
   { href: "/what-we-do", label: "What we do" },
@@ -106,6 +107,7 @@ export function SiteFooter() {
       { href: "/admin", label: "Admin workspace" },
       { href: "/admin/homepage", label: "Homepage editor" },
       { href: "/admin/businesses", label: "Business manager" },
+      { href: "/admin/professionals", label: "Professionals" },
       { href: "/admin/marketplace", label: "Marketplace" },
       { href: "/admin/members", label: "Solidarity Circle" },
       { href: "/admin/import", label: "Import spreadsheet" }

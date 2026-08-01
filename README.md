@@ -78,9 +78,19 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+
+# Optional: enables text alerts selected by admins
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
 ```
 
 These same variables should be added in Vercel for production.
+
+Admin directory-alert emails use the Firebase Trigger Email extension and its
+`mail` collection. Text alerts remain off unless all three Twilio variables are
+configured. Each admin opts into event types and delivery channels from
+`/admin/team`; preferences default to off.
 
 ## Firebase Setup
 

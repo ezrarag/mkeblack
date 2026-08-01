@@ -252,6 +252,12 @@ export async function createPendingBusinessClaim({
     }
   );
 
+  await fetch("/api/notifications/admin-directory", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind: "claim", id: claimReference.id })
+  }).catch(() => undefined);
+
   return "pending_verification";
 }
 

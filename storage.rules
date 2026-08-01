@@ -58,5 +58,11 @@ service firebase.storage {
       allow read: if true;
       allow write: if isAdmin() || isGroupMember(groupId);
     }
+
+    // Professional profile photos are public and writable only by their owner.
+    match /professionals/{uid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() || (signedIn() && request.auth.uid == uid);
+    }
   }
 }

@@ -3,6 +3,18 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/components/providers/auth-provider";
+import { getFirebaseDb, loadFirebaseFirestoreModule } from "@/lib/firebase/client";
+import type { AdminNotificationPrefs } from "@/lib/types";
+
+const DEFAULT_ADMIN_NOTIFICATION_PREFS: AdminNotificationPrefs = {
+  inApp: false,
+  email: false,
+  sms: false,
+  phone: "",
+  directorySubmissions: true,
+  claimVerifications: true,
+  possibleDuplicates: true
+};
 
 type AdminUser = {
   uid: string;
@@ -32,7 +44,7 @@ type TeamResponse = {
 };
 
 export function AdminTeamPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +58,46 @@ export function AdminTeamPage() {
 
   const [removingKey, setRemovingKey] = useState<string | null>(null);
   const [clearingBusinessKey, setClearingBusinessKey] = useState<string | null>(null);
+  const [notificationPrefs, setNotificationPrefs] = useState<AdminNotificationPrefs>({
+    ...DEFAULT_ADMIN_NOTIFICATION_PREFS
+  });
+  const [savingNotifications, setSavingNotifications] = useState(false);
+  const [notificationFeedback, setNotificationFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNotificationPrefs({
+      ...DEFAULT_ADMIN_NOTIFICATION_PREFS,
+      ...profile?.adminNotificationPrefs
+    });
+  }, [profile?.adminNotificationPrefs]);
+
+  async function saveNotificationPreferences() {
+    if (!user) return;
+    if (notificationPrefs.sms && !notificationPrefs.phone.trim()) {
+      setNotificationFeedback("Add a mobile number before enabling text alerts.");
+      return;
+    }
+
+    setSavingNotifications(true);
+    setNotificationFeedback(null);
+    try {
+      const [firestoreModule, db] = await Promise.all([
+        loadFirebaseFirestoreModule(),
+        getFirebaseDb()
+      ]);
+      if (!db) throw new Error("Firebase is unavailable.");
+      await firestoreModule.setDoc(
+        firestoreModule.doc(db, "users", user.uid),
+        { adminNotificationPrefs: notificationPrefs },
+        { merge: true }
+      );
+      setNotificationFeedback("Admin notification preferences saved.");
+    } catch (error) {
+      setNotificationFeedback(error instanceof Error ? error.message : "Unable to save preferences.");
+    } finally {
+      setSavingNotifications(false);
+    }
+  }
 
   const apiFetch = useCallback(
     async (method: "GET" | "POST" | "DELETE", body?: object) => {
@@ -223,6 +275,80 @@ export function AdminTeamPage() {
             </code>{" "}
             on <code className="rounded bg-panelAlt px-2 py-0.5 text-accentSoft">/login</code>.
           </p>
+        </div>
+
+        <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-8">
+          <p className="text-sm uppercase tracking-[0.28em] text-accentSoft">
+            Your approval notifications
+          </p>
+          <p className="mt-2 text-sm leading-7 text-stone-400">
+            These choices apply only to your admin account. Select what deserves an alert and how MKE Black should reach you.
+          </p>
+
+          <div className="mt-6 grid gap-5 lg:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Alert me about</p>
+              <div className="mt-3 space-y-2">
+                {[
+                  ["directorySubmissions", "New directory submissions"],
+                  ["claimVerifications", "Claims awaiting verification"],
+                  ["possibleDuplicates", "Possible duplicate businesses"]
+                ].map(([key, label]) => (
+                  <label key={key} className="flex items-center justify-between rounded-xl border border-line bg-panelAlt/60 px-4 py-3 text-sm text-stone-200">
+                    <span>{label}</span>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(notificationPrefs[key as keyof AdminNotificationPrefs])}
+                      onChange={(event) => setNotificationPrefs((current) => ({ ...current, [key]: event.target.checked }))}
+                      className="accent-accent"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Reach me by</p>
+              <div className="mt-3 space-y-2">
+                {[
+                  ["inApp", "Notification bell"],
+                  ["email", `Email${user?.email ? ` · ${user.email}` : ""}`],
+                  ["sms", "Text message"]
+                ].map(([key, label]) => (
+                  <label key={key} className="flex items-center justify-between rounded-xl border border-line bg-panelAlt/60 px-4 py-3 text-sm text-stone-200">
+                    <span>{label}</span>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(notificationPrefs[key as keyof AdminNotificationPrefs])}
+                      onChange={(event) => setNotificationPrefs((current) => ({ ...current, [key]: event.target.checked }))}
+                      className="accent-accent"
+                    />
+                  </label>
+                ))}
+                {notificationPrefs.sms ? (
+                  <input
+                    type="tel"
+                    value={notificationPrefs.phone}
+                    onChange={(event) => setNotificationPrefs((current) => ({ ...current, phone: event.target.value }))}
+                    placeholder="Mobile number, including area code"
+                    className="w-full rounded-xl border border-line bg-panelAlt/70 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-accent/50 focus:outline-none"
+                  />
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={() => void saveNotificationPreferences()}
+              disabled={savingNotifications}
+              className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
+            >
+              {savingNotifications ? "Saving…" : "Save notification choices"}
+            </button>
+            {notificationFeedback ? <p className="text-sm text-stone-400">{notificationFeedback}</p> : null}
+          </div>
         </div>
 
         <div className="rounded-2xl border border-line bg-panel/85 p-6 sm:p-8">

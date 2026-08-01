@@ -40,7 +40,7 @@ export function MarketplaceListingCard({
   const [checkingOut, setCheckingOut] = useState(false);
   const orderHref =
     listing.orderUrl ||
-    `/business/${listing.businessId}`;
+    `/marketplace/storefront/${listing.businessId}`;
   const orderIsExternal = listing.orderUrl
     ? !listing.orderUrl.startsWith("/")
     : false;
@@ -134,7 +134,7 @@ export function MarketplaceListingCard({
       {/* Body */}
       <div className="flex flex-1 flex-col p-4">
         <Link
-          href={`/business/${listing.businessId}`}
+          href={`/marketplace/storefront/${listing.businessId}`}
           className="text-xs font-semibold uppercase tracking-[0.18em] text-accent transition hover:text-accentSoft"
         >
           {listing.businessName}
@@ -151,6 +151,13 @@ export function MarketplaceListingCard({
         ) : (
           <div className="flex-1" />
         )}
+
+        <Link
+          href={`/marketplace/storefront/${listing.businessId}`}
+          className="mt-3 inline-flex w-fit text-xs font-semibold text-stone-400 underline decoration-line underline-offset-4 transition hover:text-accentSoft"
+        >
+          Visit storefront →
+        </Link>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
           <span

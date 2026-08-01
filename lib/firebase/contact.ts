@@ -4,6 +4,7 @@ import {
   isFirebaseConfigured
 } from "@/lib/firebase/client";
 import { createBusiness } from "@/lib/firebase/businesses";
+import { findPossibleDuplicates, normalizeBusinessRecord } from "@/lib/businesses";
 import { BUSINESS_CATEGORIES, createEmptyBusinessForm } from "@/lib/constants";
 import { BusinessFormValues } from "@/lib/types";
 import { addCapability } from "@/lib/user-capabilities";
@@ -35,7 +36,11 @@ export type ContactFormData = {
   submitterPhotoUrl?: string | null;
 };
 
-export type BusinessSubmissionStatus = "pending" | "approved" | "rejected";
+export type BusinessSubmissionStatus =
+  | "pending"
+  | "waiting_clarification"
+  | "approved"
+  | "rejected";
 
 export type BusinessListingSubmission = ContactFormData & {
   id: string;
@@ -112,7 +117,11 @@ function normalizeBusinessSubmission(
     submitterDisplayName: stringValue(record.submitterDisplayName) || null,
     submitterPhotoUrl: stringValue(record.submitterPhotoUrl) || null,
     status:
-      status === "approved" || status === "rejected" ? status : "pending",
+      status === "approved" ||
+      status === "rejected" ||
+      status === "waiting_clarification"
+        ? status
+        : "pending",
     submittedAt: parseDateValue(record.submittedAt),
     approvedAt: parseDateValue(record.approvedAt),
     approvedBusinessId: stringValue(record.approvedBusinessId) || null,
@@ -169,6 +178,14 @@ export async function submitContactForm(data: ContactFormData): Promise<string> 
       submittedAt: firestoreModule.serverTimestamp()
     }
   );
+
+  if (data.reason === "submit_business") {
+    await fetch("/api/notifications/admin-directory", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "submission", id: submissionReference.id })
+    }).catch(() => undefined);
+  }
 
   return submissionReference.id;
 }
@@ -230,7 +247,11 @@ export async function getPendingBusinessListingSubmissions(): Promise<
     .map((docSnapshot) =>
       normalizeBusinessSubmission(docSnapshot.id, docSnapshot.data())
     )
-    .filter((submission) => submission.status === "pending")
+    .filter(
+      (submission) =>
+        submission.status === "pending" ||
+        submission.status === "waiting_clarification"
+    )
     .sort(
       (left, right) =>
         (right.submittedAt?.getTime() ?? 0) -
@@ -239,7 +260,8 @@ export async function getPendingBusinessListingSubmissions(): Promise<
 }
 
 export async function approveBusinessListingSubmission(
-  submission: BusinessListingSubmission
+  submission: BusinessListingSubmission,
+  options: { duplicateReviewed?: boolean } = {}
 ) {
   if (!isFirebaseConfigured) {
     throw new Error("Firebase is not configured.");
@@ -256,6 +278,23 @@ export async function approveBusinessListingSubmission(
 
   if (!db) {
     throw new Error("Firebase could not initialize.");
+  }
+
+  const businessesSnapshot = await firestoreModule.getDocs(
+    firestoreModule.collection(db, "businesses")
+  );
+  const duplicateCandidates = findPossibleDuplicates(
+    businessesSnapshot.docs.map((document) =>
+      normalizeBusinessRecord(document.data(), document.id)
+    ),
+    submission.businessName ?? "",
+    submission.address ?? ""
+  );
+
+  if (duplicateCandidates.length && !options.duplicateReviewed) {
+    throw new Error(
+      `Review the possible duplicate ${duplicateCandidates[0].name} before creating a new listing.`
+    );
   }
 
   const businessId = await createBusiness(businessSubmissionToFormValues(submission));
@@ -311,6 +350,112 @@ export async function approveBusinessListingSubmission(
   }
 
   return businessId;
+}
+
+export async function resolveSubmissionWithExistingBusiness(
+  submission: BusinessListingSubmission,
+  businessId: string
+) {
+  const [firestoreModule, db] = await Promise.all([
+    loadFirebaseFirestoreModule(),
+    getFirebaseDb()
+  ]);
+
+  if (!db) throw new Error("Firebase could not initialize.");
+
+  const businessReference = firestoreModule.doc(db, "businesses", businessId);
+  const businessSnapshot = await firestoreModule.getDoc(businessReference);
+  if (!businessSnapshot.exists()) throw new Error("The existing listing was not found.");
+
+  const writes: Promise<unknown>[] = [
+    firestoreModule.setDoc(
+      firestoreModule.doc(db, "contactSubmissions", submission.id),
+      {
+        status: "approved",
+        resolutionType: "linked_existing",
+        approvedBusinessId: businessId,
+        approvedAt: firestoreModule.serverTimestamp()
+      },
+      { merge: true }
+    )
+  ];
+
+  if (submission.submitterUid) {
+    const userReference = firestoreModule.doc(db, "users", submission.submitterUid);
+    const userSnapshot = await firestoreModule.getDoc(userReference);
+    const existingRole = userSnapshot.exists() ? userSnapshot.data().role : null;
+    const existingCapabilities = userSnapshot.exists()
+      ? userSnapshot.data().capabilities
+      : [];
+
+    writes.push(
+      firestoreModule.setDoc(
+        userReference,
+        {
+          uid: submission.submitterUid,
+          email: submission.ownerEmail || submission.businessEmail || "",
+          role: existingRole === "admin" ? "admin" : "business",
+          capabilities: addCapability(existingCapabilities, "business"),
+          businessId
+        },
+        { merge: true }
+      )
+    );
+
+    if (!String(businessSnapshot.data()?.ownerUid ?? "").trim()) {
+      writes.push(
+        firestoreModule.setDoc(
+          businessReference,
+          { ownerUid: submission.submitterUid, claimInviteStatus: "claimed" },
+          { merge: true }
+        )
+      );
+    }
+  }
+
+  await Promise.all(writes);
+}
+
+export async function requestBusinessSubmissionClarification(
+  submission: BusinessListingSubmission,
+  message: string
+) {
+  const normalizedMessage = message.trim();
+  if (!normalizedMessage) throw new Error("Add a question for the submitter.");
+
+  const [firestoreModule, db] = await Promise.all([
+    loadFirebaseFirestoreModule(),
+    getFirebaseDb()
+  ]);
+  if (!db) throw new Error("Firebase could not initialize.");
+
+  const recipient = (submission.ownerEmail || submission.businessEmail || "").trim();
+  if (!recipient) throw new Error("This submission does not include an email address.");
+
+  await Promise.all([
+    firestoreModule.setDoc(
+      firestoreModule.doc(db, "contactSubmissions", submission.id),
+      {
+        status: "waiting_clarification",
+        clarificationMessage: normalizedMessage,
+        clarificationRequestedAt: firestoreModule.serverTimestamp()
+      },
+      { merge: true }
+    ),
+    firestoreModule.setDoc(
+      firestoreModule.doc(firestoreModule.collection(db, "mail")),
+      {
+        to: [recipient],
+        message: {
+          subject: `A question about ${submission.businessName || "your MKE Black listing"}`,
+          text: `${normalizedMessage}\n\nReply to this email or contact MKE Black to continue your directory request.`,
+          html: `<p>${normalizedMessage.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character] ?? character)}</p><p>Reply to this email or contact MKE Black to continue your directory request.</p>`
+        },
+        createdAt: firestoreModule.serverTimestamp(),
+        submissionId: submission.id
+      }
+    )
+  ]);
 }
 
 export async function rejectBusinessListingSubmission(submissionId: string) {
