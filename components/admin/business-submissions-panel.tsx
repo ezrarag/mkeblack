@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   approveBusinessListingSubmission,
   getPendingBusinessListingSubmissions,
+  requestBusinessSubmissionClarification,
   rejectBusinessListingSubmission,
+  resolveSubmissionWithExistingBusiness,
   type BusinessListingSubmission
 } from "@/lib/firebase/contact";
 import { formatFirebaseError } from "@/lib/firebase-errors";
+import { createBusinessNameFingerprint, findPossibleDuplicates } from "@/lib/businesses";
+import { useAllBusinesses } from "@/hooks/use-all-businesses";
 
 function formatSubmittedAt(value: Date | null) {
   if (!value) {
@@ -25,11 +29,36 @@ function formatSubmittedAt(value: Date | null) {
 }
 
 export function BusinessSubmissionsPanel() {
+  const { businesses, loading: businessesLoading } = useAllBusinesses();
   const [submissions, setSubmissions] = useState<BusinessListingSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const existingDuplicatePairs = useMemo(() => {
+    const seen = new Set<string>();
+    const pairs: Array<{ left: (typeof businesses)[number]; right: (typeof businesses)[number] }> = [];
+
+    for (const business of businesses) {
+      for (const candidate of findPossibleDuplicates(
+        businesses,
+        business.name,
+        business.address,
+        { excludeBusinessId: business.id }
+      )) {
+        if (
+          createBusinessNameFingerprint(business.name) !==
+          createBusinessNameFingerprint(candidate.name)
+        ) continue;
+        const key = [business.id, candidate.id].sort().join("::");
+        if (seen.has(key)) continue;
+        seen.add(key);
+        pairs.push({ left: business, right: candidate });
+      }
+    }
+
+    return pairs.slice(0, 25);
+  }, [businesses]);
 
   async function loadSubmissions() {
     setLoading(true);
@@ -48,19 +77,74 @@ export function BusinessSubmissionsPanel() {
     void loadSubmissions();
   }, []);
 
-  async function handleApprove(submission: BusinessListingSubmission) {
+  async function handleApprove(
+    submission: BusinessListingSubmission,
+    duplicateReviewed = false
+  ) {
     setBusyId(submission.id);
     setFeedback(null);
     setError(null);
 
     try {
-      const businessId = await approveBusinessListingSubmission(submission);
+      const businessId = await approveBusinessListingSubmission(submission, {
+        duplicateReviewed
+      });
       setSubmissions((current) =>
         current.filter((candidate) => candidate.id !== submission.id)
       );
       setFeedback(`Approved ${submission.businessName}. Listing ID: ${businessId}`);
     } catch (approveError) {
       setError(formatFirebaseError(approveError));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleUseExisting(
+    submission: BusinessListingSubmission,
+    businessId: string
+  ) {
+    const confirmed = window.confirm(
+      "Resolve this request using the existing listing? The submitter will be linked to it when their account is attached."
+    );
+    if (!confirmed) return;
+
+    setBusyId(submission.id);
+    setFeedback(null);
+    setError(null);
+    try {
+      await resolveSubmissionWithExistingBusiness(submission, businessId);
+      setSubmissions((current) => current.filter((item) => item.id !== submission.id));
+      setFeedback(`Resolved ${submission.businessName} using the existing listing.`);
+    } catch (resolveError) {
+      setError(formatFirebaseError(resolveError));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleClarification(submission: BusinessListingSubmission) {
+    const message = window.prompt(
+      `What should MKE Black ask about ${submission.businessName || "this request"}?`,
+      "We found a similar business in the directory. Is this request for that existing listing, or is this a separate business?"
+    );
+    if (!message?.trim()) return;
+
+    setBusyId(submission.id);
+    setFeedback(null);
+    setError(null);
+    try {
+      await requestBusinessSubmissionClarification(submission, message);
+      setSubmissions((current) =>
+        current.map((item) =>
+          item.id === submission.id
+            ? { ...item, status: "waiting_clarification" }
+            : item
+        )
+      );
+      setFeedback(`Clarification requested from ${submission.ownerEmail || submission.businessEmail}.`);
+    } catch (clarificationError) {
+      setError(formatFirebaseError(clarificationError));
     } finally {
       setBusyId(null);
     }
@@ -121,6 +205,32 @@ export function BusinessSubmissionsPanel() {
         </div>
       ) : null}
 
+      {!businessesLoading && existingDuplicatePairs.length ? (
+        <details className="mt-5 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-5">
+          <summary className="cursor-pointer text-sm font-semibold text-amber-200">
+            Existing listings to review ({existingDuplicatePairs.length})
+          </summary>
+          <p className="mt-2 text-xs leading-5 text-stone-400">
+            These pairs have similar names or addresses. Review both before deciding whether they represent a move, separate locations, or records that should eventually be merged.
+          </p>
+          <div className="mt-4 space-y-3">
+            {existingDuplicatePairs.map(({ left, right }) => (
+              <div key={`${left.id}-${right.id}`} className="grid gap-3 rounded-xl border border-line bg-canvas/35 p-4 sm:grid-cols-2">
+                {[left, right].map((business) => (
+                  <div key={business.id}>
+                    <p className="text-sm font-semibold text-stone-100">{business.name}</p>
+                    <p className="mt-1 text-xs leading-5 text-stone-500">{business.address || "No address"}</p>
+                    <Link href={`/admin/businesses/${business.id}`} className="mt-2 inline-block text-xs text-accentSoft underline underline-offset-4">
+                      Review this listing
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
+
       {loading ? (
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
           {Array.from({ length: 2 }).map((_, index) => (
@@ -132,10 +242,20 @@ export function BusinessSubmissionsPanel() {
         </div>
       ) : submissions.length ? (
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          {submissions.map((submission) => (
+          {submissions.map((submission) => {
+            const duplicateCandidates = findPossibleDuplicates(
+              businesses,
+              submission.businessName ?? "",
+              submission.address ?? ""
+            );
+            const hasDuplicates = duplicateCandidates.length > 0;
+
+            return (
             <article
               key={submission.id}
-              className="rounded-2xl border border-line bg-panelAlt/70 p-5"
+              className={`rounded-2xl border bg-panelAlt/70 p-5 ${
+                hasDuplicates ? "border-amber-400/45" : "border-line"
+              }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -146,8 +266,16 @@ export function BusinessSubmissionsPanel() {
                     {formatSubmittedAt(submission.submittedAt)}
                   </p>
                 </div>
-                <span className="rounded-full border border-accent/35 bg-accent/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-accentSoft">
-                  Pending
+                <span className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.18em] ${
+                  hasDuplicates
+                    ? "border-amber-400/40 bg-amber-400/10 text-amber-200"
+                    : "border-accent/35 bg-accent/10 text-accentSoft"
+                }`}>
+                  {submission.status === "waiting_clarification"
+                    ? "Waiting on submitter"
+                    : hasDuplicates
+                      ? "Possible duplicate"
+                      : "Pending"}
                 </span>
               </div>
 
@@ -213,14 +341,61 @@ export function BusinessSubmissionsPanel() {
                 ) : null}
               </div>
 
+              {hasDuplicates ? (
+                <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+                    Similar listing{duplicateCandidates.length === 1 ? "" : "s"} found
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    {duplicateCandidates.map((business) => (
+                      <div key={business.id} className="rounded-xl border border-line bg-canvas/40 p-3">
+                        <p className="text-sm font-semibold text-stone-100">{business.name}</p>
+                        <p className="mt-1 text-xs leading-5 text-stone-400">
+                          {business.address || "No address"}
+                          {business.email ? ` · ${business.email}` : ""}
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Link
+                            href={`/admin/businesses/${business.id}`}
+                            className="rounded-full border border-line px-3 py-1.5 text-xs text-stone-300 hover:border-accent/40"
+                          >
+                            Review listing
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => void handleUseExisting(submission, business.id)}
+                            disabled={busyId === submission.id}
+                            className="rounded-full bg-amber-300 px-3 py-1.5 text-xs font-semibold text-stone-950 disabled:opacity-50"
+                          >
+                            Use existing listing
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               <div className="mt-5 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => void handleApprove(submission)}
+                  onClick={() => void handleApprove(submission, hasDuplicates)}
                   disabled={busyId === submission.id}
                   className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentSoft disabled:opacity-50"
                 >
-                  {busyId === submission.id ? "Working..." : "Approve listing"}
+                  {busyId === submission.id
+                    ? "Working..."
+                    : hasDuplicates
+                      ? "Not a duplicate — approve"
+                      : "Approve listing"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleClarification(submission)}
+                  disabled={busyId === submission.id || businessesLoading}
+                  className="rounded-full border border-amber-400/35 px-5 py-3 text-sm font-semibold text-amber-200 transition hover:bg-amber-400/10 disabled:opacity-50"
+                >
+                  Request clarification
                 </button>
                 <button
                   type="button"
@@ -232,7 +407,8 @@ export function BusinessSubmissionsPanel() {
                 </button>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-dashed border-line bg-canvas/30 p-6 text-sm text-stone-400">

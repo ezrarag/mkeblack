@@ -38,6 +38,10 @@ export async function createSolidarityCheckoutSession({
     mode: "subscription",
     subscription_data: {
       ...sessionParams.subscription_data,
+      metadata: {
+        ...sessionParams.subscription_data?.metadata,
+        ...sessionParams.metadata
+      },
       application_fee_percent: platformFeeRate * 100
     }
   }, {
@@ -67,6 +71,10 @@ export async function createDonationCheckoutSession({
     mode: "payment",
     payment_intent_data: {
       ...sessionParams.payment_intent_data,
+      metadata: {
+        ...sessionParams.payment_intent_data?.metadata,
+        ...sessionParams.metadata
+      },
       application_fee_amount: Math.round(donationAmountCents * platformFeeRate)
     }
   }, {

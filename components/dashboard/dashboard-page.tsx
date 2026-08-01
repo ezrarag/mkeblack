@@ -205,6 +205,12 @@ export function DashboardPageContent() {
               >
                 Add marketplace listing
               </button>
+              <Link
+                href="/professionals/new"
+                className="rounded-full border border-line bg-panelAlt/70 px-5 py-2.5 text-sm font-semibold text-stone-200 transition hover:border-accent/35 hover:text-accentSoft"
+              >
+                My professional profile
+              </Link>
             </div>
           ) : null}
         </div>

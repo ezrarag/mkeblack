@@ -12,7 +12,10 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   group_post: true,
   group_mention: true,
   group_event: true,
-  group_member_joined: true
+  group_member_joined: true,
+  admin_directory_submission: false,
+  admin_claim_verification: false,
+  admin_possible_duplicate: false
 };
 
 type FirestoreRecord = Record<string, unknown>;
@@ -53,7 +56,10 @@ function getPrefs(value: unknown): NotificationPrefs {
     group_member_joined:
       typeof record.group_member_joined === "boolean"
         ? record.group_member_joined
-        : DEFAULT_NOTIFICATION_PREFS.group_member_joined
+        : DEFAULT_NOTIFICATION_PREFS.group_member_joined,
+    admin_directory_submission: false,
+    admin_claim_verification: false,
+    admin_possible_duplicate: false
   };
 }
 

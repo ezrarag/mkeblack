@@ -8,7 +8,9 @@ import {
 } from "@/components/admin/admin-action-ui";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-listings";
 import { MarketplaceListingCard } from "@/components/marketplace/marketplace-listing-card";
+import { MarketplaceStorefrontCard } from "@/components/marketplace/marketplace-storefront-card";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useBusinesses } from "@/hooks/use-businesses";
 import { StatePanel } from "@/components/ui/state-panel";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { formatFirebaseError } from "@/lib/firebase-errors";
@@ -19,6 +21,7 @@ import {
 } from "@/lib/types";
 
 type PriceRange = "any" | "free" | "under25" | "25to100" | "over100";
+type MarketplaceView = "products" | "businesses";
 
 const PRICE_RANGE_LABELS: Record<PriceRange, string> = {
   any: "Any price",
@@ -43,7 +46,13 @@ export function MarketplacePage() {
   const { listings, loading, error } = useMarketplaceListings({
     availableOnly: true
   });
+  const {
+    businesses,
+    loading: businessesLoading,
+    error: businessesError
+  } = useBusinesses();
 
+  const [view, setView] = useState<MarketplaceView>("products");
   const [category, setCategory] = useState("all");
   const [priceRange, setPriceRange] = useState<PriceRange>("any");
   const [featuredOnly, setFeaturedOnly] = useState(false);
@@ -83,6 +92,22 @@ export function MarketplacePage() {
     businessSearch,
     optimisticallyRemovedIds
   ]);
+
+  const storefronts = useMemo(() => {
+    const listingsByBusiness = new Map<string, MarketplaceListing[]>();
+    for (const listing of filtered) {
+      const current = listingsByBusiness.get(listing.businessId) ?? [];
+      current.push(listing);
+      listingsByBusiness.set(listing.businessId, current);
+    }
+
+    return businesses
+      .filter((business) => business.solidarityMember && listingsByBusiness.has(business.id))
+      .map((business) => ({
+        business,
+        listings: listingsByBusiness.get(business.id) ?? []
+      }));
+  }, [businesses, filtered]);
 
   const cancelDelete = useCallback(() => {
     if (!deletingId) setPendingDelete(null);
@@ -148,6 +173,23 @@ export function MarketplacePage() {
           Products and services from Milwaukee&apos;s Black-owned businesses.
           Click &ldquo;Order&rdquo; to purchase directly from the business.
         </p>
+      </div>
+
+      <div className="mt-6 inline-flex rounded-full border border-line bg-panel/80 p-1" aria-label="Marketplace view">
+        {(["products", "businesses"] as MarketplaceView[]).map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setView(option)}
+            className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition ${
+              view === option
+                ? "bg-accent text-white"
+                : "text-stone-400 hover:text-ink"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
       </div>
 
       {deleteFeedback ? (
@@ -222,19 +264,24 @@ export function MarketplacePage() {
         </label>
 
         {/* Result count */}
-        {!loading && (
+        {!loading && !businessesLoading && (
           <p className="ml-auto text-xs text-stone-500">
-            {filtered.length} listing{filtered.length !== 1 ? "s" : ""}
+            {view === "products"
+              ? `${filtered.length} listing${filtered.length !== 1 ? "s" : ""}`
+              : `${storefronts.length} storefront${storefronts.length !== 1 ? "s" : ""}`}
           </p>
         )}
       </div>
 
       {/* ── Content ── */}
-      {error ? (
+      {error || (view === "businesses" && businessesError) ? (
         <div className="mt-6">
-          <StatePanel title="Unable to load listings" description={error} />
+          <StatePanel
+            title="Unable to load marketplace"
+            description={error ?? businessesError ?? "Please try again."}
+          />
         </div>
-      ) : loading ? (
+      ) : loading || (view === "businesses" && businessesLoading) ? (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -243,7 +290,7 @@ export function MarketplacePage() {
             />
           ))}
         </div>
-      ) : !filtered.length ? (
+      ) : !filtered.length || (view === "businesses" && !storefronts.length) ? (
         <div className="mt-6 rounded-2xl border border-dashed border-line bg-canvas/30 px-6 py-12 text-center">
           <p className="font-display text-xl font-bold text-ink">
             {listings.length === 0
@@ -277,7 +324,7 @@ export function MarketplacePage() {
             </button>
           )}
         </div>
-      ) : (
+      ) : view === "products" ? (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((listing) => (
             <MarketplaceListingCard
@@ -286,6 +333,16 @@ export function MarketplacePage() {
               showAdminDelete={hasAdminAccess}
               deleting={deletingId === listing.id}
               onRequestDelete={setPendingDelete}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {storefronts.map(({ business, listings: businessListings }) => (
+            <MarketplaceStorefrontCard
+              key={business.id}
+              business={business}
+              listings={businessListings}
             />
           ))}
         </div>

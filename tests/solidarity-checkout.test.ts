@@ -10,6 +10,12 @@ import {
   getBaseUrl,
   isStripeDestinationAccountReady
 } from "../lib/stripe/server";
+import {
+  invoiceSubscriptionId,
+  memberStatusForSubscription,
+  subscriptionMemberId,
+  subscriptionPeriodEnd
+} from "../lib/stripe/membership-lifecycle";
 
 const destinationAccountId = "acct_mke_black_test";
 
@@ -28,7 +34,8 @@ function baseSessionParams(): Stripe.Checkout.SessionCreateParams {
       }
     ],
     success_url: "https://example.test/membership/success",
-    cancel_url: "https://example.test/membership"
+    cancel_url: "https://example.test/membership",
+    metadata: { kind: "membership", memberId: "member_test" }
   };
 }
 
@@ -66,7 +73,33 @@ test("Solidarity checkout creates a direct subscription on MKE Black with the co
   assert.equal(calls[0].subscription_data?.on_behalf_of, undefined);
   assert.equal(calls[0].subscription_data?.transfer_data, undefined);
   assert.equal(calls[0].subscription_data?.application_fee_percent, 5);
+  assert.deepEqual(calls[0].subscription_data?.metadata, {
+    kind: "membership",
+    memberId: "member_test"
+  });
   assert.equal(options[0].stripeAccount, destinationAccountId);
+});
+
+test("membership lifecycle maps Stripe states and identifiers", () => {
+  assert.equal(memberStatusForSubscription("active"), "active");
+  assert.equal(memberStatusForSubscription("trialing"), "active");
+  assert.equal(memberStatusForSubscription("past_due"), "pending");
+  assert.equal(memberStatusForSubscription("canceled"), "expired");
+
+  const subscription = {
+    id: "sub_test",
+    metadata: { memberId: "member_test" },
+    items: {
+      data: [{ current_period_end: 100 }, { current_period_end: 200 }]
+    }
+  } as unknown as Stripe.Subscription;
+  assert.equal(subscriptionMemberId(subscription), "member_test");
+  assert.equal(subscriptionPeriodEnd(subscription), 200);
+
+  const invoice = {
+    parent: { subscription_details: { subscription: "sub_test" } }
+  } as unknown as Stripe.Invoice;
+  assert.equal(invoiceSubscriptionId(invoice), "sub_test");
 });
 
 test("Solidarity checkout fails closed without creating a Stripe session", async () => {
@@ -131,6 +164,10 @@ test("donation checkout creates a direct payment on MKE Black with the configure
   assert.equal(calls[0].mode, "payment");
   assert.equal(calls[0].payment_intent_data?.on_behalf_of, undefined);
   assert.equal(calls[0].payment_intent_data?.application_fee_amount, 63);
+  assert.deepEqual(calls[0].payment_intent_data?.metadata, {
+    kind: "membership",
+    memberId: "member_test"
+  });
   assert.equal(calls[0].payment_intent_data?.transfer_data, undefined);
   assert.equal(options[0].stripeAccount, destinationAccountId);
 });
@@ -186,7 +223,7 @@ test("destination readiness requires details, transfers, and card payments", () 
       details_submitted: true,
       capabilities: { transfers: "active", card_payments: "inactive" }
     }
-  ]) {
+  ] as Array<Pick<Stripe.Account, "details_submitted" | "capabilities">>) {
     assert.equal(isStripeDestinationAccountReady(account), false);
   }
 });

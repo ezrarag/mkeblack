@@ -13,11 +13,9 @@ Dashboard → Connect → Accounts → (MKE Black's connected account)
 - [ ] `details_submitted` is `true`
 - [ ] No items under "Requirements" → "Past due" or "Currently due"
 - [ ] Bank account / payout destination on file matches what MKE Black expects
-- [ ] Confirm the account is still on **destination charges** via the
-      platform account (per the comment in `lib/stripe/server.ts`) — if
-      Rick's account setup changed to a different Connect charge type, the
-      `getReadyStripeDestinationAccountId()` logic in that file will need a
-      matching update.
+- [ ] Confirm memberships and donations appear as **direct charges** in MKE
+      Black's connected account. ReadyAimGo should see only its configured
+      application fee in the platform account.
 
 ## 2. Webhook endpoints
 Dashboard → Developers → Webhooks
@@ -27,10 +25,10 @@ Dashboard → Developers → Webhooks
       pointing at a preview/staging URL or an old domain from before the
       Vercel migration (see `DEPLOYMENT_MIGRATION.md`)
 - [ ] Endpoint status is **Enabled** (not disabled)
-- [ ] Subscribed events include at minimum `checkout.session.completed`
-      (the only event type `app/api/webhooks/stripe/route.ts` currently
-      handles) — if you've added new event handling since, confirm those
-      event types are subscribed too
+- [ ] Subscribed events include `checkout.session.completed`,
+      `customer.subscription.created`, `customer.subscription.updated`,
+      `customer.subscription.deleted`, `invoice.paid`, and
+      `invoice.payment_failed`
 - [ ] Open the endpoint's **"Recent deliveries"** tab and check the success
       rate directly — this is the exact number; the health-check script can
       only approximate it from recent event `pending_webhooks` counts
@@ -61,12 +59,10 @@ Cross-check against `.env.example` in this repo:
 
 - [ ] `STRIPE_SECRET_KEY` — set in Vercel Production
 - [ ] `STRIPE_WEBHOOK_SECRET` — set in Vercel Production
-- [ ] `STRIPE_MKE_BLACK_ACCOUNT_ID` — this is read by
-      `lib/stripe/server.ts` but is **not currently listed in
-      `.env.example`**. Worth adding it there (with no value) so future
-      setup doesn't miss it.
-- [ ] `PLATFORM_FEE_RATE` is the intended value (defaults to `0.05` if unset
-      — confirm that's still correct)
+- [ ] `STRIPE_MKE_BLACK_ACCOUNT_ID` points to MKE Black's live connected account
+- [ ] `STRIPE_CONNECT_WEBHOOK_SECRET` matches the connected-account endpoint
+- [ ] `PLATFORM_FEE_RATE` is the intended membership fee (defaults to `0.05`)
+- [ ] `DONATION_PLATFORM_FEE_RATE` is the intended donation fee (defaults to `0.025`)
 
 ---
 Generated as part of a July 2026 diagnostic pass. Not a substitute for

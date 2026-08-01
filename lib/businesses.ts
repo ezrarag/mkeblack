@@ -443,7 +443,7 @@ export function createBusinessDuplicateKey(name: string, address: string) {
   return `${name.trim().toLowerCase()}::${address.trim().toLowerCase()}`;
 }
 
-function normalizeDuplicateBusinessName(name: string) {
+export function createBusinessNameFingerprint(name: string) {
   return name
     .toLowerCase()
     .replace(/[&]/g, " and ")
@@ -485,7 +485,7 @@ export function findPossibleDuplicates(
   address: string,
   options?: { excludeBusinessId?: string }
 ) {
-  const normalizedName = normalizeDuplicateBusinessName(name);
+  const normalizedName = createBusinessNameFingerprint(name);
   const normalizedAddress = normalizeDuplicateStreetAddress(address);
 
   if (!normalizedName) {
@@ -495,7 +495,7 @@ export function findPossibleDuplicates(
   return businesses
     .filter((business) => business.id !== options?.excludeBusinessId)
     .map((business) => {
-      const candidateName = normalizeDuplicateBusinessName(business.name);
+      const candidateName = createBusinessNameFingerprint(business.name);
       const candidateAddress = normalizeDuplicateStreetAddress(business.address);
       const exactNameMatch = candidateName === normalizedName;
       const containsNameMatch =
